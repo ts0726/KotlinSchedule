@@ -1,30 +1,16 @@
 package kmp.project.schedule.ui.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -37,6 +23,14 @@ import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.util.getCurrentDate
 import kmp.project.schedule.util.getDayTimestamp
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import org.jetbrains.compose.ui.tooling.preview.Preview
+
+@Composable
+@Preview
+fun mainPagePreview() {
+    topDocker(0.dp)
+}
 
 /**
  * 主页
@@ -223,7 +217,6 @@ fun topDocker(
 ) {
     Column (
         modifier = Modifier
-//            .fillMaxWidth()
             .padding(10.dp, 30.dp, 10.dp, bottomPadding),
         horizontalAlignment = Alignment.Start
     ) {
@@ -234,12 +227,27 @@ fun topDocker(
             color = MaterialTheme.colorScheme.primary
         )
 
-        //显示当前日期
-        Text(
-            text = getCurrentDate(),
-            fontWeight = FontWeight.W800,
-            fontSize = 20.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            //显示当前日期
+            Text(
+                text = getCurrentDate(),
+                fontWeight = FontWeight.W800,
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            IconButton(
+                onClick = {},
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "Select Repeat"
+                )
+            }
+        }
     }
 }

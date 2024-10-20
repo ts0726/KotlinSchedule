@@ -126,7 +126,7 @@ fun contentContainer(
 @Composable
 fun sideNavRail(pageID: MutableIntState) {
     val cardSizes = remember { mutableStateListOf(50.dp, 30.dp, 30.dp) }
-    val items = listOf("主页", "我喜欢的", "设置")
+    val items = listOf("主页", "全部", "我的")
 
     //根据pageID初始化图标状态
     for (i in 0 .. 2) {
@@ -196,7 +196,7 @@ fun sideNavRail(pageID: MutableIntState) {
  */
 @Composable
 fun bottomNavBar(pageID: MutableIntState) {
-    val items = listOf("主页", "我喜欢的", "设置")
+    val items = listOf("主页", "全部", "我的")
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.error,

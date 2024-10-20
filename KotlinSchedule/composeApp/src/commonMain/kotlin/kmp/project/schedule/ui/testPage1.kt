@@ -1,17 +1,10 @@
 package kmp.project.schedule.ui
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import kmp.project.schedule.ui.composableItem.CalendarView
+import java.time.YearMonth
 
 @Composable
 fun TestPage1() {
-    Text(
-        text = "Test Page 1",
-        modifier = Modifier
-            .fillMaxSize(),
-        textAlign = TextAlign.Center
-    )
+    CalendarView(YearMonth.now())
 }
