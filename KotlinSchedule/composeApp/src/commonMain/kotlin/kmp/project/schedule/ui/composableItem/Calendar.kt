@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -64,11 +65,14 @@ fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .padding(top = 3.dp, bottom = 3.dp)
+                    .padding(top = 5.dp, bottom = 5.dp)
             ) {
                 while (index < i * 7){
                     val day = days[index]
-                    val isSelected = selectedDay.value == yearMonth.atDay(day.day).toEpochDay()
+                    var isSelected = false
+                    if (day.isCurrentMonth) {
+                        isSelected = selectedDay.value == yearMonth.atDay(day.day).toEpochDay()
+                    }
                     Card(
                         shape = CircleShape,
                         onClick = {
@@ -84,23 +88,29 @@ fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
                             disabledContentColor = calendarTextColor(day, isSelected)
                         ),
                         border = calendarSelectedBorder(day, isSelected),
-                        modifier = Modifier.size(55.dp),
+                        modifier = Modifier.size(50.dp),
                     ) {
-                        Text(
-                            text = day.day.toString(),
-                            color = calendarTextColor(day, isSelected),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            fontSize = 15.sp,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Text(
-                            text = "初一",
-                            color = calendarTextColor(day, isSelected),
-                            textAlign = TextAlign.Center,
-                            fontSize = 10.sp,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = day.day.toString(),
+                                color = calendarTextColor(day, isSelected),
+                                fontWeight = FontWeight.ExtraBold,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.sp,
+                                fontSize = 13.sp,
+                            )
+                            Text(
+                                text = "初一",
+                                color = calendarTextColor(day, isSelected),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 9.sp,
+                                fontSize = 9.sp,
+                            )
+                        }
                     }
                     index++
                 }
