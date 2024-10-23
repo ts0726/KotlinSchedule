@@ -1,5 +1,6 @@
 package kmp.project.schedule.ui.composableItem
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
@@ -7,6 +8,8 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +29,7 @@ fun CalendarPreview() {
 @Composable
 fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
     val days = generateCalendarDays(yearMonth, onDayClick)
+    val selectedDay = remember { mutableStateOf(initSelectedDay(yearMonth, days)) }
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -64,20 +68,27 @@ fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
             ) {
                 while (index < i * 7){
                     val day = days[index]
+                    val isSelected = selectedDay.value == yearMonth.atDay(day.day).toEpochDay()
                     Card(
                         shape = CircleShape,
-                        onClick = { day.onClick() },
+                        onClick = {
+                            if(day.isCurrentMonth) {
+                                day.onClick()
+                                selectedDay.value = yearMonth.atDay(day.day).toEpochDay()
+                            }
+                        },
                         colors = CardColors(
-                            containerColor = calendarTodayColor(day),
+                            containerColor = calendarTodayColor(day, isSelected),
                             contentColor = Color.LightGray,
-                            disabledContainerColor = calendarTextColor(day),
-                            disabledContentColor = calendarTextColor(day)
+                            disabledContainerColor = calendarTextColor(day, isSelected),
+                            disabledContentColor = calendarTextColor(day, isSelected)
                         ),
+                        border = calendarSelectedBorder(day, isSelected),
                         modifier = Modifier.size(55.dp),
                     ) {
                         Text(
                             text = day.day.toString(),
-                            color = calendarTextColor(day),
+                            color = calendarTextColor(day, isSelected),
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             fontSize = 15.sp,
@@ -85,7 +96,7 @@ fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
                         )
                         Text(
                             text = "初一",
-                            color = calendarTextColor(day),
+                            color = calendarTextColor(day, isSelected),
                             textAlign = TextAlign.Center,
                             fontSize = 10.sp,
                             modifier = Modifier.fillMaxWidth()
@@ -162,17 +173,37 @@ fun generateCalendarDays(yearMonth: YearMonth, onDayClick: (Long) -> Unit): List
 }
 
 @Composable
-fun calendarTextColor(day: CalendarDay): Color {
-    if (day.isToday)
+fun calendarTextColor(day: CalendarDay, isSelected: Boolean): Color {
+    if (isSelected && day.isCurrentMonth)
         return MaterialTheme.colorScheme.onPrimary
+    if (day.isToday) {
+        return MaterialTheme.colorScheme.primary
+    }
     if (day.isCurrentMonth)
         return MaterialTheme.colorScheme.onSurface
     return MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
 }
 
 @Composable
-fun calendarTodayColor(day: CalendarDay): Color {
-    if (day.isToday)
+fun calendarTodayColor(day: CalendarDay, isSelected: Boolean): Color {
+    if (isSelected && day.isCurrentMonth)
         return MaterialTheme.colorScheme.primary
     return MaterialTheme.colorScheme.surface
+}
+
+@Composable
+fun calendarSelectedBorder(day: CalendarDay, isSelected: Boolean):BorderStroke {
+    if (day.isToday && !isSelected) {
+        return BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+    }
+    return BorderStroke(0.dp, Color.Transparent)
+}
+
+fun initSelectedDay(yearMonth: YearMonth, days: List<CalendarDay>):Long {
+    days.forEach { day ->
+        if (day.isToday) {
+            return yearMonth.atDay(day.day).toEpochDay()
+        }
+    }
+    return 0L
 }
