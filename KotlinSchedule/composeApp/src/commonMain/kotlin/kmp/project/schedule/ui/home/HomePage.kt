@@ -21,10 +21,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.model.NewScheduleViewModel
+import kmp.project.schedule.ui.composableItem.CalendarView
 import kmp.project.schedule.util.getCurrentDate
 import kmp.project.schedule.util.getDayTimestamp
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import java.time.YearMonth
 
 @Composable
 @Preview
@@ -202,7 +204,9 @@ fun otherInformation(
                 }
             )
         }
-
+        item {
+            CalendarView(YearMonth.now()){}
+        }
     }
 }
 
