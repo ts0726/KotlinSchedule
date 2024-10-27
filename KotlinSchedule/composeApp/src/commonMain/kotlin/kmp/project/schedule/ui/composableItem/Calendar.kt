@@ -14,9 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cn.hutool.core.date.ChineseDate
+import cn.hutool.core.date.DateUtil
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.time.LocalDate
 import java.time.YearMonth
@@ -28,8 +31,9 @@ fun CalendarPreview() {
 }
 
 @Composable
-fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
+fun CalendarView(yearMonth: YearMonth, onDayClick: (LocalDate) -> Unit) {
     val days = generateCalendarDays(yearMonth, onDayClick)
+    //初始化被选择的日期为今天
     val selectedDay = remember { mutableStateOf(initSelectedDay(yearMonth, days)) }
 
     Column(
@@ -70,6 +74,7 @@ fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
                 while (index < i * 7){
                     val day = days[index]
                     var isSelected = false
+                    //判断是否为本月，否则会超出访问范围导致崩溃
                     if (day.isCurrentMonth) {
                         isSelected = selectedDay.value == yearMonth.atDay(day.day).toEpochDay()
                     }
@@ -103,13 +108,15 @@ fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
                                 lineHeight = 13.sp,
                                 fontSize = 13.sp,
                             )
-                            Text(
-                                text = "初一",
-                                color = calendarTextColor(day, isSelected),
-                                textAlign = TextAlign.Center,
-                                lineHeight = 9.sp,
-                                fontSize = 9.sp,
-                            )
+                            if (day.isCurrentMonth) {
+                                Text(
+                                    text = toLunarCalendar(yearMonth.atDay(day.day)),
+                                    color = calendarTextColor(day, isSelected),
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 9.sp,
+                                    fontSize = 9.sp,
+                                )
+                            }
                         }
                     }
                     index++
@@ -128,7 +135,7 @@ fun CalendarView(yearMonth: YearMonth, onDayClick: (Long) -> Unit) {
  */
 data class CalendarDay(val day: Int, val isCurrentMonth: Boolean, val isToday: Boolean, val onClick: () -> Unit)
 
-fun generateCalendarDays(yearMonth: YearMonth, onDayClick: (Long) -> Unit): List<CalendarDay> {
+fun generateCalendarDays(yearMonth: YearMonth, onDayClick: (LocalDate) -> Unit): List<CalendarDay> {
     val days = mutableListOf<CalendarDay>()
     val firstDayOfMonth = yearMonth.atDay(1)
     val dayOfWeek = firstDayOfMonth.dayOfWeek.value % 7
@@ -159,7 +166,7 @@ fun generateCalendarDays(yearMonth: YearMonth, onDayClick: (Long) -> Unit): List
                 day = i,
                 isCurrentMonth = true,
                 isToday = isToday,
-                onClick = {onDayClick(date.toEpochDay())}
+                onClick = {onDayClick(date)}
             )
         )
     }
@@ -216,4 +223,14 @@ fun initSelectedDay(yearMonth: YearMonth, days: List<CalendarDay>):Long {
         }
     }
     return 0L
+}
+
+fun toLunarCalendar(day: LocalDate): String {
+    val chineseDate = ChineseDate(DateUtil.parseDate(day.toString()))
+    if (chineseDate.festivals == "") {
+        if (chineseDate.chineseDay == "初一")
+            return if (chineseDate.chineseMonthName == "") chineseDate.chineseMonth else chineseDate.chineseMonthName
+        return chineseDate.chineseDay
+    }
+    return chineseDate.festivals
 }
