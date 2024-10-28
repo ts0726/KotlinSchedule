@@ -2,17 +2,17 @@ package kmp.project.schedule.ui.composableItem
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import cn.hutool.core.date.ChineseDate
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.date.chinese.LunarInfo
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.time.LocalDate
 import java.time.YearMonth
@@ -30,55 +31,102 @@ import java.time.YearMonth
 @Composable
 @Preview
 fun CalendarPreview() {
-    CalendarView(YearMonth.now()) {}
+//    CalendarView(YearMonth.now()) {}
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
     val initPager = 50
-    val pagerStaate = rememberPagerState(initialPage = initPager, pageCount = { 100 })
+    val pagerState = rememberPagerState(initialPage = initPager, pageCount = { 100 })
+    val year = remember { mutableIntStateOf(YearMonth.now().year) }
+    val month = remember { mutableIntStateOf(YearMonth.now().monthValue) }
+    //初始化被选择的日期为今天
+    val selectedDay = remember { mutableStateOf(initSelectedDay(YearMonth.now(), generateCalendarDays(YearMonth.now(), onDayClick))) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        val yearMonth = YearMonth.now().plusMonths((pagerState.currentPage - initPager).toLong())
+        year.value = yearMonth.year
+        month.value = yearMonth.monthValue
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
+        Text(
+            text = "${year.value}年 ${month.value}月",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 10.dp, top = 5.dp, bottom = 5.dp)
+        )
+        pageSwitcher(pagerState)
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 5.dp, bottom = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             listOf("日", "一", "二", "三", "四", "五", "六").forEach { day ->
-                Card(
-                    shape = CircleShape,
-                    colors = CardColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.LightGray,
-                        disabledContainerColor = Color.Transparent,
-                        disabledContentColor = Color.Transparent
-                    ),
-                    modifier = Modifier.size(55.dp),
-                ) {
-                    Text(
-                        text = day,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                Text(
+                    text = day,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(50.dp)
+                )
             }
         }
         HorizontalPager(
-            state = pagerStaate
+            state = pagerState
         ) { page ->
-            val yearMonth = YearMonth.now().plusMonths((page - initPager).toLong())
-            CalendarView(yearMonth, onDayClick)
+            CalendarView(YearMonth.now().plusMonths((page - initPager).toLong()),selectedDay, onDayClick)
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun pageSwitcher(pagerState: PagerState) {
+    val coroutineScope = rememberCoroutineScope()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        Row {
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                },
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
+            ){
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
+                    contentDescription = "Close"
+                )
+            }
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                },
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
+            ){
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    contentDescription = "Close"
+                )
+            }
         }
     }
 }
 
 @Composable
-fun CalendarView(yearMonth: YearMonth, onDayClick: (LocalDate) -> Unit) {
+fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, onDayClick: (LocalDate) -> Unit) {
     val days = generateCalendarDays(yearMonth, onDayClick)
-    //初始化被选择的日期为今天
-    val selectedDay = remember { mutableStateOf(initSelectedDay(yearMonth, days)) }
 
     Column(
         modifier = Modifier.fillMaxWidth()

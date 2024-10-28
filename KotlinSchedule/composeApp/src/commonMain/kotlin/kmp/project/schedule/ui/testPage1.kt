@@ -15,11 +15,11 @@ import java.time.YearMonth
 
 @Composable
 fun TestPage1() {
-    val time = remember { mutableStateOf("2024-10-01") }
+    val time = remember { mutableStateOf("--------") }
     Column {
         Text(text = time.value)
-        val chineseDate = ChineseDate(DateUtil.parseDate(time.value))
-        Text(text = chineseDate.chineseDay)
+//        val chineseDate = ChineseDate(DateUtil.parseDate(time.value))
+//        Text(text = chineseDate.chineseDay)
         CalendarPaager {day ->
             time.value = day.toString()
         }
