@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import cn.hutool.core.date.ChineseDate
 import cn.hutool.core.date.DateUnit
 import cn.hutool.core.date.DateUtil
+import kmp.project.schedule.ui.composableItem.CalendarPaager
 import kmp.project.schedule.ui.composableItem.CalendarView
 import java.time.LocalDate
 import java.time.YearMonth
@@ -19,7 +20,7 @@ fun TestPage1() {
         Text(text = time.value)
         val chineseDate = ChineseDate(DateUtil.parseDate(time.value))
         Text(text = chineseDate.chineseDay)
-        CalendarView(YearMonth.now()) { day ->
+        CalendarPaager {day ->
             time.value = day.toString()
         }
     }

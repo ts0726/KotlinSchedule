@@ -1,7 +1,10 @@
 package kmp.project.schedule.ui.composableItem
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -14,12 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.hutool.core.date.ChineseDate
 import cn.hutool.core.date.DateUtil
+import cn.hutool.core.date.chinese.LunarInfo
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.time.LocalDate
 import java.time.YearMonth
@@ -30,11 +33,11 @@ fun CalendarPreview() {
     CalendarView(YearMonth.now()) {}
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CalendarView(yearMonth: YearMonth, onDayClick: (LocalDate) -> Unit) {
-    val days = generateCalendarDays(yearMonth, onDayClick)
-    //初始化被选择的日期为今天
-    val selectedDay = remember { mutableStateOf(initSelectedDay(yearMonth, days)) }
+fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
+    val initPager = 50
+    val pagerStaate = rememberPagerState(initialPage = initPager, pageCount = { 100 })
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -62,6 +65,24 @@ fun CalendarView(yearMonth: YearMonth, onDayClick: (LocalDate) -> Unit) {
                 }
             }
         }
+        HorizontalPager(
+            state = pagerStaate
+        ) { page ->
+            val yearMonth = YearMonth.now().plusMonths((page - initPager).toLong())
+            CalendarView(yearMonth, onDayClick)
+        }
+    }
+}
+
+@Composable
+fun CalendarView(yearMonth: YearMonth, onDayClick: (LocalDate) -> Unit) {
+    val days = generateCalendarDays(yearMonth, onDayClick)
+    //初始化被选择的日期为今天
+    val selectedDay = remember { mutableStateOf(initSelectedDay(yearMonth, days)) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
         var index = 0
         for (i in 1 .. days.size / 7) {
             Row(
@@ -227,10 +248,78 @@ fun initSelectedDay(yearMonth: YearMonth, days: List<CalendarDay>):Long {
 
 fun toLunarCalendar(day: LocalDate): String {
     val chineseDate = ChineseDate(DateUtil.parseDate(day.toString()))
-    if (chineseDate.festivals == "") {
+    if (chineseFestival(chineseDate) == "") {
+        if (chineseDate.term != "")
+            return chineseDate.term
         if (chineseDate.chineseDay == "初一")
             return if (chineseDate.chineseMonthName == "") chineseDate.chineseMonth else chineseDate.chineseMonthName
         return chineseDate.chineseDay
     }
-    return chineseDate.festivals
+    return chineseFestival(chineseDate)
+}
+
+fun chineseFestival(chineseDate: ChineseDate): String {
+    val month = if (chineseDate.chineseMonthName == "") chineseDate.chineseMonth else chineseDate.chineseMonthName
+    when (month) {
+        "正月" -> {
+            when(chineseDate.chineseDay) {
+                "初一" -> return "春节"
+                "十五" -> return "元宵节"
+            }
+        }
+        "二月" -> {
+            when(chineseDate.chineseDay) {
+                "初二" -> return "龙抬头"
+            }
+        }
+        "五月" -> {
+            when(chineseDate.chineseDay) {
+                "初五" -> return "端午节"
+            }
+        }
+        "六月" -> {
+            when(chineseDate.chineseDay) {
+                "廿四" -> return "火把节"
+            }
+        }
+        "七月" -> {
+            when(chineseDate.chineseDay) {
+                "初七" -> return "七夕"
+                "十五" -> return "中元节"
+            }
+        }
+        "八月" -> {
+            when(chineseDate.chineseDay) {
+                "十五" -> return "中秋节"
+            }
+        }
+        "九月" -> {
+            when(chineseDate.chineseDay) {
+                "初九" -> return "重阳节"
+            }
+        }
+        "腊月" -> {
+            when(chineseDate.chineseDay) {
+                "初八" -> return "腊八节"
+                "廿三" -> return "小年"
+                "廿九" -> {
+                    //判断大小月，如果12月是小月，则29是除夕，否则30为除夕
+                    val lunarYear = chineseDate.chineseYear
+                    val lunarMonth = chineseDate.month
+                    val lunarDay = chineseDate.day
+                    var flag = false
+                    if (12 == lunarMonth && 29 == lunarDay) {
+                        if (29 == LunarInfo.monthDays(lunarYear, lunarMonth)) {
+                            flag = true
+                        }
+                    }
+                    if (flag)
+                        return "除夕"
+                }
+
+                "三十" -> return "除夕"
+            }
+        }
+    }
+    return ""
 }
