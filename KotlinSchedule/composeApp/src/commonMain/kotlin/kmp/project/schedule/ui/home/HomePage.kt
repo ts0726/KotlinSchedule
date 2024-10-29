@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -154,53 +155,45 @@ fun otherInformation(
     modifier: Modifier,
     navController: NavHostController
 ) {
-    val datePickerState = rememberDatePickerState(
+    rememberDatePickerState(
         initialSelectedDateMillis = getDayTimestamp()
     )
     LazyColumn(
         modifier = modifier.fillMaxHeight()
     ) {
         item {
-            DatePicker(
-                state = datePickerState,
-                showModeToggle = false,
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth(),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp, top = 20.dp),
+            ) {
+                Text(
+                    text = "宜看窗外云卷云舒~",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                )
 
-                    ) {
-                        Text(
-                            text = "宜看窗外云卷云舒~",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                Spacer(modifier = Modifier.weight(1f))
 
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        Button(
-                            onClick = {
-                                navController.navigate("home_add")
-                            },
-                            modifier = Modifier
-                                .padding(20.dp)
-                        ) {
-                            Icon(Icons.Filled.Add, contentDescription = "Add")
-                        }
-                    }
-                },
-                headline = {
-                    DatePickerDefaults.DatePickerHeadline(
-                        selectedDateMillis = datePickerState.selectedDateMillis,
-                        displayMode = datePickerState.displayMode,
-                        dateFormatter = DatePickerDefaults.dateFormatter(),
-                        modifier = Modifier.padding(start = 0.dp, end = 0.dp, bottom = 12.dp)
-                    )
+                Button(
+                    onClick = { navController.navigate("home_add") },
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add")
                 }
+            }
+        }
+
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 5.dp, vertical = 20.dp),
+                thickness = 1.dp,
+                color = Color.LightGray
             )
         }
+
         item {
             CalendarPaager {}
         }

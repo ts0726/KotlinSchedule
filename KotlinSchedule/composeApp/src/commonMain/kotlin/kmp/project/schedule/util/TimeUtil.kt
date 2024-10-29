@@ -1,10 +1,7 @@
 package kmp.project.schedule.util
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
+import java.time.LocalDate
 
 /**
  * 获取日期，返回xx月xx日 星期x
@@ -29,6 +26,10 @@ fun convertMillisToDate(millis: Long): String {
             " 周${convertDayOfWeekToChinese(localDateTime.dayOfWeek.name)}"
 }
 
+fun convertLocalDateToDate(date: LocalDate): String {
+    return "${date.year}年${date.monthValue}月${date.dayOfMonth}日 周${convertDayOfWeekToChinese(date.dayOfWeek.name)}"
+}
+
 /**
  * 转换英文星期为中文
  */
@@ -41,6 +42,24 @@ fun convertDayOfWeekToChinese(dayOfWeek: String): String {
         "FRIDAY" -> "五"
         "SATURDAY" -> "六"
         "SUNDAY" -> "日"
+        else -> "--"
+    }
+}
+
+fun convertMonthOfYearToChinese(monthOfYear: Int): String {
+    return when(monthOfYear) {
+        1 -> "一月"
+        2 -> "二月"
+        3 -> "三月"
+        4 -> "四月"
+        5 -> "五月"
+        6 -> "六月"
+        7 -> "七月"
+        8 -> "八月"
+        9 -> "九月"
+        10 -> "十月"
+        11 -> "十一月"
+        12 -> "十二月"
         else -> "--"
     }
 }

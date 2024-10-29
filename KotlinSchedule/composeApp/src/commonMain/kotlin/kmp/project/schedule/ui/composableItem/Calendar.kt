@@ -23,12 +23,12 @@ import androidx.compose.ui.unit.sp
 import cn.hutool.core.date.ChineseDate
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.date.chinese.LunarInfo
+import kmp.project.schedule.util.convertLocalDateToDate
+import kmp.project.schedule.util.convertMonthOfYearToChinese
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.ZoneId
-import java.util.*
 
 @Composable
 @Preview
@@ -54,15 +54,28 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
-            text = "${year.value}年 ${month.value}月",
-            fontSize = 30.sp,
+            text = convertLocalDateToDate(LocalDate.ofEpochDay(selectedDay.value)),
+            fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 10.dp, top = 5.dp, bottom = 5.dp)
+            modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
         )
-        pageSwitcher(pagerState, selectedDay, days, onDayClick)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "${year.value}年 ${convertMonthOfYearToChinese(month.value)}",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+            )
+            pageSwitcher(pagerState, selectedDay, days, onDayClick)
+        }
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
@@ -91,10 +104,7 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
 @Composable
 fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: List<CalendarDay>, onDayClick: (LocalDate) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
+    Row {
         Row {
             IconButton(
                 onClick = {
@@ -136,7 +146,6 @@ fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: 
                 Text(
                     text = "今",
                     fontWeight = FontWeight.ExtraBold,
-//                    fontSize = 30.sp
                 )
             }
         }
@@ -145,8 +154,6 @@ fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: 
 
 @Composable
 fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, days: List<CalendarDay>) {
-//    val days = generateCalendarDays(yearMonth, onDayClick)
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,7 +167,6 @@ fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, days: Li
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-//                    .padding(top = 5.dp, bottom = 5.dp)
             ) {
                 while (index < i * 7){
                     val day = days[index]

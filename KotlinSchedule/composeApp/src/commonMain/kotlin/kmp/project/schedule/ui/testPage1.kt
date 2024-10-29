@@ -5,23 +5,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import cn.hutool.core.date.ChineseDate
-import cn.hutool.core.date.DateUnit
-import cn.hutool.core.date.DateUtil
 import kmp.project.schedule.ui.composableItem.CalendarPaager
-import kmp.project.schedule.ui.composableItem.CalendarView
+import kmp.project.schedule.util.convertLocalDateToDate
 import java.time.LocalDate
-import java.time.YearMonth
 
 @Composable
 fun TestPage1() {
-    val time = remember { mutableStateOf("--------") }
+    val time = remember { mutableStateOf<LocalDate>(LocalDate.now()) }
     Column {
-        Text(text = time.value)
+        Text(text = convertLocalDateToDate(time.value))
 //        val chineseDate = ChineseDate(DateUtil.parseDate(time.value))
 //        Text(text = chineseDate.chineseDay)
         CalendarPaager {day ->
-            time.value = day.toString()
+            time.value = day
         }
     }
 }
