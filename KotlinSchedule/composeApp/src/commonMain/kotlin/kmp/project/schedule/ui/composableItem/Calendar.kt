@@ -37,8 +37,8 @@ fun CalendarPreview() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
-    val initPager = 50
-    val pagerState = rememberPagerState(initialPage = initPager, pageCount = { 100 })
+    val initPager = (YearMonth.now().year - 1901 - 1) * 12 + YearMonth.now().monthValue
+    val pagerState = rememberPagerState(initialPage = initPager, pageCount = { (2099 - 1901) * 12 })
     val year = remember { mutableIntStateOf(YearMonth.now().year) }
     val month = remember { mutableIntStateOf(YearMonth.now().monthValue) }
     //初始化被选择的日期为今天
@@ -76,9 +76,9 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
             }
         }
         HorizontalPager(
-            state = pagerState
+            state = pagerState,
         ) { page ->
-            CalendarView(YearMonth.now().plusMonths((page - initPager).toLong()),selectedDay, onDayClick)
+            CalendarView(YearMonth.now().plusMonths((page - initPager).toLong()), selectedDay, onDayClick)
         }
     }
 }
@@ -129,7 +129,10 @@ fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, onDayCli
     val days = generateCalendarDays(yearMonth, onDayClick)
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(400.dp),
+        verticalArrangement = Arrangement.SpaceAround
     ) {
         var index = 0
         for (i in 1 .. days.size / 7) {
@@ -138,7 +141,7 @@ fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, onDayCli
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .padding(top = 5.dp, bottom = 5.dp)
+//                    .padding(top = 5.dp, bottom = 5.dp)
             ) {
                 while (index < i * 7){
                     val day = days[index]
