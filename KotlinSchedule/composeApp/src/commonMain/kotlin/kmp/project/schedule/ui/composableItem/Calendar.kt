@@ -27,6 +27,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneId
+import java.util.*
 
 @Composable
 @Preview
@@ -41,8 +43,9 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
     val pagerState = rememberPagerState(initialPage = initPager, pageCount = { (2099 - 1901) * 12 })
     val year = remember { mutableIntStateOf(YearMonth.now().year) }
     val month = remember { mutableIntStateOf(YearMonth.now().monthValue) }
+    var days = generateCalendarDays(YearMonth.now(), onDayClick)
     //初始化被选择的日期为今天
-    val selectedDay = remember { mutableStateOf(initSelectedDay(YearMonth.now(), generateCalendarDays(YearMonth.now(), onDayClick))) }
+    val selectedDay = remember { mutableStateOf(initSelectedDay(YearMonth.now(), days)) }
 
     LaunchedEffect(pagerState.currentPage) {
         val yearMonth = YearMonth.now().plusMonths((pagerState.currentPage - initPager).toLong())
@@ -59,7 +62,7 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 10.dp, top = 5.dp, bottom = 5.dp)
         )
-        pageSwitcher(pagerState)
+        pageSwitcher(pagerState, selectedDay, days, onDayClick)
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
@@ -78,14 +81,15 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
         HorizontalPager(
             state = pagerState,
         ) { page ->
-            CalendarView(YearMonth.now().plusMonths((page - initPager).toLong()), selectedDay, onDayClick)
+            days = generateCalendarDays(YearMonth.now().plusMonths((page - initPager).toLong()), onDayClick)
+            CalendarView(YearMonth.now().plusMonths((page - initPager).toLong()), selectedDay, days)
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun pageSwitcher(pagerState: PagerState) {
+fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: List<CalendarDay>, onDayClick: (LocalDate) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     Row(
         modifier = Modifier
@@ -120,13 +124,28 @@ fun pageSwitcher(pagerState: PagerState) {
                     contentDescription = "Close"
                 )
             }
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(page = (YearMonth.now().year - 1901 - 1) * 12 + YearMonth.now().monthValue)
+                        selectedDay.value = initSelectedDay(YearMonth.now(), days)
+                        onDayClick(LocalDate.ofEpochDay(selectedDay.value))
+                    }
+                }
+            ) {
+                Text(
+                    text = "今",
+                    fontWeight = FontWeight.ExtraBold,
+//                    fontSize = 30.sp
+                )
+            }
         }
     }
 }
 
 @Composable
-fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, onDayClick: (LocalDate) -> Unit) {
-    val days = generateCalendarDays(yearMonth, onDayClick)
+fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, days: List<CalendarDay>) {
+//    val days = generateCalendarDays(yearMonth, onDayClick)
 
     Column(
         modifier = Modifier
