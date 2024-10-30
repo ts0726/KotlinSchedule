@@ -8,6 +8,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.ui.composableItem.CalendarPaager
+import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.util.getCurrentDate
 import kmp.project.schedule.util.getDayTimestamp
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -205,10 +208,12 @@ fun otherInformation(
  *
  * 显示用户信息
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun topDocker(
     bottomPadding: Dp = 30.dp
 ) {
+    val showDatePickerDialog = remember { mutableStateOf(false) }
     Column (
         modifier = Modifier
             .padding(10.dp, 30.dp, 10.dp, bottomPadding),
@@ -235,7 +240,7 @@ fun topDocker(
             Spacer(modifier = Modifier.weight(1f))
 
             IconButton(
-                onClick = {},
+                onClick = { showDatePickerDialog.value = !showDatePickerDialog.value },
             ) {
                 Icon(
                     imageVector = Icons.Default.DateRange,
@@ -244,4 +249,11 @@ fun topDocker(
             }
         }
     }
+    if (showDatePickerDialog.value) {
+        CalendarPickerDialog(
+            onDismiss = { showDatePickerDialog.value = false },
+            onDateSelected = {}
+        )
+    }
 }
+

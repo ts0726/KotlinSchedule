@@ -2,7 +2,6 @@ package kmp.project.schedule.ui.composableItem
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -112,8 +111,6 @@ fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: 
                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
                 },
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
             ){
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
@@ -126,8 +123,6 @@ fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: 
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
                 },
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
             ){
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
@@ -145,7 +140,7 @@ fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: 
             ) {
                 Text(
                     text = "今",
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }
@@ -157,7 +152,7 @@ fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, days: Li
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(400.dp),
+            .height(370.dp),
         verticalArrangement = Arrangement.SpaceAround
     ) {
         var index = 0
