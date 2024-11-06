@@ -1,7 +1,6 @@
 package kmp.project.schedule.util
 
 import kotlinx.datetime.*
-import java.time.LocalDate
 
 /**
  * 获取日期，返回xx月xx日 星期x
@@ -27,7 +26,7 @@ fun convertMillisToDate(millis: Long): String {
 }
 
 fun convertLocalDateToDate(date: LocalDate): String {
-    return "${date.year}年${date.monthValue}月${date.dayOfMonth}日 周${convertDayOfWeekToChinese(date.dayOfWeek.name)}"
+    return "${date.year}年${date.monthNumber}月${date.dayOfMonth}日 周${convertDayOfWeekToChinese(date.dayOfWeek.name)}"
 }
 
 /**

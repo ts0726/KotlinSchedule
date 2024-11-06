@@ -25,9 +25,9 @@ import cn.hutool.core.date.chinese.LunarInfo
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.convertMonthOfYearToChinese
 import kotlinx.coroutines.launch
+import kotlinx.datetime.*
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import java.time.LocalDate
-import java.time.YearMonth
+
 
 @Composable
 @Preview
@@ -38,25 +38,26 @@ fun CalendarPreview() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
-    val initPager = (YearMonth.now().year - 1901 - 1) * 12 + YearMonth.now().monthValue
+    val currentDate =Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val initPager = (currentDate.year - 1901 - 1) * 12 + currentDate.monthNumber
     val pagerState = rememberPagerState(initialPage = initPager, pageCount = { (2099 - 1901) * 12 })
-    val year = remember { mutableIntStateOf(YearMonth.now().year) }
-    val month = remember { mutableIntStateOf(YearMonth.now().monthValue) }
-    var days = generateCalendarDays(YearMonth.now(), onDayClick)
+    val year = remember { mutableIntStateOf(currentDate.year) }
+    val month = remember { mutableIntStateOf(currentDate.monthNumber) }
+//    var days: List<CalendarDay>
     //初始化被选择的日期为今天
-    val selectedDay = remember { mutableStateOf(initSelectedDay(YearMonth.now(), days)) }
+    val selectedDay = remember { mutableStateOf(currentDate.toEpochDays()) }
 
     LaunchedEffect(pagerState.currentPage) {
-        val yearMonth = YearMonth.now().plusMonths((pagerState.currentPage - initPager).toLong())
+        val yearMonth = currentDate.plus(DatePeriod(months = pagerState.currentPage - initPager))
         year.value = yearMonth.year
-        month.value = yearMonth.monthValue
+        month.value = yearMonth.monthNumber
     }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
-            text = convertLocalDateToDate(LocalDate.ofEpochDay(selectedDay.value)),
+            text = convertLocalDateToDate(LocalDate.fromEpochDays(selectedDay.value)),
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
@@ -73,7 +74,7 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
             )
-            pageSwitcher(pagerState, selectedDay, days, onDayClick)
+            pageSwitcher(currentDate, pagerState, selectedDay, onDayClick)
         }
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -93,15 +94,22 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
         HorizontalPager(
             state = pagerState,
         ) { page ->
-            days = generateCalendarDays(YearMonth.now().plusMonths((page - initPager).toLong()), onDayClick)
-            CalendarView(YearMonth.now().plusMonths((page - initPager).toLong()), selectedDay, days)
+            val days = remember(page) {
+                generateCalendarDays(currentDate.plus(DatePeriod(months = page - initPager)), onDayClick)
+            }
+            CalendarView(currentDate.plus(DatePeriod(months = page - initPager)), selectedDay, days)
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: List<CalendarDay>, onDayClick: (LocalDate) -> Unit) {
+fun pageSwitcher(
+    date: LocalDate,
+    pagerState: PagerState,
+    selectedDay: MutableState<Int>,
+    onDayClick: (LocalDate) -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     Row {
         Row {
@@ -132,9 +140,9 @@ fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: 
             IconButton(
                 onClick = {
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(page = (YearMonth.now().year - 1901 - 1) * 12 + YearMonth.now().monthValue)
-                        selectedDay.value = initSelectedDay(YearMonth.now(), days)
-                        onDayClick(LocalDate.ofEpochDay(selectedDay.value))
+                        pagerState.animateScrollToPage(page = (date.year - 1901 - 1) * 12 + date.monthNumber)
+                        selectedDay.value = LocalDate(date.year, date.month, date.dayOfMonth).toEpochDays()
+                        onDayClick(LocalDate.fromEpochDays(selectedDay.value))
                     }
                 }
             ) {
@@ -148,7 +156,7 @@ fun pageSwitcher(pagerState: PagerState, selectedDay: MutableState<Long>, days: 
 }
 
 @Composable
-fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, days: List<CalendarDay>) {
+fun CalendarView(date: LocalDate, selectedDay: MutableState<Int>, days: List<CalendarDay>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -156,64 +164,61 @@ fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, days: Li
         verticalArrangement = Arrangement.SpaceAround
     ) {
         var index = 0
-        for (i in 1 .. days.size / 7) {
+        for (i in 1..days.size / 7) {
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
             ) {
-                while (index < i * 7){
+                while (index < i * 7) {
                     val day = days[index]
-                    var isSelected = false
-                    //判断是否为本月，否则会超出访问范围导致崩溃
-                    if (day.isCurrentMonth) {
-                        isSelected = selectedDay.value == yearMonth.atDay(day.day).toEpochDay()
-                    }
-                    Card(
-                        shape = CircleShape,
-                        onClick = {
-                            if(day.isCurrentMonth) {
-                                day.onClick()
-                                selectedDay.value = yearMonth.atDay(day.day).toEpochDay()
-                            }
-                        },
-                        colors = CardColors(
-                            containerColor = calendarTodayColor(day, isSelected),
-                            contentColor = Color.LightGray,
-                            disabledContainerColor = calendarTextColor(day, isSelected),
-                            disabledContentColor = calendarTextColor(day, isSelected)
-                        ),
-                        border = calendarSelectedBorder(day, isSelected),
-                        modifier = Modifier.size(50.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = day.day.toString(),
-                                color = calendarTextColor(day, isSelected),
-                                fontWeight = FontWeight.ExtraBold,
-                                textAlign = TextAlign.Center,
-                                lineHeight = 13.sp,
-                                fontSize = 13.sp,
-                            )
-                            if (day.isCurrentMonth) {
-                                Text(
-                                    text = toLunarCalendar(yearMonth.atDay(day.day)),
-                                    color = calendarTextColor(day, isSelected),
-                                    textAlign = TextAlign.Center,
-                                    lineHeight = 9.sp,
-                                    fontSize = 9.sp,
-                                )
-                            }
-                        }
+                    key(day.day) {
+                        CalendarDayCard(day, date, selectedDay)
                     }
                     index++
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState<Int>) {
+    val isSelected = remember(day, selectedDay.value) {
+        day.isCurrentMonth && selectedDay.value == LocalDate(date.year, date.monthNumber, day.day).toEpochDays()
+    }
+
+    Card(
+        shape = CircleShape,
+        onClick = {
+            if (day.isCurrentMonth) {
+                day.onClick()
+                selectedDay.value = LocalDate(date.year, date.monthNumber, day.day).toEpochDays()
+            }
+        },
+        colors = CardColors(
+            containerColor = calendarTodayColor(day, isSelected),
+            contentColor = Color.LightGray,
+            disabledContainerColor = calendarTextColor(day, isSelected),
+            disabledContentColor = calendarTextColor(day, isSelected)
+        ),
+        border = calendarSelectedBorder(day, isSelected),
+        modifier = Modifier.size(50.dp),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = day.day.toString(),
+                color = calendarTextColor(day, isSelected),
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center,
+                lineHeight = 13.sp,
+                fontSize = 13.sp,
+            )
         }
     }
 }
@@ -227,16 +232,16 @@ fun CalendarView(yearMonth: YearMonth, selectedDay: MutableState<Long>, days: Li
  */
 data class CalendarDay(val day: Int, val isCurrentMonth: Boolean, val isToday: Boolean, val onClick: () -> Unit)
 
-fun generateCalendarDays(yearMonth: YearMonth, onDayClick: (LocalDate) -> Unit): List<CalendarDay> {
+fun generateCalendarDays(date: LocalDate, onDayClick: (LocalDate) -> Unit): List<CalendarDay> {
     val days = mutableListOf<CalendarDay>()
-    val firstDayOfMonth = yearMonth.atDay(1)
-    val dayOfWeek = firstDayOfMonth.dayOfWeek.value % 7
-    val daysInMonth = yearMonth.lengthOfMonth()
-    val today = LocalDate.now()
+    val firstDayOfMonth = LocalDate(date.year, date.month, 1)
+    val dayOfWeek = (firstDayOfMonth.dayOfWeek.ordinal + 1) % 7
+    val daysInMonth = getMonthOfDay(date.year, date.monthNumber)
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
     //添加上个月的日期
-    val previousMonth = yearMonth.minusMonths(1)
-    val daysInPreviousMonth = previousMonth.lengthOfMonth()
+    val previousMonth = date.minus(DatePeriod(months = 1))
+    val daysInPreviousMonth = getMonthOfDay(previousMonth.year, previousMonth.monthNumber)
     for (i in 1 .. dayOfWeek) {
         days.add(
             CalendarDay(
@@ -250,23 +255,27 @@ fun generateCalendarDays(yearMonth: YearMonth, onDayClick: (LocalDate) -> Unit):
 
     //添加当前月份的日期
     for (i in 1 .. daysInMonth) {
+//        println("now $i")
         //获取当月的第i天，用于返回当天的时间戳
-        val date = yearMonth.atDay(i)
-        val isToday = yearMonth.year == today.year && yearMonth.month == today.month && i == today.dayOfMonth
+        val day = LocalDate(date.year, date.monthNumber, i)
+        val isToday = day == today
         days.add(
             CalendarDay(
                 day = i,
                 isCurrentMonth = true,
                 isToday = isToday,
-                onClick = {onDayClick(date)}
+                onClick = {onDayClick(day)}
             )
         )
     }
 
     //添加下个月的日期
     if (days.size % 7 != 0) {
+//        println("days size: ${days.size}")
         val remainingDays = (days.size / 7 + 1) * 7 - days.size
+        println(remainingDays)
         for (i in 1 .. remainingDays) {
+//            println("after $i")
             days.add(
                 CalendarDay(
                     day = i,
@@ -306,15 +315,6 @@ fun calendarSelectedBorder(day: CalendarDay, isSelected: Boolean):BorderStroke {
         return BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
     }
     return BorderStroke(0.dp, Color.Transparent)
-}
-
-fun initSelectedDay(yearMonth: YearMonth, days: List<CalendarDay>):Long {
-    days.forEach { day ->
-        if (day.isToday) {
-            return yearMonth.atDay(day.day).toEpochDay()
-        }
-    }
-    return 0L
 }
 
 fun toLunarCalendar(day: LocalDate): String {
@@ -393,4 +393,15 @@ fun chineseFestival(chineseDate: ChineseDate): String {
         }
     }
     return ""
+}
+
+fun getMonthOfDay(year: Int, month: Int): Int {
+    val day: Int = if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0) 29 else 28
+
+    when (month) {
+        1, 3, 5, 7, 8, 10, 12 -> return 31
+        4, 6, 9, 11 -> return 30
+        2 -> return day
+    }
+    return 0
 }
