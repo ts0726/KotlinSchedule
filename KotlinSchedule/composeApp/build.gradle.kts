@@ -38,7 +38,6 @@ kotlin {
             implementation(libs.jetbrains.kotlinx.datetime)
             implementation("dev.chrisbanes.material3:material3-window-size-class-multiplatform:0.5.0")
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.7.0-alpha07")
-            implementation ("cn.hutool:hutool-core:5.8.32")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

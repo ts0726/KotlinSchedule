@@ -19,9 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.hutool.core.date.ChineseDate
-import cn.hutool.core.date.DateUtil
-import cn.hutool.core.date.chinese.LunarInfo
+import kmp.project.schedule.util.LunarUtil
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.convertMonthOfYearToChinese
 import kotlinx.coroutines.launch
@@ -219,6 +217,16 @@ fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState
                 lineHeight = 13.sp,
                 fontSize = 13.sp,
             )
+            if (day.isCurrentMonth) {
+                val dateTime = LocalDate(date.year, date.monthNumber, day.day).atStartOfDayIn(TimeZone.UTC).toLocalDateTime(TimeZone.UTC)
+                Text(
+                    text = LunarUtil(dateTime).getChineseLunarDay(),
+                    color = calendarTextColor(day, isSelected),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 9.sp,
+                    fontSize = 9.sp,
+                )
+            }
         }
     }
 }
@@ -273,7 +281,7 @@ fun generateCalendarDays(date: LocalDate, onDayClick: (LocalDate) -> Unit): List
     if (days.size % 7 != 0) {
 //        println("days size: ${days.size}")
         val remainingDays = (days.size / 7 + 1) * 7 - days.size
-        println(remainingDays)
+//        println(remainingDays)
         for (i in 1 .. remainingDays) {
 //            println("after $i")
             days.add(
@@ -315,84 +323,6 @@ fun calendarSelectedBorder(day: CalendarDay, isSelected: Boolean):BorderStroke {
         return BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
     }
     return BorderStroke(0.dp, Color.Transparent)
-}
-
-fun toLunarCalendar(day: LocalDate): String {
-    val chineseDate = ChineseDate(DateUtil.parseDate(day.toString()))
-    if (chineseFestival(chineseDate) == "") {
-        if (chineseDate.term != "")
-            return chineseDate.term
-        if (chineseDate.chineseDay == "初一")
-            return if (chineseDate.chineseMonthName == "") chineseDate.chineseMonth else chineseDate.chineseMonthName
-        return chineseDate.chineseDay
-    }
-    return chineseFestival(chineseDate)
-}
-
-fun chineseFestival(chineseDate: ChineseDate): String {
-    val month = if (chineseDate.chineseMonthName == "") chineseDate.chineseMonth else chineseDate.chineseMonthName
-    when (month) {
-        "正月" -> {
-            when(chineseDate.chineseDay) {
-                "初一" -> return "春节"
-                "十五" -> return "元宵节"
-            }
-        }
-        "二月" -> {
-            when(chineseDate.chineseDay) {
-                "初二" -> return "龙抬头"
-            }
-        }
-        "五月" -> {
-            when(chineseDate.chineseDay) {
-                "初五" -> return "端午节"
-            }
-        }
-        "六月" -> {
-            when(chineseDate.chineseDay) {
-                "廿四" -> return "火把节"
-            }
-        }
-        "七月" -> {
-            when(chineseDate.chineseDay) {
-                "初七" -> return "七夕"
-                "十五" -> return "中元节"
-            }
-        }
-        "八月" -> {
-            when(chineseDate.chineseDay) {
-                "十五" -> return "中秋节"
-            }
-        }
-        "九月" -> {
-            when(chineseDate.chineseDay) {
-                "初九" -> return "重阳节"
-            }
-        }
-        "腊月" -> {
-            when(chineseDate.chineseDay) {
-                "初八" -> return "腊八节"
-                "廿三" -> return "小年"
-                "廿九" -> {
-                    //判断大小月，如果12月是小月，则29是除夕，否则30为除夕
-                    val lunarYear = chineseDate.chineseYear
-                    val lunarMonth = chineseDate.month
-                    val lunarDay = chineseDate.day
-                    var flag = false
-                    if (12 == lunarMonth && 29 == lunarDay) {
-                        if (29 == LunarInfo.monthDays(lunarYear, lunarMonth)) {
-                            flag = true
-                        }
-                    }
-                    if (flag)
-                        return "除夕"
-                }
-
-                "三十" -> return "除夕"
-            }
-        }
-    }
-    return ""
 }
 
 fun getMonthOfDay(year: Int, month: Int): Int {
