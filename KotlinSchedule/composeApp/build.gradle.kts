@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -25,6 +26,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.android.driver)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -42,6 +44,7 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.sqlite.driver)
         }
     }
 }
@@ -75,10 +78,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-}
-
-dependencies {
-    debugImplementation(compose.uiTooling)
+    dependencies {
+        debugImplementation(compose.uiTooling)
+    }
 }
 
 compose.desktop {
@@ -89,6 +91,15 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "kmp.project.schedule"
             packageVersion = "1.0.0"
+        }
+    }
+}
+
+
+sqldelight {
+    databases {
+        create("ScheduleDatabase") {
+            packageName.set("kmp.project.schedule.database")
         }
     }
 }

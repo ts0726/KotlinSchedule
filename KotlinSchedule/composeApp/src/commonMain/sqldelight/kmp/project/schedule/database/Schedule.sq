@@ -1,0 +1,35 @@
+CREATE TABLE Schedule (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, -- 主键
+    title TEXT NOT NULL, -- 标题
+    content TEXT, -- 内容
+    date INTEGER NOT NULL, -- 时间
+    repeatMode INTEGER NOT NULL, -- 重复模式
+    location TEXT -- 地点
+);
+
+-- 插入一条新的日程数据
+insertSchedule:
+INSERT INTO Schedule (title, content, date, repeatMode, location)
+VALUES (?, ?, ?, ?, ?);
+
+-- 查询所有的日程数据
+selectAllSchedules:
+SELECT * FROM Schedule;
+
+-- 根据ID查询一条日程数据
+selectScheduleById:
+SELECT * FROM Schedule WHERE id = ?;
+
+-- 根据日期查询日程数据
+selectSchedulesByDate:
+SELECT * FROM Schedule WHERE date = ?;
+
+-- 更新一条日程数据
+updateSchedule:
+UPDATE Schedule
+SET title = ?, content = ?, date = ?, repeatMode = ?, location = ?
+WHERE id = ?;
+
+-- 删除一条日程数据
+deleteSchedule:
+DELETE FROM Schedule WHERE id = ?;

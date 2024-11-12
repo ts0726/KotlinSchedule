@@ -23,7 +23,6 @@ roomCommon = "2.6.1"
 sqlDelight = "2.0.2"
 
 [libraries]
-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
 hutool-all = { module = "cn.hutool:hutool-all", version.ref = "hutoolAll" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
@@ -43,6 +42,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
 sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqlDelight" }
+android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
