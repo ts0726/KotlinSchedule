@@ -6,4 +6,6 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
     private val database = ScheduleDatabase(databaseDriverFactory.createDriver())
     private val dbQuery = database.scheduleQueries
 
+
+
 }
