@@ -111,6 +111,7 @@ fun NewScheduleTopBar(
             onClick = onSave,
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
+
         ){
             Icon(
                 imageVector = Icons.Filled.Done,
@@ -515,3 +516,4 @@ fun locationPickerModal(
         }
     }
 }
+

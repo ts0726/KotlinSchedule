@@ -1,12 +1,28 @@
 package kmp.project.schedule.ui.home
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +37,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.ui.composableItem.CalendarPaager
@@ -43,6 +60,7 @@ fun mainPagePreview() {
  */
 @Composable
 fun mainPage(
+    sdk: ScheduleSDK,
     isCompact: Boolean,
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
@@ -86,7 +104,7 @@ fun mainPage(
             composable("home_add") {
                 NewSchedule(
                     onBack = { navController.popBackStack() },
-                    onSave = {},
+                    onSave = { viewModel.onSave(sdk, navController) },
                     viewModel = viewModel
                 )
             }
@@ -208,7 +226,6 @@ fun otherInformation(
  *
  * 显示用户信息
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun topDocker(
     bottomPadding: Dp = 30.dp

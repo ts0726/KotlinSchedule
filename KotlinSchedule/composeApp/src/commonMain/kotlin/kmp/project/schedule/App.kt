@@ -77,10 +77,12 @@ fun CustomScaffold(isCompact: Boolean) {
                 val navController = rememberNavController()
                 val listState = rememberLazyListState()
                 val viewModel: NewScheduleViewModel = viewModel{ NewScheduleViewModel() }
+                val sdk = getScheduleSDK()
                 contentContainer(
                     content = {
                         when (pageID.value) {
                             0 -> mainPage(
+                                sdk = sdk,
                                 isCompact = isCompact,
                                 navController = navController,
                                 listState = listState,
@@ -241,3 +243,6 @@ fun customTheme(
         content = content
     )
 }
+
+@Composable
+expect fun getScheduleSDK(): ScheduleSDK

@@ -14,6 +14,8 @@ androidx-test-junit = "1.2.1"
 compose-plugin = "1.6.11"
 hutoolAll = "5.8.32"
 junit = "4.13.2"
+koin = "3.5.3"
+koinCore = "4.0.0"
 kotlin = "2.0.20"
 kotlinx-coroutines = "1.8.1"
 kotlinxDatetimeVersion = "0.6.0"
@@ -24,6 +26,8 @@ sqlDelight = "2.0.2"
 
 [libraries]
 hutool-all = { module = "cn.hutool:hutool-all", version.ref = "hutoolAll" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
