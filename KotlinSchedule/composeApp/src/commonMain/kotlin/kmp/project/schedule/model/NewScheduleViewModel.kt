@@ -18,6 +18,14 @@ class NewScheduleViewModel: ViewModel() {
     val repeatMode = mutableStateOf(0)
     val location = mutableStateOf("未设定")
 
+    fun reset() {
+        title.value = ""
+        content.value = ""
+        date.value = getDayTimestamp()
+        repeatMode.value = 0
+        location.value = "未设定"
+    }
+
     fun onSave(sdk: ScheduleSDK, navController: NavController) {
         CoroutineScope(Dispatchers.IO).launch {
             sdk.insertSchedule(

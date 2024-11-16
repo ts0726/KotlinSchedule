@@ -85,7 +85,10 @@ fun mainPage(
             }
             composable("home_add") {
                 NewSchedule(
-                    onBack = { navController.popBackStack() },
+                    onBack = {
+                        viewModel.reset()
+                        navController.popBackStack()
+                    },
                     onSave = {},
                     viewModel = viewModel
                 )

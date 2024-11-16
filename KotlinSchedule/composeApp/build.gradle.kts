@@ -41,6 +41,7 @@ kotlin {
             implementation(libs.jetbrains.kotlinx.datetime)
             implementation("dev.chrisbanes.material3:material3-window-size-class-multiplatform:0.5.0")
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.7.0-alpha07")
+            implementation("com.squareup.okio:okio:3.9.1")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -93,6 +94,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "kmp.project.schedule"
             packageVersion = "1.0.0"
+            modules("schedule.sql")
         }
     }
 }

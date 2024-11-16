@@ -39,11 +39,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.data.ScheduleData
+import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.ui.composableItem.CalendarPaager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.util.getCurrentDate
 import kmp.project.schedule.util.getDayTimestamp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -73,6 +77,7 @@ fun mainPage(
         //横屏模式下显示日程信息，通过listState同步竖屏时的滚动位置
         if (!isCompact) {
             scheduledInformation(
+                sdk,
                 isCompact,
                 Modifier.weight(1f),
                 listState,
@@ -88,6 +93,7 @@ fun mainPage(
             composable("home") {
                 if (isCompact) {
                     scheduledInformation(
+                        sdk,
                         isCompact,
                         Modifier.weight(1f),
                         listState,
@@ -103,8 +109,19 @@ fun mainPage(
             }
             composable("home_add") {
                 NewSchedule(
-                    onBack = { navController.popBackStack() },
-                    onSave = { viewModel.onSave(sdk, navController) },
+                    onBack = {
+                        viewModel.reset()
+                        navController.popBackStack()
+                    },
+                    onSave = {
+                        if (viewModel.title.value.isEmpty()) {
+                            viewModel.title.value = "未命名事件"
+                        }
+                        if (viewModel.content.value.isEmpty()) {
+                            viewModel.content.value = "无"
+                        }
+                        viewModel.onSave(sdk, navController)
+                    },
                     viewModel = viewModel
                 )
             }
@@ -126,15 +143,19 @@ fun mainPage(
  */
 @Composable
 fun scheduledInformation(
+    sdk: ScheduleSDK,
     isCompact: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState,
     navController: NavHostController
 ) {
     //测试数据
-    val list = arrayListOf<String>()
-    repeat(100) {
-        list.add("Item $it")
+    val list = arrayListOf<Schedule>()
+//    repeat(100) {
+//        list.add("Item $it")
+//    }
+    CoroutineScope(Dispatchers.IO).launch {
+        list.addAll(sdk.getScheduleList())
     }
     Box(
         modifier = modifier.fillMaxSize()
@@ -151,7 +172,7 @@ fun scheduledInformation(
                 }
             }
             items(list.size) { index ->
-                scheduleCard("日程$index", list[index], navController)
+                list[index].content?.let { scheduleCard(list[index].title, it, navController) }
             }
         }
 

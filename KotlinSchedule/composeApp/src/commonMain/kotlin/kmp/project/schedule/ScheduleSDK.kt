@@ -25,4 +25,8 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
                 location = location)
         )
     }
+
+    fun getScheduleList(): List<Schedule> {
+        return database.getAllSchedules()
+    }
 }
