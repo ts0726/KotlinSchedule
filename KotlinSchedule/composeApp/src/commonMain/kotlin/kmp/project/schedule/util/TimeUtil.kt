@@ -5,12 +5,10 @@ import kotlinx.datetime.*
 /**
  * 获取日期，返回xx月xx日 星期x
  */
-fun getCurrentDate(): String {
-    val currentInstant = Clock.System.now()
-    val currentDate = currentInstant.toLocalDateTime(TimeZone.currentSystemDefault())
-    val month = currentDate.monthNumber
-    val day = currentDate.dayOfMonth
-    val dayOfWeek = currentDate.dayOfWeek.name
+fun getCurrentDate(date: LocalDate): String {
+    val month = date.monthNumber
+    val day = date.dayOfMonth
+    val dayOfWeek = date.dayOfWeek.name
     return "$month" + "月" + "$day" + "日 " + "星期${convertDayOfWeekToChinese(dayOfWeek)}"
 }
 

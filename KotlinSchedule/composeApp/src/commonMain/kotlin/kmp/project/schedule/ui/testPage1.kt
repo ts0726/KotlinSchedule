@@ -36,7 +36,8 @@ fun TestPage1() {
                 onDismiss = { showDatePickerDialog.value = false },
                 onDateSelected = {day ->
                     time.value = day
-                }
+                },
+                date = time
             )
         }
     }

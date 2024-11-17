@@ -35,8 +35,7 @@ fun CalendarPreview() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
-    val currentDate =Clock.System.todayIn(TimeZone.currentSystemDefault())
+fun CalendarPaager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
     val initPager = (currentDate.year - 1901 - 1) * 12 + currentDate.monthNumber
     val pagerState = rememberPagerState(initialPage = initPager, pageCount = { (2099 - 1901) * 12 })
     val year = remember { mutableIntStateOf(currentDate.year) }
@@ -72,7 +71,7 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
             )
-            pageSwitcher(currentDate, pagerState, selectedDay, onDayClick)
+            pageSwitcher(pagerState, selectedDay, onDayClick)
         }
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -103,7 +102,6 @@ fun CalendarPaager(onDayClick: (LocalDate) -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun pageSwitcher(
-    date: LocalDate,
     pagerState: PagerState,
     selectedDay: MutableState<Int>,
     onDayClick: (LocalDate) -> Unit
@@ -138,8 +136,9 @@ fun pageSwitcher(
             IconButton(
                 onClick = {
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(page = (date.year - 1901 - 1) * 12 + date.monthNumber)
-                        selectedDay.value = LocalDate(date.year, date.month, date.dayOfMonth).toEpochDays()
+                        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                        pagerState.animateScrollToPage(page = (today.year - 1901 - 1) * 12 + today.monthNumber)
+                        selectedDay.value = LocalDate(today.year, today.month, today.dayOfMonth).toEpochDays()
                         onDayClick(LocalDate.fromEpochDays(selectedDay.value))
                     }
                 }

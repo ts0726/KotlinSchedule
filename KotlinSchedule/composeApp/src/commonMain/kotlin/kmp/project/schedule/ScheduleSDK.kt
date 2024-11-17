@@ -26,7 +26,11 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
         )
     }
 
-    fun getScheduleList(): List<Schedule> {
-        return database.getAllSchedules()
+//    fun getAllScheduleList(): List<Schedule> {
+//        return database.getAllSchedules()
+//    }
+
+    fun getScheduleByDate(date: Long): List<Schedule> {
+        return database.getAllSchedules().filter { it.date == date }
     }
 }

@@ -32,10 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-
 import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.model.NewScheduleViewModel
-import kmp.project.schedule.util.convertMillisToDate
+import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getRepeat
 
 /**
@@ -186,7 +185,7 @@ fun ScheduleDetailContent(
                 modifier = Modifier.padding(end = 15.dp)
             )
             Text(
-                text = convertMillisToDate(scheduleData.date),
+                text = convertLocalDateToDate(scheduleData.date),
                 fontSize = 20.sp
             )
         }

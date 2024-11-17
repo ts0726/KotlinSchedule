@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
-import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,8 +30,8 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,9 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import kmp.project.schedule.model.NewScheduleViewModel
-import kmp.project.schedule.util.convertMillisToDate
+import kmp.project.schedule.ui.composableItem.CalendarPaager
+import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getOptions
 import kmp.project.schedule.util.getRepeat
+import kotlinx.datetime.LocalDate
 
 
 /**
@@ -180,7 +181,7 @@ fun DatePickerDocked(viewModel: NewScheduleViewModel) {
             .padding(top = 10.dp, bottom = 10.dp)
     ) {
         OutlinedTextField(
-            value = convertMillisToDate(viewModel.date.value),
+            value = convertLocalDateToDate(viewModel.date.value),
             onValueChange = { },
             label = { Text("选择日期") },
             readOnly = true,
@@ -201,13 +202,10 @@ fun DatePickerDocked(viewModel: NewScheduleViewModel) {
         )
         if (showDatePickerModal) {
             DatePickerModal(
-                onDateSelected = {
-                    viewModel.date.value = it
-                },
                 onDismiss = {
                     showDatePickerModal = false
                 },
-                date = viewModel.date.value
+                date = viewModel.date
             )
         }
     }
@@ -215,24 +213,22 @@ fun DatePickerDocked(viewModel: NewScheduleViewModel) {
 
 /**
  * 日期选择器弹窗
- * @param onDateSelected 日期选择事件
  * @param onDismiss 取消按钮点击事件
  * @param date 日期值（时间戳）
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerModal(
-    onDateSelected: (Long) -> Unit,
     onDismiss: () -> Unit,
-    date: Long,
+    date: MutableState<LocalDate>,
 ) {
-    val datePickerState = rememberDatePickerState( initialSelectedDateMillis = date )
+    var selectedDate = date.value
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
                 onClick = {
-                    datePickerState.selectedDateMillis?.let { onDateSelected(it) }
+                    date.value = selectedDate
                     onDismiss()
                 }
             ) {
@@ -253,17 +249,13 @@ fun DatePickerModal(
             }
         }
     ) {
-        DatePicker(
-            state = datePickerState,
-            showModeToggle = false,
-            title = {
-                Text(
-                    text = "选择日期",
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp)
-                )
-            }
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+        ) {
+            CalendarPaager(date.value) { selectedDate = it }
+        }
     }
 }
 
