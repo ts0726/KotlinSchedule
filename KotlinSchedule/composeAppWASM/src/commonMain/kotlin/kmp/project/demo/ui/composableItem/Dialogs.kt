@@ -7,32 +7,34 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.datetime.*
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-@Composable
-@Preview
-fun dialogPreview() {
-    CalendarPickerDialog({}, {})
-}
+import kotlinx.datetime.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarPickerDialog(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
+    date: MutableState<LocalDate>
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
     ) {
-        var localDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        var localDate = date.value
         Card(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -51,7 +53,7 @@ fun CalendarPickerDialog(
                     onDismiss()
                 }
             )
-            CalendarPaager { date ->
+            CalendarPager(localDate) { date ->
                 localDate = date
             }
         }
@@ -83,37 +85,6 @@ fun ModalBottomSheetTitle(
                 imageVector = Icons.Default.Check,
                 contentDescription = "Confirm",
                 tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
-
-@Composable
-fun dialogOptions(
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End
-    ) {
-        TextButton(
-            onClick = onDismiss
-        ) {
-            Text(
-                text = "取消",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(5.dp)
-            )
-        }
-        TextButton(
-            onClick = onConfirm
-        ) {
-            Text(
-                text = "确定",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(5.dp)
             )
         }
     }

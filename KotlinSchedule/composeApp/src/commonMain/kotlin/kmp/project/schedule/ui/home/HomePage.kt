@@ -41,7 +41,7 @@ import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.NewScheduleViewModel
-import kmp.project.schedule.ui.composableItem.CalendarPaager
+import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.util.getCurrentDate
 import kotlinx.coroutines.CoroutineScope
@@ -237,7 +237,7 @@ fun otherInformation(
         }
 
         item {
-            CalendarPaager(date.value) { date.value = it }
+            CalendarPager(date.value) { date.value = it }
         }
     }
 }

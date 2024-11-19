@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,17 +24,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kmp.project.demo.data.ScheduleData
 import kmp.project.demo.model.NewScheduleViewModel
-import kmp.project.demo.ui.composableItem.CalendarPaager
+import kmp.project.demo.ui.composableItem.CalendarPager
 import kmp.project.demo.ui.composableItem.CalendarPickerDialog
-import kmp.project.schedule.util.getCurrentDate
-import kmp.project.schedule.util.getDayTimestamp
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-@Composable
-@Preview
-fun mainPagePreview() {
-    topDocker(0.dp)
-}
+import kmp.project.demo.util.getCurrentDate
+import kmp.project.demo.util.getDayTimestamp
+import kotlinx.datetime.LocalDate
 
 /**
  * 主页
@@ -46,7 +41,8 @@ fun mainPage(
     isCompact: Boolean,
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
-    viewModel: NewScheduleViewModel
+    viewModel: NewScheduleViewModel,
+    date: MutableState<LocalDate>
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -58,7 +54,8 @@ fun mainPage(
                 isCompact,
                 Modifier.weight(1f),
                 listState,
-                navController
+                navController,
+                date
             )
         }
         //竖屏模式下显示日程信息，横屏模式下作为操作页显示其他信息
@@ -73,12 +70,14 @@ fun mainPage(
                         isCompact,
                         Modifier.weight(1f),
                         listState,
-                        navController
+                        navController,
+                        date
                     )
                 } else {
                     otherInformation(
                         Modifier.weight(1f),
-                        navController
+                        navController,
+                        date
                     )
                 }
 
@@ -114,7 +113,8 @@ fun scheduledInformation(
     isCompact: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState,
-    navController: NavHostController
+    navController: NavHostController,
+    date: MutableState<LocalDate>
 ) {
     //测试数据
     val list = arrayListOf<String>()
@@ -132,7 +132,7 @@ fun scheduledInformation(
         ) {
             if (isCompact) {
                 item {
-                    topDocker()
+                    topDocker(date = date)
                 }
             }
             items(list.size) { index ->
@@ -159,7 +159,8 @@ fun scheduledInformation(
 @Composable
 fun otherInformation(
     modifier: Modifier,
-    navController: NavHostController
+    navController: NavHostController,
+    date: MutableState<LocalDate>
 ) {
     rememberDatePickerState(
         initialSelectedDateMillis = getDayTimestamp()
@@ -201,7 +202,7 @@ fun otherInformation(
         }
 
         item {
-            CalendarPaager {}
+            CalendarPager(date.value) { date.value = it }
         }
     }
 }
@@ -211,10 +212,10 @@ fun otherInformation(
  *
  * 显示用户信息
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun topDocker(
-    bottomPadding: Dp = 30.dp
+    bottomPadding: Dp = 30.dp,
+    date: MutableState<LocalDate>
 ) {
     val showDatePickerDialog = remember { mutableStateOf(false) }
     Column (
@@ -222,19 +223,19 @@ fun topDocker(
             .padding(10.dp, 30.dp, 10.dp, bottomPadding),
         horizontalAlignment = Alignment.Start
     ) {
-        Text(
-            text = "今天是",
-            fontWeight = FontWeight.W800,
-            fontSize = 20.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
+//        Text(
+//            text = "今天是",
+//            fontWeight = FontWeight.W800,
+//            fontSize = 20.sp,
+//            color = MaterialTheme.colorScheme.primary
+//        )
 
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             //显示当前日期
             Text(
-                text = getCurrentDate(),
+                text = getCurrentDate(date.value),
                 fontWeight = FontWeight.W800,
                 fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.primary
@@ -255,7 +256,8 @@ fun topDocker(
     if (showDatePickerDialog.value) {
         CalendarPickerDialog(
             onDismiss = { showDatePickerDialog.value = false },
-            onDateSelected = {}
+            onDateSelected = {date.value = it},
+            date = date
         )
     }
 }

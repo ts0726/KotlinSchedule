@@ -35,7 +35,7 @@ fun CalendarPreview() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CalendarPaager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
+fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
     val initPager = (currentDate.year - 1901 - 1) * 12 + currentDate.monthNumber
     val pagerState = rememberPagerState(initialPage = initPager, pageCount = { (2099 - 1901) * 12 })
     val year = remember { mutableIntStateOf(currentDate.year) }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,17 +20,19 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -41,9 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import kmp.project.schedule.model.NewScheduleViewModel
-import kmp.project.schedule.ui.composableItem.CalendarPaager
+import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getOptions
 import kmp.project.schedule.util.getRepeat
@@ -205,7 +207,7 @@ fun DatePickerDocked(viewModel: NewScheduleViewModel) {
                 onDismiss = {
                     showDatePickerModal = false
                 },
-                date = viewModel.date
+                date = viewModel.date,
             )
         }
     }
@@ -216,45 +218,57 @@ fun DatePickerDocked(viewModel: NewScheduleViewModel) {
  * @param onDismiss 取消按钮点击事件
  * @param date 日期值（时间戳）
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun DatePickerModal(
     onDismiss: () -> Unit,
     date: MutableState<LocalDate>,
 ) {
+    val windowSize = calculateWindowSizeClass()
+    val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
     var selectedDate = date.value
-    DatePickerDialog(
+    BasicAlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    date.value = selectedDate
-                    onDismiss()
-                }
-            ) {
-                Text(
-                    text = "确定",
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss
-            ) {
-                Text(
-                    text = "取消",
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
     ) {
-        Box(
+        Surface(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+                .requiredWidth(if (!isCompact) 500.dp else 380.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface
         ) {
-            CalendarPaager(date.value) { selectedDate = it }
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                CalendarPager(date.value) { selectedDate = it }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = onDismiss
+                    ) {
+                        Text(
+                            text = "取消",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(5.dp)
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            date.value = selectedDate
+                            onDismiss()
+                        }
+                    ) {
+                        Text(
+                            text = "确定",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(5.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -310,6 +324,7 @@ fun repeatPicker(
  * @param viewModel 新建日程ViewModel
  * @param options 重复选项
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RepeatPickerModal(
     onDismiss: () -> Unit,
@@ -320,14 +335,15 @@ fun RepeatPickerModal(
     //预览选中的重复模式，确认后才将值赋给viewModel中的repeatMode
     val i = remember { mutableStateOf( viewModel.repeatMode.value ) }
 
-    Dialog(
+    BasicAlertDialog(
         onDismissRequest = onDismiss
     ) {
-        Card(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface
         ) {
             Column(
                 modifier = Modifier
@@ -431,6 +447,7 @@ fun locationPicker(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun locationPickerModal(
     onDismiss: () -> Unit,
@@ -438,14 +455,15 @@ fun locationPickerModal(
 ) {
     val options = listOf("家", "公司", "学校")
     var tempLocation by remember { mutableStateOf(viewModel.location.value) }
-    Dialog(
+    BasicAlertDialog(
         onDismissRequest = onDismiss
     ) {
-        Card(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface
         ) {
             Column(
                 modifier = Modifier
@@ -457,12 +475,12 @@ fun locationPickerModal(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(10.dp)
                 )
-                TextField(
+                OutlinedTextField(
                     value = tempLocation,
                     onValueChange = {
                         tempLocation = it
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

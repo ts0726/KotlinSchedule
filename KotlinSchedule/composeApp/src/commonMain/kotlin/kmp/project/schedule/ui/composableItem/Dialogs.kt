@@ -53,7 +53,7 @@ fun CalendarPickerDialog(
                     onDismiss()
                 }
             )
-            CalendarPaager(localDate) { date ->
+            CalendarPager(localDate) { date ->
                 localDate = date
             }
         }
