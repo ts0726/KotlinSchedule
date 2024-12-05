@@ -35,7 +35,9 @@ import androidx.navigation.NavHostController
 import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.util.convertLocalDateToDate
+import kmp.project.schedule.util.getDaysFromToday
 import kmp.project.schedule.util.getRepeat
+import kotlinx.datetime.LocalDate
 
 /**
  * 日程详情页
@@ -199,7 +201,7 @@ fun ScheduleDetailContent(
                 modifier = Modifier.padding(end = 15.dp)
             )
             Text(
-                text = "10天后",
+                text = getDaysStringFromToday(scheduleData.date),
                 fontSize = 20.sp,
             )
         }
@@ -245,5 +247,20 @@ fun ScheduleDetailContent(
                 fontSize = 20.sp
             )
         }
+    }
+}
+
+fun getDaysStringFromToday(date: LocalDate): String {
+    val days = getDaysFromToday(date)
+    if (days == 0) {
+        return "今天"
+    } else if (days == 1) {
+        return "明天"
+    } else if (days == -1) {
+        return "昨天"
+    } else if (days > 0){
+        return "$days 天后"
+    } else {
+        return "${-days} 天前"
     }
 }

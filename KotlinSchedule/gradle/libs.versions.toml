@@ -21,6 +21,7 @@ kotlinx-coroutines = "1.8.1"
 kotlinxDatetimeVersion = "0.6.0"
 material3WindowSizeClassMultiplatform = "0.5.0"
 navigationCompose = "2.8.0"
+okio = "3.9.1"
 roomCommon = "2.6.1"
 sqlDelight = "2.0.2"
 
@@ -44,6 +45,7 @@ kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-co
 jetbrains-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetimeVersion" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
 sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqlDelight" }
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }

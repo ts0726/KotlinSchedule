@@ -34,9 +34,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.database.Schedule
@@ -132,10 +134,27 @@ fun mainPage(
                     viewModel = viewModel
                 )
             }
-            composable("scheduleDetail/{title}/{content}") { backStackEntry ->
+            composable(
+                route = "scheduleDetail/{title}/{content}/{date}",
+                arguments = listOf(
+                    navArgument("title") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                    navArgument("content") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                    navArgument("date") {
+                        type = NavType.LongType
+                        defaultValue = 0
+                    }
+                )
+            ) { backStackEntry ->
                 val title = backStackEntry.arguments?.getString("title") ?: ""
                 val content = backStackEntry.arguments?.getString("content") ?: ""
-                ScheduleDetail(ScheduleData(title, content), navController, viewModel)
+                val epochDays = backStackEntry.arguments?.getLong("date") ?: 0
+                ScheduleDetail(ScheduleData(title, content, LocalDate.fromEpochDays(epochDays.toInt())), navController, viewModel)
             }
         }
     }
@@ -172,7 +191,7 @@ fun scheduledInformation(
                 }
             }
             items(list.size) { index ->
-                list[index].content?.let { scheduleCard(list[index].title, it, navController) }
+                list[index].content?.let { scheduleCard(list[index].title, it, list[index].date, navController) }
             }
         }
 

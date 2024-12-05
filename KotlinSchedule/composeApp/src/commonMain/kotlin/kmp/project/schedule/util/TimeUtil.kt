@@ -69,3 +69,13 @@ fun getDayTimestamp(): Long {
     val currentDate = currentInstant.toLocalDateTime(TimeZone.currentSystemDefault())
     return currentDate.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 }
+
+/**
+ * 计算距离今日的天数
+ */
+fun getDaysFromToday(date: LocalDate): Int {
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    println("today: " + today.toEpochDays())
+    println("date: " + date.toEpochDays())
+    return date.toEpochDays() - today.toEpochDays()
+}

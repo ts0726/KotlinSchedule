@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 fun scheduleCard(
     title: String,
     content: String,
+    epochDays: Long,
     navHostController: NavHostController
 ) {
     Card(
@@ -32,8 +33,9 @@ fun scheduleCard(
         shape = RoundedCornerShape(16.dp),
         onClick = {
             navHostController.navigate("scheduleDetail" +
-                    "/$title" +
-                    "/$content"
+                    "/${title}" +
+                    "/${content}" +
+                    "/${epochDays}"
             ) {
                 //清除栈中的日程详情页面，防止叠加
                 popUpTo("scheduleDetail/{title}/{content}") {
