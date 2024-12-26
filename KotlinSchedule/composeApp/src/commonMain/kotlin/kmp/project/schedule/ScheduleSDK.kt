@@ -3,10 +3,13 @@ package kmp.project.schedule
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.db.Database
 import kmp.project.schedule.db.DatabaseDriverFactory
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
     private val database = Database(databaseDriverFactory)
 
+    @OptIn(ExperimentalUuidApi::class)
     @Throws(Exception::class)
     fun insertSchedule(
         title: String,
@@ -18,6 +21,7 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
         database.createSchedule(
             Schedule(
                 id = 0,
+                uuid = Uuid.random().toString(),
                 title = title,
                 content = content,
                 date = date,
@@ -32,5 +36,9 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
 
     fun getScheduleByDate(date: Long): List<Schedule> {
         return database.getAllSchedules().filter { it.date == date }
+    }
+
+    fun getScheduleByUuid(uuid: String): Schedule {
+        return database.getAllSchedules().filter { it.uuid == uuid }[0]
     }
 }

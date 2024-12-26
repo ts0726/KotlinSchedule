@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import kmp.project.schedule.database.Schedule
 
 /**
  * 日程显示卡片
@@ -21,31 +23,33 @@ import androidx.navigation.NavHostController
  */
 @Composable
 fun scheduleCard(
-    title: String,
-    content: String,
-    epochDays: Long,
-    navHostController: NavHostController
+    schedule: Schedule,
+    onCardClick: (String) -> Unit,
 ) {
     Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+        shape = RoundedCornerShape(16.dp),
+        onClick = { onCardClick(schedule.uuid) },
+//        onClick = {
+//            navHostController.navigate("scheduleDetail" +
+//                    "/${title}" +
+//                    "/${content}" +
+//                    "/${epochDays}"
+//            ) {
+//                //清除栈中的日程详情页面，防止叠加
+//                popUpTo("scheduleDetail/{title}/{content}") {
+//                    inclusive = true
+//                }
+//            }
+//        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp),
-        shape = RoundedCornerShape(16.dp),
-        onClick = {
-            navHostController.navigate("scheduleDetail" +
-                    "/${title}" +
-                    "/${content}" +
-                    "/${epochDays}"
-            ) {
-                //清除栈中的日程详情页面，防止叠加
-                popUpTo("scheduleDetail/{title}/{content}") {
-                    inclusive = true
-                }
-            }
-        }
     ) {
         Column {
-            scheduleCard_Content(title, content)
+            scheduleCard_Content(schedule.title, schedule.content!!)
         }
     }
 }

@@ -15,6 +15,7 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         dbQuery.transaction {
             dbQuery.insertSchedule(
                 title = schedule.title,
+                uuid = schedule.uuid,
                 content = schedule.content,
                 date = schedule.date,
                 repeatMode = schedule.repeatMode,
@@ -25,6 +26,7 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
 
     private fun mapResultToList(
         id: Long,
+        uuid: String,
         title: String,
         content: String?,
         date: Long,
@@ -33,6 +35,7 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
     ): Schedule {
         return Schedule(
             id = id,
+            uuid = uuid,
             title = title,
             content = content,
             date = date,

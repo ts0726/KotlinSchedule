@@ -12,17 +12,17 @@ fun getCurrentDate(date: LocalDate): String {
     return "$month" + "月" + "$day" + "日 " + "星期${convertDayOfWeekToChinese(dayOfWeek)}"
 }
 
-/**
- * 将时间戳转换为日期字符串
- * @param millis 时间戳
- */
-fun convertMillisToDate(millis: Long): String {
-    val instant = Instant.fromEpochMilliseconds(millis)
-    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${localDateTime.year}年${localDateTime.monthNumber}月${localDateTime.dayOfMonth}日" +
-            " 周${convertDayOfWeekToChinese(localDateTime.dayOfWeek.name)}"
-}
-
+///**
+// * 将时间戳转换为日期字符串
+// * @param millis 时间戳
+// */
+//fun convertMillisToDate(millis: Long): String {
+//    val instant = Instant.fromEpochMilliseconds(millis)
+//    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+//    return "${localDateTime.year}年${localDateTime.monthNumber}月${localDateTime.dayOfMonth}日" +
+//            " 周${convertDayOfWeekToChinese(localDateTime.dayOfWeek.name)}"
+//}
+//
 fun convertLocalDateToDate(date: LocalDate): String {
     return "${date.year}年${date.monthNumber}月${date.dayOfMonth}日 周${convertDayOfWeekToChinese(date.dayOfWeek.name)}"
 }
@@ -64,18 +64,16 @@ fun convertMonthOfYearToChinese(monthOfYear: Int): String {
 /**
  * 获取“日”时间戳
  */
-fun getDayTimestamp(): Long {
-    val currentInstant = Clock.System.now()
-    val currentDate = currentInstant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return currentDate.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
-}
+//fun getDayTimestamp(): Long {
+//    val currentInstant = Clock.System.now()
+//    val currentDate = currentInstant.toLocalDateTime(TimeZone.currentSystemDefault())
+//    return currentDate.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+//}
 
 /**
  * 计算距离今日的天数
  */
 fun getDaysFromToday(date: LocalDate): Int {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    println("today: " + today.toEpochDays())
-    println("date: " + date.toEpochDays())
     return date.toEpochDays() - today.toEpochDays()
 }

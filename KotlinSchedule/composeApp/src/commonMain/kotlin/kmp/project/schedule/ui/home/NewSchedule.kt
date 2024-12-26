@@ -1,6 +1,5 @@
 package kmp.project.schedule.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -41,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -94,8 +93,6 @@ fun NewScheduleTopBar(
     ) {
         IconButton(
             onClick = onBack,
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
         ){
             Icon(
                 imageVector = Icons.Filled.Close,
@@ -105,16 +102,13 @@ fun NewScheduleTopBar(
 
         Text(
             text = "创建新日程",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )
 
         IconButton(
             onClick = onSave,
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
-
         ){
             Icon(
                 imageVector = Icons.Filled.Done,
@@ -200,7 +194,8 @@ fun DatePickerDocked(viewModel: NewScheduleViewModel) {
                 }
             },
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            textStyle = TextStyle(MaterialTheme.colorScheme.onBackground)
         )
         if (showDatePickerModal) {
             DatePickerModal(
@@ -234,7 +229,7 @@ fun DatePickerModal(
             modifier = Modifier
                 .requiredWidth(if (!isCompact) 500.dp else 380.dp),
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface
+            color = MaterialTheme.colorScheme.background
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()

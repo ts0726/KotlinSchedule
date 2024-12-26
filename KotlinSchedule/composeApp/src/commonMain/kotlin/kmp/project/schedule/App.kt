@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -42,10 +43,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.TestPage2
@@ -94,7 +95,7 @@ fun CustomScaffold(isCompact: Boolean) {
             },
             content = { innerPadding ->
                 //保存控件状态
-                val navController = rememberNavController()
+//                val navController = rememberNavController()
                 val listState = rememberLazyListState()
                 val viewModel: NewScheduleViewModel = viewModel{ NewScheduleViewModel() }
                 val sdk = getScheduleSDK()
@@ -104,10 +105,10 @@ fun CustomScaffold(isCompact: Boolean) {
                             0 -> mainPage(
                                 sdk = sdk,
                                 isCompact = isCompact,
-                                navController = navController,
+//                                navController = navController,
                                 listState = listState,
                                 viewModel = viewModel,
-                                date = date
+                                date = date,
                             )
                             1 -> TestPage1()
                             2 -> TestPage2()
@@ -189,6 +190,9 @@ fun sideNavRail(pageID: MutableIntState) {
                         .size(cardSize)
                         .padding(top = 5.dp),
                     shape = RoundedCornerShape(15.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
                 ) {
                     Box(
                         modifier = Modifier
@@ -222,7 +226,6 @@ fun bottomNavBar(pageID: MutableIntState) {
     val items = listOf("主页", "全部", "我的")
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = MaterialTheme.colorScheme.error,
     ) {
         items.forEachIndexed { index, _ ->
             NavigationBarItem(
@@ -230,7 +233,7 @@ fun bottomNavBar(pageID: MutableIntState) {
                 selected = index == pageID.intValue,
                 onClick = {
                     pageID.value = index
-                }
+                },
             )
         }
     }
@@ -256,8 +259,14 @@ fun customTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        darkTheme -> darkColorScheme()
-        else -> lightColorScheme()
+        darkTheme -> darkColorScheme(
+            background = Color(0xFF212028),
+            surfaceContainer = Color(0xFF141318)
+        )
+        else -> lightColorScheme(
+            background = Color(0xFFF3EDF7),
+            surfaceContainer = Color(0xFFFDF8FF)
+        )
     }
     MaterialTheme(
         colorScheme = colorScheme,

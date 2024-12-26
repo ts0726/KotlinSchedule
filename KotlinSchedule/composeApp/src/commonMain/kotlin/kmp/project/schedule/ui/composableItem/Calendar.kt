@@ -24,14 +24,13 @@ import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.convertMonthOfYearToChinese
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
-@Composable
-@Preview
-fun CalendarPreview() {
-//    CalendarView(YearMonth.now()) {}
-}
+//@Composable
+//@Preview
+//fun CalendarPreview() {
+////    CalendarView(YearMonth.now()) {}
+//}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -180,6 +179,12 @@ fun CalendarView(date: LocalDate, selectedDay: MutableState<Int>, days: List<Cal
     }
 }
 
+/**
+ * 日历卡片
+ * @param day 日期数据类
+ * @param date 当前日期
+ * @param selectedDay 选中的日期
+ */
 @Composable
 fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState<Int>) {
     val isSelected = remember(day, selectedDay.value) {
@@ -305,15 +310,15 @@ fun calendarTextColor(day: CalendarDay, isSelected: Boolean): Color {
         return MaterialTheme.colorScheme.primary
     }
     if (day.isCurrentMonth)
-        return MaterialTheme.colorScheme.onSurface
-    return MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+        return MaterialTheme.colorScheme.onBackground
+    return MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
 }
 
 @Composable
 fun calendarTodayColor(day: CalendarDay, isSelected: Boolean): Color {
     if (isSelected && day.isCurrentMonth)
         return MaterialTheme.colorScheme.primary
-    return MaterialTheme.colorScheme.surface
+    return MaterialTheme.colorScheme.background
 }
 
 @Composable

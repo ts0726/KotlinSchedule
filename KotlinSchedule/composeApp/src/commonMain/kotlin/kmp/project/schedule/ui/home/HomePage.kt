@@ -40,7 +40,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kmp.project.schedule.ScheduleSDK
-import kmp.project.schedule.data.ScheduleData
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.ui.composableItem.CalendarPager
@@ -64,7 +63,7 @@ fun mainPage(
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
     viewModel: NewScheduleViewModel,
-    date: MutableState<LocalDate>
+    date: MutableState<LocalDate>,
 ) {
     val scheduleList = remember { mutableStateOf<List<Schedule>>(emptyList()) }
 
@@ -84,7 +83,15 @@ fun mainPage(
                 listState,
                 navController,
                 scheduleList.value,
-                date
+                date,
+                onScheduleCardClick = { uuid ->
+                    navController.navigate("scheduleDetail/$uuid") {
+                        //清除栈中的日程详情页面，防止叠加
+                        popUpTo("scheduleDetail/{uuid}") {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
         //竖屏模式下显示日程信息，横屏模式下作为操作页显示其他信息
@@ -101,7 +108,15 @@ fun mainPage(
                         listState,
                         navController,
                         scheduleList.value,
-                        date
+                        date,
+                        onScheduleCardClick = { uuid ->
+                            navController.navigate("scheduleDetail/$uuid") {
+                                //清除栈中的日程详情页面，防止叠加
+                                popUpTo("scheduleDetail/{uuid}") {
+                                    inclusive = true
+                                }
+                            }
+                        }
                     )
                 } else {
                     otherInformation(
@@ -135,26 +150,27 @@ fun mainPage(
                 )
             }
             composable(
-                route = "scheduleDetail/{title}/{content}/{date}",
+                route = "scheduleDetail/{uuid}",
                 arguments = listOf(
-                    navArgument("title") {
+                    navArgument("uuid") {
                         type = NavType.StringType
                         defaultValue = ""
                     },
-                    navArgument("content") {
-                        type = NavType.StringType
-                        defaultValue = ""
-                    },
-                    navArgument("date") {
-                        type = NavType.LongType
-                        defaultValue = 0
-                    }
+//                    navArgument("content") {
+//                        type = NavType.StringType
+//                        defaultValue = ""
+//                    },
+//                    navArgument("date") {
+//                        type = NavType.LongType
+//                        defaultValue = 0
+//                    }
                 )
             ) { backStackEntry ->
-                val title = backStackEntry.arguments?.getString("title") ?: ""
-                val content = backStackEntry.arguments?.getString("content") ?: ""
-                val epochDays = backStackEntry.arguments?.getLong("date") ?: 0
-                ScheduleDetail(ScheduleData(title, content, LocalDate.fromEpochDays(epochDays.toInt())), navController, viewModel)
+//                val title = backStackEntry.arguments?.getString("title") ?: ""
+//                val content = backStackEntry.arguments?.getString("content") ?: ""
+//                val epochDays = backStackEntry.arguments?.getLong("date") ?: 0
+                val uuid = backStackEntry.arguments?.getString("uuid") ?: ""
+                ScheduleDetail(sdk, uuid, navController, viewModel)
             }
         }
     }
@@ -174,10 +190,11 @@ fun scheduledInformation(
     listState: LazyListState,
     navController: NavHostController,
     list: List<Schedule>,
-    date: MutableState<LocalDate>
+    date: MutableState<LocalDate>,
+    onScheduleCardClick: (String) -> Unit
 ) {
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
@@ -191,7 +208,14 @@ fun scheduledInformation(
                 }
             }
             items(list.size) { index ->
-                list[index].content?.let { scheduleCard(list[index].title, it, list[index].date, navController) }
+                list[index].content?.let {
+                    scheduleCard(
+                        list[index],
+                        onCardClick = { uuid ->
+                            onScheduleCardClick(uuid)
+                        }
+                    )
+                }
             }
         }
 

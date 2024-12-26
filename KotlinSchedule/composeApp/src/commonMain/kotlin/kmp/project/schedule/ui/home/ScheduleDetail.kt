@@ -1,13 +1,11 @@
 package kmp.project.schedule.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
@@ -24,15 +22,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import kmp.project.schedule.data.ScheduleData
+import kmp.project.schedule.ScheduleSDK
+import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getDaysFromToday
@@ -41,25 +43,38 @@ import kotlinx.datetime.LocalDate
 
 /**
  * 日程详情页
- * @param scheduleData 日程数据
+ * @param sdk 日程SDK
+ * @param uuid 日程UUID
  * @param navHostController 导航控制器
  * @param viewModel 日程ViewModel
  */
 @Composable
 fun ScheduleDetail(
-    scheduleData: ScheduleData,
+//    scheduleData: ScheduleData,
+    sdk: ScheduleSDK,
+    uuid: String,
     navHostController: NavHostController,
     viewModel: NewScheduleViewModel
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        ScheduleDetailTopBar(
-            navHostController,
-            viewModel,
-            scheduleData
-        )
-        ScheduleDetailContent(scheduleData = scheduleData)
+    var schedule by remember { mutableStateOf<Schedule?>(null) }
+    LaunchedEffect(uuid) {
+        schedule = sdk.getScheduleByUuid(uuid)
+    }
+
+    if (schedule != null) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            ScheduleDetailTopBar(
+                navHostController,
+                viewModel,
+                schedule!!
+            )
+            ScheduleDetailContent(schedule!!)
+        }
+    } else {
+        // 显示加载指示器或占位符
+        Text("Loading...")
     }
 }
 
@@ -67,13 +82,13 @@ fun ScheduleDetail(
  * 日程详情页顶部栏,用于返回和呼出菜单
  * @param navHostController 导航控制器
  * @param viewModel 日程ViewModel
- * @param scheduleData 日程数据
+ * @param schedule 日程数据
  */
 @Composable
 fun ScheduleDetailTopBar(
     navHostController: NavHostController,
     viewModel: NewScheduleViewModel,
-    scheduleData: ScheduleData
+    schedule: Schedule
 ) {
     val expanded = remember { mutableStateOf(false) }
 
@@ -86,8 +101,6 @@ fun ScheduleDetailTopBar(
     ) {
         IconButton(
             onClick = { navHostController.navigateUp() },
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
         ){
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -104,8 +117,6 @@ fun ScheduleDetailTopBar(
 
         IconButton(
             onClick = { expanded.value = true },
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
         ){
             Icon(
                 imageVector = Icons.Filled.Menu,
@@ -118,10 +129,10 @@ fun ScheduleDetailTopBar(
                 DropdownMenuItem(
                     onClick = {
                         expanded.value = false
-                        viewModel.date.value = scheduleData.date
-                        viewModel.title.value = scheduleData.title
-                        viewModel.content.value = scheduleData.content
-                        viewModel.repeatMode.value = scheduleData.repeatMode
+                        viewModel.date.value = LocalDate.fromEpochDays(schedule.date.toInt())
+                        viewModel.title.value = schedule.title
+                        viewModel.content.value = schedule.content!!
+                        viewModel.repeatMode.value = schedule.repeatMode.toInt()
                         navHostController.navigate("home_add")
                     },
                     text = {
@@ -159,11 +170,11 @@ fun ScheduleDetailTopBar(
 
 /**
  * 日程详情页内容
- * @param scheduleData 日程数据
+ * @param schedule 日程数据
  */
 @Composable
 fun ScheduleDetailContent(
-    scheduleData: ScheduleData
+    schedule: Schedule
 ) {
     Column(
         modifier = Modifier
@@ -172,7 +183,7 @@ fun ScheduleDetailContent(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
-            text = scheduleData.title,
+            text = schedule.title,
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 20.dp, top = 10.dp)
@@ -187,7 +198,7 @@ fun ScheduleDetailContent(
                 modifier = Modifier.padding(end = 15.dp)
             )
             Text(
-                text = convertLocalDateToDate(scheduleData.date),
+                text = convertLocalDateToDate(LocalDate.fromEpochDays(schedule.date.toInt())),
                 fontSize = 20.sp
             )
         }
@@ -201,7 +212,7 @@ fun ScheduleDetailContent(
                 modifier = Modifier.padding(end = 15.dp)
             )
             Text(
-                text = getDaysStringFromToday(scheduleData.date),
+                text = getDaysStringFromToday(LocalDate.fromEpochDays(schedule.date.toInt())),
                 fontSize = 20.sp,
             )
         }
@@ -215,7 +226,10 @@ fun ScheduleDetailContent(
                 modifier = Modifier.padding(end = 15.dp)
             )
             Text(
-                text = getRepeat(scheduleData.date, scheduleData.repeatMode),
+                text = getRepeat(
+                    LocalDate.fromEpochDays(schedule.date.toInt()),
+                    schedule.repeatMode.toInt()
+                ),
                 fontSize = 20.sp
             )
         }
@@ -243,7 +257,7 @@ fun ScheduleDetailContent(
                 modifier = Modifier.padding(end = 15.dp)
             )
             Text(
-                text = scheduleData.content,
+                text = schedule.content!!,
                 fontSize = 20.sp
             )
         }
@@ -252,15 +266,15 @@ fun ScheduleDetailContent(
 
 fun getDaysStringFromToday(date: LocalDate): String {
     val days = getDaysFromToday(date)
-    if (days == 0) {
-        return "今天"
+    return if (days == 0) {
+        "今天"
     } else if (days == 1) {
-        return "明天"
+        "明天"
     } else if (days == -1) {
-        return "昨天"
+        "昨天"
     } else if (days > 0){
-        return "$days 天后"
+        "$days 天后"
     } else {
-        return "${-days} 天前"
+        "${-days} 天前"
     }
 }
