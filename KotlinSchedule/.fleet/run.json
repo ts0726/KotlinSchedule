@@ -1,0 +1,12 @@
+{
+    "configurations": [
+
+        {
+            "name": "composeApp (1)",
+            "type": "android-app",
+            "workingDir": "E:\\KMP\\Schedule\\KotlinSchedule",
+            "allowParallelRun": true,
+            "module": "KotlinSchedule.composeApp.main"
+        }
+    ]
+}
