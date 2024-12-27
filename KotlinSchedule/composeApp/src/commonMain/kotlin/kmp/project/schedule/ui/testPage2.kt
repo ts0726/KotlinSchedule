@@ -9,7 +9,7 @@ import androidx.compose.ui.text.style.TextAlign
 @Composable
 fun TestPage2() {
     Text(
-        text = "Test Page 2",
+        text = "Test Page 2.",
         modifier = Modifier
             .fillMaxSize(),
         textAlign = TextAlign.Center
