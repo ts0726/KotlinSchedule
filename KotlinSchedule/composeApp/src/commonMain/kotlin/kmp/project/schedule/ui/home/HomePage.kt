@@ -1,5 +1,6 @@
 package kmp.project.schedule.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -156,19 +157,8 @@ fun mainPage(
                         type = NavType.StringType
                         defaultValue = ""
                     },
-//                    navArgument("content") {
-//                        type = NavType.StringType
-//                        defaultValue = ""
-//                    },
-//                    navArgument("date") {
-//                        type = NavType.LongType
-//                        defaultValue = 0
-//                    }
                 )
             ) { backStackEntry ->
-//                val title = backStackEntry.arguments?.getString("title") ?: ""
-//                val content = backStackEntry.arguments?.getString("content") ?: ""
-//                val epochDays = backStackEntry.arguments?.getLong("date") ?: 0
                 val uuid = backStackEntry.arguments?.getString("uuid") ?: ""
                 ScheduleDetail(sdk, uuid, navController, viewModel)
             }
@@ -193,6 +183,8 @@ fun scheduledInformation(
     date: MutableState<LocalDate>,
     onScheduleCardClick: (String) -> Unit
 ) {
+//    val preFirstItem by mutableStateOf(listState.firstVisibleItemIndex)
+
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -204,7 +196,15 @@ fun scheduledInformation(
         ) {
             if (isCompact) {
                 item {
-                    topDocker(date = date)
+                    AnimatedVisibility(
+                        visible = listState.firstVisibleItemIndex == 0,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        topDocker(
+                            date = date,
+                            onAddClick = { navController.navigate("home_add") }
+                        )
+                    }
                 }
             }
             items(list.size) { index ->
@@ -220,15 +220,23 @@ fun scheduledInformation(
         }
 
         if (isCompact) {
-            FloatingActionButton(
-                onClick = {
-                    navController.navigate("home_add")
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
+//            println("preFirstItem: $preFirstItem")
+            println("firstVisibleItemIndex: ${listState.firstVisibleItemIndex}")
+            AnimatedVisibility(
+//                visible = listState.firstVisibleItemIndex <= preFirstItem,
+                modifier = Modifier.align(Alignment.BottomEnd),
+                visible = listState.firstVisibleItemIndex != 0,
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add")
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("home_add")
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(20.dp)
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                }
             }
         }
     }
@@ -293,7 +301,8 @@ fun otherInformation(
 @Composable
 fun topDocker(
     bottomPadding: Dp = 30.dp,
-    date: MutableState<LocalDate>
+    date: MutableState<LocalDate>,
+    onAddClick: () -> Unit
 ) {
     val showDatePickerDialog = remember { mutableStateOf(false) }
     Column (
@@ -301,12 +310,6 @@ fun topDocker(
             .padding(10.dp, 30.dp, 10.dp, bottomPadding),
         horizontalAlignment = Alignment.Start
     ) {
-//        Text(
-//            text = "今天是",
-//            fontWeight = FontWeight.W800,
-//            fontSize = 20.sp,
-//            color = MaterialTheme.colorScheme.primary
-//        )
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -327,6 +330,15 @@ fun topDocker(
                 Icon(
                     imageVector = Icons.Default.DateRange,
                     contentDescription = "Select Repeat"
+                )
+            }
+
+            IconButton(
+                onClick = onAddClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add"
                 )
             }
         }

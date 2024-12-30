@@ -105,7 +105,6 @@ fun CustomScaffold(isCompact: Boolean) {
                             0 -> mainPage(
                                 sdk = sdk,
                                 isCompact = isCompact,
-//                                navController = navController,
                                 listState = listState,
                                 viewModel = viewModel,
                                 date = date,
