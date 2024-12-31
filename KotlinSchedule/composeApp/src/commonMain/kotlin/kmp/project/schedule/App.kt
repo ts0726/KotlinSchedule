@@ -95,7 +95,6 @@ fun CustomScaffold(isCompact: Boolean) {
             },
             content = { innerPadding ->
                 //保存控件状态
-//                val navController = rememberNavController()
                 val listState = rememberLazyListState()
                 val viewModel: NewScheduleViewModel = viewModel{ NewScheduleViewModel() }
                 val sdk = getScheduleSDK()

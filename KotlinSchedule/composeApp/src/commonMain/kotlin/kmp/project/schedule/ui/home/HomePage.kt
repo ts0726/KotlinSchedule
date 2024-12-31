@@ -35,20 +35,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.NewScheduleViewModel
+import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.util.getCurrentDate
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 /**
@@ -96,73 +90,16 @@ fun mainPage(
             )
         }
         //竖屏模式下显示日程信息，横屏模式下作为操作页显示其他信息
-        NavHost(
+        HomeNavHost(
+            sdk = sdk,
             navController = navController,
-            startDestination = "home",
-            modifier = Modifier.weight(1f)
-        ) {
-            composable("home") {
-                if (isCompact) {
-                    scheduledInformation(
-                        isCompact,
-                        Modifier.weight(1f),
-                        listState,
-                        navController,
-                        scheduleList.value,
-                        date,
-                        onScheduleCardClick = { uuid ->
-                            navController.navigate("scheduleDetail/$uuid") {
-                                //清除栈中的日程详情页面，防止叠加
-                                popUpTo("scheduleDetail/{uuid}") {
-                                    inclusive = true
-                                }
-                            }
-                        }
-                    )
-                } else {
-                    otherInformation(
-                        Modifier.weight(1f),
-                        navController,
-                        date
-                    )
-                }
-
-            }
-            composable("home_add") {
-                NewSchedule(
-                    onBack = {
-                        viewModel.reset()
-                        navController.popBackStack()
-                    },
-                    onSave = {
-                        if (viewModel.title.value.isEmpty()) {
-                            viewModel.title.value = "未命名事件"
-                        }
-                        if (viewModel.content.value.isEmpty()) {
-                            viewModel.content.value = "无"
-                        }
-                        CoroutineScope(Dispatchers.IO).launch {
-                            viewModel.onSave(sdk, navController)
-                            scheduleList.value = sdk.getScheduleByDate(date.value.toEpochDays().toLong())
-                            viewModel.reset()
-                        }
-                    },
-                    viewModel = viewModel
-                )
-            }
-            composable(
-                route = "scheduleDetail/{uuid}",
-                arguments = listOf(
-                    navArgument("uuid") {
-                        type = NavType.StringType
-                        defaultValue = ""
-                    },
-                )
-            ) { backStackEntry ->
-                val uuid = backStackEntry.arguments?.getString("uuid") ?: ""
-                ScheduleDetail(sdk, uuid, navController, viewModel)
-            }
-        }
+            modifier = Modifier.weight(1f),
+            isCompact = isCompact,
+            listState = listState,
+            scheduleList = scheduleList,
+            date = date,
+            viewModel = viewModel
+        )
     }
 }
 
@@ -183,8 +120,6 @@ fun scheduledInformation(
     date: MutableState<LocalDate>,
     onScheduleCardClick: (String) -> Unit
 ) {
-//    val preFirstItem by mutableStateOf(listState.firstVisibleItemIndex)
-
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -220,10 +155,7 @@ fun scheduledInformation(
         }
 
         if (isCompact) {
-//            println("preFirstItem: $preFirstItem")
-            println("firstVisibleItemIndex: ${listState.firstVisibleItemIndex}")
             AnimatedVisibility(
-//                visible = listState.firstVisibleItemIndex <= preFirstItem,
                 modifier = Modifier.align(Alignment.BottomEnd),
                 visible = listState.firstVisibleItemIndex != 0,
             ) {
