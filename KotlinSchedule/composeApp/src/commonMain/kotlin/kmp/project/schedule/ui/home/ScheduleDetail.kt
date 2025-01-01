@@ -179,14 +179,15 @@ fun ScheduleDetailContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp),
+            .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
             text = schedule.title,
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 20.dp, top = 10.dp)
+            modifier = Modifier.padding(bottom = 20.dp, top = 10.dp),
+            lineHeight = 45.sp
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,

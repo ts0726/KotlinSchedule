@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kmp.project.schedule.database.Schedule
@@ -32,18 +33,6 @@ fun scheduleCard(
         ),
         shape = RoundedCornerShape(16.dp),
         onClick = { onCardClick(schedule.uuid) },
-//        onClick = {
-//            navHostController.navigate("scheduleDetail" +
-//                    "/${title}" +
-//                    "/${content}" +
-//                    "/${epochDays}"
-//            ) {
-//                //清除栈中的日程详情页面，防止叠加
-//                popUpTo("scheduleDetail/{title}/{content}") {
-//                    inclusive = true
-//                }
-//            }
-//        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp),
@@ -66,13 +55,17 @@ fun scheduleCard_Content(title: String, content: String) {
         Text(
             text = title,
             fontSize = 25.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            lineHeight = 30.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         Text(
             text = content,
             fontSize = 15.sp,
             textAlign = TextAlign.Justify,
-            maxLines = 5
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

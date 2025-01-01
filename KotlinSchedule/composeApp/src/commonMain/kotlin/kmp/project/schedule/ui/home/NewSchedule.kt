@@ -135,13 +135,19 @@ fun NewScheduleContent(viewModel: NewScheduleViewModel) {
             OutlinedTextField(
                 value = title,
                 onValueChange = {
-                    title = it
+                    title = it.substring(0, it.length.coerceAtMost(20))
                 },
-                label = { Text("输入事件标题") },
+                label = { Text("事件标题") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 10.dp, bottom = 10.dp),
-                maxLines = 1
+                supportingText = {
+                    Text(
+                        text = "${20 - title.length}",
+                        color = if (title.length >= 20) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             )
 
             DatePickerDocked(viewModel)
