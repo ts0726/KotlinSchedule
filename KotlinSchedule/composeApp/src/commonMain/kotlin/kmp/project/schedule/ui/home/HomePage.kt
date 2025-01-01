@@ -39,6 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.NewScheduleViewModel
+import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
@@ -58,12 +59,13 @@ fun mainPage(
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
     viewModel: NewScheduleViewModel,
+    scheduleViewModel: ScheduleViewModel,
     date: MutableState<LocalDate>,
 ) {
-    val scheduleList = remember { mutableStateOf<List<Schedule>>(emptyList()) }
+    val scheduleList = remember { scheduleViewModel.schedules }
 
     LaunchedEffect(date.value) {
-        scheduleList.value = sdk.getScheduleByDate(date.value.toEpochDays().toLong())
+        scheduleViewModel.loadSchedules(sdk, date)
     }
 
     Row(
@@ -77,7 +79,7 @@ fun mainPage(
                 Modifier.weight(1f),
                 listState,
                 navController,
-                scheduleList.value,
+                scheduleList,
                 date,
                 onScheduleCardClick = { uuid ->
                     navController.navigate("scheduleDetail/$uuid") {
@@ -98,7 +100,8 @@ fun mainPage(
             listState = listState,
             scheduleList = scheduleList,
             date = date,
-            viewModel = viewModel
+            viewModel = viewModel,
+            scheduleViewModel = scheduleViewModel
         )
     }
 }

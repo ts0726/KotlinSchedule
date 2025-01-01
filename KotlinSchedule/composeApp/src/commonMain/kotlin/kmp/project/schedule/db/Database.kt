@@ -24,6 +24,12 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         }
     }
 
+    internal fun deleteSchedule(uuid: String) {
+        dbQuery.transaction {
+            dbQuery.deleteSchedule(uuid)
+        }
+    }
+
     private fun mapResultToList(
         id: Long,
         uuid: String,

@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.NewScheduleViewModel
+import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.home.NewSchedule
 import kmp.project.schedule.ui.home.ScheduleDetail
 import kmp.project.schedule.ui.home.otherInformation
@@ -40,9 +41,10 @@ fun HomeNavHost(
     modifier: Modifier,
     isCompact: Boolean,
     listState: LazyListState,
-    scheduleList: MutableState<List<Schedule>>,
+    scheduleList: List<Schedule>,
     date: MutableState<LocalDate>,
-    viewModel: NewScheduleViewModel
+    viewModel: NewScheduleViewModel,
+    scheduleViewModel: ScheduleViewModel
 ) {
     NavHost(
         navController = navController,
@@ -56,7 +58,7 @@ fun HomeNavHost(
                     modifier,
                     listState,
                     navController,
-                    scheduleList.value,
+                    scheduleList,
                     date,
                     onScheduleCardClick = { uuid ->
                         navController.navigate("scheduleDetail/$uuid") {
@@ -91,7 +93,7 @@ fun HomeNavHost(
                     }
                     CoroutineScope(Dispatchers.IO).launch {
                         viewModel.onSave(sdk, navController)
-                        scheduleList.value = sdk.getScheduleByDate(date.value.toEpochDays().toLong())
+                        scheduleViewModel.loadSchedules(sdk, date)
                         viewModel.reset()
                     }
                 },
@@ -108,7 +110,7 @@ fun HomeNavHost(
             )
         ) { backStackEntry ->
             val uuid = backStackEntry.arguments?.getString("uuid") ?: ""
-            ScheduleDetail(sdk, uuid, navController, viewModel)
+            ScheduleDetail(sdk, uuid, navController, viewModel, scheduleViewModel)
         }
     }
 }

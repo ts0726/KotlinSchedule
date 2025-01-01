@@ -36,6 +36,8 @@ import androidx.navigation.NavHostController
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.NewScheduleViewModel
+import kmp.project.schedule.model.ScheduleViewModel
+import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getDaysFromToday
 import kmp.project.schedule.util.getRepeat
@@ -50,11 +52,11 @@ import kotlinx.datetime.LocalDate
  */
 @Composable
 fun ScheduleDetail(
-//    scheduleData: ScheduleData,
     sdk: ScheduleSDK,
     uuid: String,
     navHostController: NavHostController,
-    viewModel: NewScheduleViewModel
+    viewModel: NewScheduleViewModel,
+    scheduleViewModel: ScheduleViewModel
 ) {
     var schedule by remember { mutableStateOf<Schedule?>(null) }
     LaunchedEffect(uuid) {
@@ -66,6 +68,7 @@ fun ScheduleDetail(
             modifier = Modifier.fillMaxSize()
         ) {
             ScheduleDetailTopBar(
+                delateSchedule = { scheduleViewModel.deleteSchedule(sdk, it) },
                 navHostController,
                 viewModel,
                 schedule!!
@@ -86,11 +89,13 @@ fun ScheduleDetail(
  */
 @Composable
 fun ScheduleDetailTopBar(
+    delateSchedule: (String) -> Unit,
     navHostController: NavHostController,
     viewModel: NewScheduleViewModel,
     schedule: Schedule
 ) {
     val expanded = remember { mutableStateOf(false) }
+    val showConfirmDialog = remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -149,7 +154,10 @@ fun ScheduleDetailTopBar(
                     }
                 )
                 DropdownMenuItem(
-                    onClick = {},
+                    onClick = {
+                        expanded.value = false
+                        showConfirmDialog.value = true
+                    },
                     text = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
@@ -165,6 +173,19 @@ fun ScheduleDetailTopBar(
                 )
             }
         }
+    }
+
+    if (showConfirmDialog.value) {
+        ConfirmDialog(
+            title = "删除日程",
+            content = "将同步删除本地和云端的日程，且删除后不可恢复\n确定要删除该日程吗？",
+            onConfirm = {
+                showConfirmDialog.value = false
+                delateSchedule(schedule.uuid)
+                navHostController.navigateUp()
+            },
+            onDismiss = { showConfirmDialog.value = false }
+        )
     }
 }
 

@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kmp.project.schedule.model.NewScheduleViewModel
+import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.TestPage2
 import kmp.project.schedule.ui.home.mainPage
@@ -61,8 +62,12 @@ import kotlinx.datetime.todayIn
 fun App() {
     val windowSize = calculateWindowSizeClass()
     val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
+    val sdk = getScheduleSDK()
     customTheme {
-        CustomScaffold(isCompact = isCompact)
+        CustomScaffold(
+            sdk = sdk,
+            isCompact = isCompact
+        )
     }
 }
 
@@ -74,7 +79,10 @@ fun App() {
  * @param isCompact 检测显示设备屏幕宽度, 用于判断是否显示侧边栏
  */
 @Composable
-fun CustomScaffold(isCompact: Boolean) {
+fun CustomScaffold(
+    sdk: ScheduleSDK,
+    isCompact: Boolean
+) {
     val pageID = remember{ mutableIntStateOf(0) }
     val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     Row (
@@ -97,7 +105,7 @@ fun CustomScaffold(isCompact: Boolean) {
                 //保存控件状态
                 val listState = rememberLazyListState()
                 val viewModel: NewScheduleViewModel = viewModel{ NewScheduleViewModel() }
-                val sdk = getScheduleSDK()
+                val scheduleViewModel: ScheduleViewModel = viewModel{ ScheduleViewModel() }
                 contentContainer(
                     content = {
                         when (pageID.value) {
@@ -106,6 +114,7 @@ fun CustomScaffold(isCompact: Boolean) {
                                 isCompact = isCompact,
                                 listState = listState,
                                 viewModel = viewModel,
+                                scheduleViewModel = scheduleViewModel,
                                 date = date,
                             )
                             1 -> TestPage1()

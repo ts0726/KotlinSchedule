@@ -41,4 +41,19 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
     fun getScheduleByUuid(uuid: String): Schedule {
         return database.getAllSchedules().filter { it.uuid == uuid }[0]
     }
+
+    fun deleteSchedule(uuid: String) {
+        database.deleteSchedule(uuid)
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: ScheduleSDK? = null
+
+        fun getInstance(databaseDriverFactory: DatabaseDriverFactory): ScheduleSDK {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: ScheduleSDK(databaseDriverFactory).also { INSTANCE = it }
+            }
+        }
+    }
 }
