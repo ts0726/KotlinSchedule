@@ -1,5 +1,10 @@
 package kmp.project.schedule.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -49,7 +54,43 @@ fun HomeNavHost(
     NavHost(
         navController = navController,
         startDestination = "home",
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = {
+            fadeIn(
+                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+            ) + slideIntoContainer(
+                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                initialOffset = { fullSize -> fullSize / 3 }
+            )
+        },
+        exitTransition = {
+            fadeOut(
+                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+            ) + slideOutOfContainer(
+                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                targetOffset = { fullSize -> fullSize / 3 }
+            )
+        },
+        popEnterTransition = {
+            fadeIn(
+                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+            ) + slideIntoContainer(
+                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                initialOffset = { fullSize -> fullSize / 3 }
+            )
+        },
+        popExitTransition = {
+            fadeOut(
+                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+            ) + slideOutOfContainer(
+                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                targetOffset = { fullSize -> fullSize / 3 }
+            )
+        }
     ) {
         composable("home") {
             if (isCompact) {
