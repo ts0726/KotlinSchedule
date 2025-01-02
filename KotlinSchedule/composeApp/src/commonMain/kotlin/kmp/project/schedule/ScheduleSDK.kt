@@ -17,17 +17,19 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
         date: Long,
         repeatMode: Int,
         location: String?
-    ) {
+    ): String {
+        val uuid = Uuid.random().toString()
         database.createSchedule(
             Schedule(
                 id = 0,
-                uuid = Uuid.random().toString(),
+                uuid = uuid,
                 title = title,
                 content = content,
                 date = date,
                 repeatMode = repeatMode.toLong(),
                 location = location)
         )
+        return uuid
     }
 
 //    fun getAllScheduleList(): List<Schedule> {

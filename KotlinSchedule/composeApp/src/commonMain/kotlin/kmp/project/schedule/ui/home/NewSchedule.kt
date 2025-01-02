@@ -43,7 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kmp.project.schedule.model.NewScheduleViewModel
+import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getOptions
@@ -61,7 +61,7 @@ import kotlinx.datetime.LocalDate
 fun NewSchedule(
     onBack: () -> Unit,
     onSave: () -> Unit,
-    viewModel: NewScheduleViewModel
+    viewModel: ScheduleViewModel
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -123,7 +123,7 @@ fun NewScheduleTopBar(
  * @param viewModel 新建日程ViewModel
  */
 @Composable
-fun NewScheduleContent(viewModel: NewScheduleViewModel) {
+fun NewScheduleContent(viewModel: ScheduleViewModel) {
     var title by viewModel.title
     var content by viewModel.content
     LazyColumn(
@@ -175,7 +175,7 @@ fun NewScheduleContent(viewModel: NewScheduleViewModel) {
  * @param viewModel 新建日程ViewModel
  */
 @Composable
-fun DatePickerDocked(viewModel: NewScheduleViewModel) {
+fun DatePickerDocked(viewModel: ScheduleViewModel) {
     var showDatePickerModal by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -280,7 +280,7 @@ fun DatePickerModal(
  */
 @Composable
 fun repeatPicker(
-    viewModel: NewScheduleViewModel
+    viewModel: ScheduleViewModel
 ) {
     var showRepeatPicker by remember { mutableStateOf(false) }
     val selectedRepeat = getRepeat(viewModel.date.value, viewModel.repeatMode.value)
@@ -329,7 +329,7 @@ fun repeatPicker(
 @Composable
 fun RepeatPickerModal(
     onDismiss: () -> Unit,
-    viewModel: NewScheduleViewModel,
+    viewModel: ScheduleViewModel,
     options: List<String>
 ) {
 
@@ -412,7 +412,7 @@ fun RepeatPickerModal(
 
 @Composable
 fun locationPicker(
-    viewModel: NewScheduleViewModel
+    viewModel: ScheduleViewModel
 ) {
     var showLocationPicker by remember { mutableStateOf(false) }
     Box(
@@ -452,7 +452,7 @@ fun locationPicker(
 @Composable
 fun locationPickerModal(
     onDismiss: () -> Unit,
-    viewModel: NewScheduleViewModel
+    viewModel: ScheduleViewModel
 ) {
     val options = listOf("家", "公司", "学校")
     var tempLocation by remember { mutableStateOf(viewModel.location.value) }

@@ -1,15 +1,22 @@
 package kmp.project.schedule.ui.home
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,24 +29,29 @@ import kmp.project.schedule.database.Schedule
  *
  * 日程信息在卡片中显示，通过点击卡片可查看对应日程
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun scheduleCard(
     schedule: Schedule,
     onCardClick: (String) -> Unit,
+    onCardLongClick: (String) -> Unit
 ) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        ),
-        shape = RoundedCornerShape(16.dp),
-        onClick = { onCardClick(schedule.uuid) },
+    val interactionSource = remember { MutableInteractionSource() }
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp),
+            .padding(5.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .combinedClickable(
+                interactionSource = interactionSource,
+                indication = rememberRipple(bounded = true),
+                onLongClick = { onCardLongClick(schedule.uuid) },
+                onClick = { onCardClick(schedule.uuid) },
+            )
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .animateContentSize()
     ) {
-        Column {
-            scheduleCard_Content(schedule.title, schedule.content!!)
-        }
+        scheduleCard_Content(schedule.title, schedule.content!!)
     }
 }
 

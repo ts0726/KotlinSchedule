@@ -3,29 +3,34 @@ agp = "8.5.2"
 android-compileSdk = "34"
 android-minSdk = "24"
 android-targetSdk = "34"
-androidx-activityCompose = "1.9.1"
+androidx-activityCompose = "1.9.2"
 androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.1.4"
 androidx-core-ktx = "1.13.1"
 androidx-espresso-core = "3.6.1"
-androidx-lifecycle = "2.8.0"
+androidx-lifecycle = "2.8.2"
 androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
+animation = "1.7.0"
 compose-plugin = "1.6.11"
 hutoolAll = "5.8.32"
 junit = "4.13.2"
 koin = "3.5.3"
 koinCore = "4.0.0"
 kotlin = "2.0.20"
-kotlinx-coroutines = "1.8.1"
+kotlinx-coroutines = "1.9.0"
 kotlinxDatetimeVersion = "0.6.0"
 material3WindowSizeClassMultiplatform = "0.5.0"
 navigationCompose = "2.8.0"
 okio = "3.9.1"
 roomCommon = "2.6.1"
+runtime = "1.7.6"
 sqlDelight = "2.0.2"
+animationDesktop = "1.7.0"
 
 [libraries]
+androidx-animation = { module = "androidx.compose.animation:animation", version.ref = "animation" }
+androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "runtime" }
 hutool-all = { module = "cn.hutool:hutool-all", version.ref = "hutoolAll" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -49,6 +54,7 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
 sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqlDelight" }
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
+androidx-animation-desktop = { group = "androidx.compose.animation", name = "animation-desktop", version.ref = "animationDesktop" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -1,6 +1,7 @@
 package kmp.project.schedule.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
@@ -38,7 +40,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
@@ -58,7 +59,7 @@ fun mainPage(
     isCompact: Boolean,
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
-    viewModel: NewScheduleViewModel,
+//    viewModel: NewScheduleViewModel,
     scheduleViewModel: ScheduleViewModel,
     date: MutableState<LocalDate>,
 ) {
@@ -100,7 +101,7 @@ fun mainPage(
             listState = listState,
             scheduleList = scheduleList,
             date = date,
-            viewModel = viewModel,
+//            viewModel = viewModel,
             scheduleViewModel = scheduleViewModel
         )
     }
@@ -113,6 +114,7 @@ fun mainPage(
  * @param modifier 修饰符
  * @param listState 列表状态
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun scheduledInformation(
     isCompact: Boolean,
@@ -133,7 +135,7 @@ fun scheduledInformation(
                 .padding(start = 10.dp, end = 10.dp),
         ) {
             if (isCompact) {
-                item {
+                item(key = 0) {
                     AnimatedVisibility(
                         visible = listState.firstVisibleItemIndex == 0,
                         modifier = Modifier.fillMaxWidth()
@@ -145,16 +147,34 @@ fun scheduledInformation(
                     }
                 }
             }
-            items(list.size) { index ->
-                list[index].content?.let {
+            items(items = list, key = { it }) {
+//                Surface(
+////                    modifier = Modifier.animateItemPlacement()
+//                ) {
                     scheduleCard(
-                        list[index],
+                        it,
                         onCardClick = { uuid ->
                             onScheduleCardClick(uuid)
+                        },
+                        onCardLongClick = { uuid ->
+                            navController.navigate("scheduleDetail/$uuid")
                         }
                     )
-                }
+//                }
             }
+//            items(list.size) { index ->
+//                list[index].content?.let {
+//                    scheduleCard(
+//                        list[index],
+//                        onCardClick = { uuid ->
+//                            onScheduleCardClick(uuid)
+//                        },
+//                        onCardLongClick = { uuid ->
+//                            navController.navigate("scheduleDetail/$uuid")
+//                        }
+//                    )
+//                }
+//            }
         }
 
         if (isCompact) {

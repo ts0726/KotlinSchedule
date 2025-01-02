@@ -16,7 +16,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.home.NewSchedule
 import kmp.project.schedule.ui.home.ScheduleDetail
@@ -37,7 +36,7 @@ import kotlinx.datetime.LocalDate
  * @param listState 列表状态
  * @param scheduleList 日程列表
  * @param date 当前日期
- * @param viewModel 新建日程ViewModel
+ * @param scheduleViewModel 日程ViewModel
  */
 @Composable
 fun HomeNavHost(
@@ -48,7 +47,7 @@ fun HomeNavHost(
     listState: LazyListState,
     scheduleList: List<Schedule>,
     date: MutableState<LocalDate>,
-    viewModel: NewScheduleViewModel,
+//    viewModel: NewScheduleViewModel,
     scheduleViewModel: ScheduleViewModel
 ) {
     NavHost(
@@ -108,7 +107,7 @@ fun HomeNavHost(
                                 inclusive = true
                             }
                         }
-                    }
+                    },
                 )
             } else {
                 otherInformation(
@@ -122,23 +121,23 @@ fun HomeNavHost(
         composable("home_add") {
             NewSchedule(
                 onBack = {
-                    viewModel.reset()
+                    scheduleViewModel.reset()
                     navController.popBackStack()
                 },
                 onSave = {
-                    if (viewModel.title.value.isEmpty()) {
-                        viewModel.title.value = "未命名事件"
+                    if (scheduleViewModel.title.value.isEmpty()) {
+                        scheduleViewModel.title.value = "未命名事件"
                     }
-                    if (viewModel.content.value.isEmpty()) {
-                        viewModel.content.value = "无"
+                    if (scheduleViewModel.content.value.isEmpty()) {
+                        scheduleViewModel.content.value = "无"
                     }
                     CoroutineScope(Dispatchers.IO).launch {
-                        viewModel.onSave(sdk, navController)
-                        scheduleViewModel.loadSchedules(sdk, date)
-                        viewModel.reset()
+                        scheduleViewModel.onSave(sdk, navController)
+//                        scheduleViewModel.loadSchedules(sdk, date)
+//                        scheduleViewModel.reset()
                     }
                 },
-                viewModel = viewModel
+                viewModel = scheduleViewModel
             )
         }
         composable(
@@ -151,7 +150,7 @@ fun HomeNavHost(
             )
         ) { backStackEntry ->
             val uuid = backStackEntry.arguments?.getString("uuid") ?: ""
-            ScheduleDetail(sdk, uuid, navController, viewModel, scheduleViewModel)
+            ScheduleDetail(sdk, uuid, navController, scheduleViewModel, scheduleViewModel)
         }
     }
 }

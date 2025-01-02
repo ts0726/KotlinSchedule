@@ -47,7 +47,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.TestPage2
@@ -104,7 +103,7 @@ fun CustomScaffold(
             content = { innerPadding ->
                 //保存控件状态
                 val listState = rememberLazyListState()
-                val viewModel: NewScheduleViewModel = viewModel{ NewScheduleViewModel() }
+//                val viewModel: NewScheduleViewModel = viewModel{ NewScheduleViewModel() }
                 val scheduleViewModel: ScheduleViewModel = viewModel{ ScheduleViewModel() }
                 contentContainer(
                     content = {
@@ -113,7 +112,7 @@ fun CustomScaffold(
                                 sdk = sdk,
                                 isCompact = isCompact,
                                 listState = listState,
-                                viewModel = viewModel,
+//                                viewModel = viewModel,
                                 scheduleViewModel = scheduleViewModel,
                                 date = date,
                             )

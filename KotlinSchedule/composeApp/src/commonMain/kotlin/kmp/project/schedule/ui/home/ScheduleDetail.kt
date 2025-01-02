@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.model.NewScheduleViewModel
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.convertLocalDateToDate
@@ -55,7 +54,7 @@ fun ScheduleDetail(
     sdk: ScheduleSDK,
     uuid: String,
     navHostController: NavHostController,
-    viewModel: NewScheduleViewModel,
+    viewModel: ScheduleViewModel,
     scheduleViewModel: ScheduleViewModel
 ) {
     var schedule by remember { mutableStateOf<Schedule?>(null) }
@@ -91,7 +90,7 @@ fun ScheduleDetail(
 fun ScheduleDetailTopBar(
     delateSchedule: (String) -> Unit,
     navHostController: NavHostController,
-    viewModel: NewScheduleViewModel,
+    viewModel: ScheduleViewModel,
     schedule: Schedule
 ) {
     val expanded = remember { mutableStateOf(false) }
