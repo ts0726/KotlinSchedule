@@ -97,7 +97,6 @@ fun HomeNavHost(
                     isCompact,
                     modifier,
                     listState,
-                    navController,
                     scheduleList,
                     date,
                     onScheduleCardClick = { uuid ->
@@ -108,6 +107,7 @@ fun HomeNavHost(
                             }
                         }
                     },
+                    onAddClick = { navController.navigate("home_add") }
                 )
             } else {
                 otherInformation(
@@ -133,8 +133,6 @@ fun HomeNavHost(
                     }
                     CoroutineScope(Dispatchers.IO).launch {
                         scheduleViewModel.onSave(sdk, navController)
-//                        scheduleViewModel.loadSchedules(sdk, date)
-//                        scheduleViewModel.reset()
                     }
                 },
                 viewModel = scheduleViewModel

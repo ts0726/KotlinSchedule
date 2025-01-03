@@ -1,6 +1,5 @@
 package kmp.project.schedule.ui.home
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -32,13 +31,14 @@ import kmp.project.schedule.database.Schedule
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun scheduleCard(
+    modifier: Modifier = Modifier,
     schedule: Schedule,
     onCardClick: (String) -> Unit,
     onCardLongClick: (String) -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(5.dp)
             .clip(RoundedCornerShape(16.dp))
@@ -49,7 +49,6 @@ fun scheduleCard(
                 onClick = { onCardClick(schedule.uuid) },
             )
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .animateContentSize()
     ) {
         scheduleCard_Content(schedule.title, schedule.content!!)
     }

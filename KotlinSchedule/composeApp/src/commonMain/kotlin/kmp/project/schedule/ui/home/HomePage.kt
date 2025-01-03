@@ -59,7 +59,6 @@ fun mainPage(
     isCompact: Boolean,
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
-//    viewModel: NewScheduleViewModel,
     scheduleViewModel: ScheduleViewModel,
     date: MutableState<LocalDate>,
 ) {
@@ -79,7 +78,6 @@ fun mainPage(
                 isCompact,
                 Modifier.weight(1f),
                 listState,
-                navController,
                 scheduleList,
                 date,
                 onScheduleCardClick = { uuid ->
@@ -89,7 +87,8 @@ fun mainPage(
                             inclusive = true
                         }
                     }
-                }
+                },
+                onAddClick = { navController.navigate("home_add") }
             )
         }
         //竖屏模式下显示日程信息，横屏模式下作为操作页显示其他信息
@@ -120,10 +119,10 @@ fun scheduledInformation(
     isCompact: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState,
-    navController: NavHostController,
     list: List<Schedule>,
     date: MutableState<LocalDate>,
-    onScheduleCardClick: (String) -> Unit
+    onScheduleCardClick: (String) -> Unit,
+    onAddClick: () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
@@ -135,46 +134,29 @@ fun scheduledInformation(
                 .padding(start = 10.dp, end = 10.dp),
         ) {
             if (isCompact) {
-                item(key = 0) {
+                item(key = "topDocker") {
                     AnimatedVisibility(
                         visible = listState.firstVisibleItemIndex == 0,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         topDocker(
+                            modifier = Modifier,
                             date = date,
-                            onAddClick = { navController.navigate("home_add") }
+                            onAddClick = onAddClick
                         )
                     }
                 }
             }
-            items(items = list, key = { it }) {
-//                Surface(
-////                    modifier = Modifier.animateItemPlacement()
-//                ) {
+            items(items = list, key = { it.uuid }) {
                     scheduleCard(
+                        modifier = if (isCompact) Modifier else Modifier.animateItemPlacement(),
                         it,
                         onCardClick = { uuid ->
                             onScheduleCardClick(uuid)
                         },
-                        onCardLongClick = { uuid ->
-                            navController.navigate("scheduleDetail/$uuid")
-                        }
+                        onCardLongClick = {}
                     )
-//                }
             }
-//            items(list.size) { index ->
-//                list[index].content?.let {
-//                    scheduleCard(
-//                        list[index],
-//                        onCardClick = { uuid ->
-//                            onScheduleCardClick(uuid)
-//                        },
-//                        onCardLongClick = { uuid ->
-//                            navController.navigate("scheduleDetail/$uuid")
-//                        }
-//                    )
-//                }
-//            }
         }
 
         if (isCompact) {
@@ -183,9 +165,7 @@ fun scheduledInformation(
                 visible = listState.firstVisibleItemIndex != 0,
             ) {
                 FloatingActionButton(
-                    onClick = {
-                        navController.navigate("home_add")
-                    },
+                    onClick = onAddClick,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(20.dp)
@@ -255,13 +235,14 @@ fun otherInformation(
  */
 @Composable
 fun topDocker(
+    modifier: Modifier,
     bottomPadding: Dp = 30.dp,
     date: MutableState<LocalDate>,
     onAddClick: () -> Unit
 ) {
     val showDatePickerDialog = remember { mutableStateOf(false) }
     Column (
-        modifier = Modifier
+        modifier = modifier
             .padding(10.dp, 30.dp, 10.dp, bottomPadding),
         horizontalAlignment = Alignment.Start
     ) {
