@@ -2,6 +2,7 @@ package kmp.project.schedule.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -32,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -124,45 +127,71 @@ fun scheduledInformation(
     onScheduleCardClick: (String) -> Unit,
     onAddClick: () -> Unit
 ) {
+    val showDeleteTopDocker = remember { mutableStateOf(false) }
+    val topDeleteDockerHeight = remember { mutableStateOf(0) }
+
+    BackHandler( showDeleteTopDocker = showDeleteTopDocker )
+
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
-        LazyColumn(
-            state = listState,
-            modifier = modifier
-                .fillMaxHeight()
-                .padding(start = 10.dp, end = 10.dp),
-        ) {
-            if (isCompact) {
-                item(key = "topDocker") {
-                    AnimatedVisibility(
-                        visible = listState.firstVisibleItemIndex == 0,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        topDocker(
-                            modifier = Modifier,
-                            date = date,
-                            onAddClick = onAddClick
-                        )
+        Column {
+            AnimatedVisibility(
+                visible = showDeleteTopDocker.value,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        topDeleteDockerHeight.value = coordinates.size.height
+                    }
+            ) {
+                topDeleteDocker(
+                    modifier = Modifier,
+                    onAddClick = onAddClick
+                )
+            }
+
+            LazyColumn(
+                state = listState,
+                modifier = modifier
+                    .fillMaxHeight(),
+            ) {
+                if (isCompact) {
+                    item(key = "topDocker") {
+                        AnimatedVisibility(
+                            visible = !showDeleteTopDocker.value,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            topDocker(
+                                modifier = Modifier.padding(
+                                    start = 20.dp,
+                                    end = 20.dp,
+                                    top = 60.dp,
+                                    bottom = 10.dp
+                                ),
+                                date = date,
+                                onAddClick = onAddClick
+                            )
+                        }
                     }
                 }
-            }
-            items(items = list, key = { it.uuid }) {
+
+                items(items = list, key = { it.uuid }) {
                     scheduleCard(
                         modifier = if (isCompact) Modifier else Modifier.animateItemPlacement(),
                         it,
                         onCardClick = { uuid ->
                             onScheduleCardClick(uuid)
                         },
-                        onCardLongClick = {}
+                        onCardLongClick = { showDeleteTopDocker.value = !showDeleteTopDocker.value }
                     )
+                }
             }
         }
 
         if (isCompact) {
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = listState.firstVisibleItemIndex != 0,
+                visible = listState.firstVisibleItemIndex >= 1 && !showDeleteTopDocker.value,
             ) {
                 FloatingActionButton(
                     onClick = onAddClick,
@@ -187,7 +216,9 @@ fun otherInformation(
     date: MutableState<LocalDate>
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxHeight()
+        modifier = modifier
+            .statusBarsPadding()
+            .fillMaxHeight()
     ) {
         item {
             Row(
@@ -236,14 +267,13 @@ fun otherInformation(
 @Composable
 fun topDocker(
     modifier: Modifier,
-    bottomPadding: Dp = 30.dp,
     date: MutableState<LocalDate>,
     onAddClick: () -> Unit
 ) {
     val showDatePickerDialog = remember { mutableStateOf(false) }
+
     Column (
-        modifier = modifier
-            .padding(10.dp, 30.dp, 10.dp, bottomPadding),
+        modifier = modifier,
         horizontalAlignment = Alignment.Start
     ) {
 
@@ -288,3 +318,54 @@ fun topDocker(
     }
 }
 
+/**
+ * 顶部删除栏
+ */
+@Composable
+fun topDeleteDocker(
+    modifier: Modifier,
+    bottomPadding: Dp = 30.dp,
+    onAddClick: () -> Unit
+) {
+    Column (
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.errorContainer),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Row(
+            modifier = modifier.padding(top = bottomPadding, bottom = bottomPadding),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            //显示当前日期
+            Text(
+                text = "已选择0项日程",
+                fontWeight = FontWeight.W800,
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            IconButton(
+                onClick = {  },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "Select Repeat"
+                )
+            }
+
+            IconButton(
+                onClick = onAddClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+expect fun BackHandler(showDeleteTopDocker: MutableState<Boolean>)

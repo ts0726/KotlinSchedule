@@ -40,7 +40,7 @@ fun scheduleCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(5.dp)
+            .padding(top = 5.dp, bottom = 5.dp, start = 15.dp, end = 15.dp)
             .clip(RoundedCornerShape(16.dp))
             .combinedClickable(
                 interactionSource = interactionSource,

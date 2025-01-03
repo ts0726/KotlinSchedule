@@ -86,6 +86,7 @@ fun CustomScaffold(
     val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     Row (
         Modifier
+//            .statusBarsPadding()
             .fillMaxSize()
     ) {
         if (!isCompact) {
@@ -103,7 +104,6 @@ fun CustomScaffold(
             content = { innerPadding ->
                 //保存控件状态
                 val listState = rememberLazyListState()
-//                val viewModel: NewScheduleViewModel = viewModel{ NewScheduleViewModel() }
                 val scheduleViewModel: ScheduleViewModel = viewModel{ ScheduleViewModel() }
                 contentContainer(
                     content = {
@@ -112,7 +112,6 @@ fun CustomScaffold(
                                 sdk = sdk,
                                 isCompact = isCompact,
                                 listState = listState,
-//                                viewModel = viewModel,
                                 scheduleViewModel = scheduleViewModel,
                                 date = date,
                             )
@@ -140,7 +139,7 @@ fun contentContainer(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(padding),
+            .padding(bottom = padding.calculateBottomPadding()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         content()
