@@ -14,7 +14,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.home.NewSchedule
@@ -29,7 +28,6 @@ import kotlinx.datetime.LocalDate
 /**
  * 主页导航
  *
- * @param sdk 数据库操作类
  * @param navController 导航控制器
  * @param modifier 修饰符
  * @param isCompact 是否是竖屏模式
@@ -40,14 +38,12 @@ import kotlinx.datetime.LocalDate
  */
 @Composable
 fun HomeNavHost(
-    sdk: ScheduleSDK,
     navController: NavHostController,
     modifier: Modifier,
     isCompact: Boolean,
     listState: LazyListState,
     scheduleList: List<Schedule>,
     date: MutableState<LocalDate>,
-//    viewModel: NewScheduleViewModel,
     scheduleViewModel: ScheduleViewModel
 ) {
     NavHost(
@@ -94,6 +90,7 @@ fun HomeNavHost(
         composable("home") {
             if (isCompact) {
                 scheduledInformation(
+                    scheduleViewModel,
                     isCompact,
                     modifier,
                     listState,
@@ -132,7 +129,7 @@ fun HomeNavHost(
                         scheduleViewModel.content.value = "无"
                     }
                     CoroutineScope(Dispatchers.IO).launch {
-                        scheduleViewModel.onSave(sdk, navController)
+                        scheduleViewModel.onSave(navController)
                     }
                 },
                 viewModel = scheduleViewModel
@@ -148,7 +145,7 @@ fun HomeNavHost(
             )
         ) { backStackEntry ->
             val uuid = backStackEntry.arguments?.getString("uuid") ?: ""
-            ScheduleDetail(sdk, uuid, navController, scheduleViewModel, scheduleViewModel)
+            ScheduleDetail(uuid, navController, scheduleViewModel)
         }
     }
 }

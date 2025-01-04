@@ -37,12 +37,13 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
 //    }
 
     fun getScheduleByDate(date: Long): List<Schedule> {
-        return database.getAllSchedules().filter { it.date == date }
+//        return database.getAllSchedules().filter { it.date == date }
+        return database.getAllSchedules().filter { it.date == date }.sortedByDescending { it.id }
     }
 
-    fun getScheduleByUuid(uuid: String): Schedule {
-        return database.getAllSchedules().filter { it.uuid == uuid }[0]
-    }
+//    fun getScheduleByUuid(uuid: String): Schedule {
+//        return database.getAllSchedules().filter { it.uuid == uuid }[0]
+//    }
 
     fun deleteSchedule(uuid: String) {
         database.deleteSchedule(uuid)

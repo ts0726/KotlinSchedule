@@ -62,9 +62,10 @@ fun App() {
     val windowSize = calculateWindowSizeClass()
     val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
     val sdk = getScheduleSDK()
+    val scheduleViewModel: ScheduleViewModel = viewModel{ ScheduleViewModel(sdk) }
     customTheme {
         CustomScaffold(
-            sdk = sdk,
+            viewModel = scheduleViewModel,
             isCompact = isCompact
         )
     }
@@ -79,7 +80,7 @@ fun App() {
  */
 @Composable
 fun CustomScaffold(
-    sdk: ScheduleSDK,
+    viewModel: ScheduleViewModel,
     isCompact: Boolean
 ) {
     val pageID = remember{ mutableIntStateOf(0) }
@@ -104,15 +105,13 @@ fun CustomScaffold(
             content = { innerPadding ->
                 //保存控件状态
                 val listState = rememberLazyListState()
-                val scheduleViewModel: ScheduleViewModel = viewModel{ ScheduleViewModel() }
                 contentContainer(
                     content = {
                         when (pageID.value) {
                             0 -> mainPage(
-                                sdk = sdk,
                                 isCompact = isCompact,
                                 listState = listState,
-                                scheduleViewModel = scheduleViewModel,
+                                scheduleViewModel = viewModel,
                                 date = date,
                             )
                             1 -> TestPage1()

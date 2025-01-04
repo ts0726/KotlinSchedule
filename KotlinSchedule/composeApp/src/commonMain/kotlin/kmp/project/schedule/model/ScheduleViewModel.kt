@@ -14,7 +14,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
-class ScheduleViewModel: ViewModel() {
+class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val title = mutableStateOf("")
     val content = mutableStateOf("")
     val date = mutableStateOf( Clock.System.todayIn(TimeZone.currentSystemDefault()) )
@@ -22,8 +22,9 @@ class ScheduleViewModel: ViewModel() {
     val location = mutableStateOf("未设定")
 
     val schedules = mutableStateListOf<Schedule>()
+    val schedulesToDelete = mutableStateListOf<String>()
 
-    suspend fun onSave(sdk: ScheduleSDK, navController: NavController) {
+    suspend fun onSave(navController: NavController) {
         val uuid = sdk.insertSchedule(
             title = title.value,
             content = content.value,
@@ -58,19 +59,21 @@ class ScheduleViewModel: ViewModel() {
     }
 
 
-    fun loadSchedules(
-        sdk: ScheduleSDK,
-        date: MutableState<LocalDate>
-    ) {
+    fun loadSchedules(date: MutableState<LocalDate>) {
         schedules.clear()
         schedules.addAll(sdk.getScheduleByDate(date.value.toEpochDays().toLong()))
     }
 
-    fun deleteSchedule(
-        sdk: ScheduleSDK,
-        uuid: String
-    ) {
+    fun deleteSchedule(uuid: String) {
         sdk.deleteSchedule(uuid)
         schedules.removeIf { it.uuid == uuid }
+    }
+
+    fun deleteSchedules() {
+        schedulesToDelete.forEach {
+            sdk.deleteSchedule(it)
+            schedules.removeIf { schedule -> schedule.uuid == it }
+        }
+        schedulesToDelete.clear()
     }
 }

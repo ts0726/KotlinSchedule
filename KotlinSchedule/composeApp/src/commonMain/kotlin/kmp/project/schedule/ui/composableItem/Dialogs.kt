@@ -103,7 +103,6 @@ fun ModalBottomSheetTitle(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfirmDialog(
     title: String,

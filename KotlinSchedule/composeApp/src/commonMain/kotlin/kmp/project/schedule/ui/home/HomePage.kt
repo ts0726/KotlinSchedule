@@ -43,12 +43,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
+import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.getCurrentDate
 import kotlinx.datetime.LocalDate
 
@@ -60,7 +60,6 @@ import kotlinx.datetime.LocalDate
  */
 @Composable
 fun mainPage(
-    sdk: ScheduleSDK,
     isCompact: Boolean,
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
@@ -70,7 +69,7 @@ fun mainPage(
     val scheduleList = remember { scheduleViewModel.schedules }
 
     LaunchedEffect(date.value) {
-        scheduleViewModel.loadSchedules(sdk, date)
+        scheduleViewModel.loadSchedules(date)
     }
 
     Row(
@@ -80,6 +79,7 @@ fun mainPage(
         //横屏模式下显示日程信息，通过listState同步竖屏时的滚动位置
         if (!isCompact) {
             scheduledInformation(
+                scheduleViewModel,
                 isCompact,
                 Modifier.weight(1f),
                 listState,
@@ -98,7 +98,6 @@ fun mainPage(
         }
         //竖屏模式下显示日程信息，横屏模式下作为操作页显示其他信息
         HomeNavHost(
-            sdk = sdk,
             navController = navController,
             modifier = Modifier.weight(1f),
             isCompact = isCompact,
@@ -121,6 +120,7 @@ fun mainPage(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun scheduledInformation(
+    viewModel: ScheduleViewModel,
     isCompact: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState,
@@ -131,8 +131,13 @@ fun scheduledInformation(
 ) {
     val showDeleteTopDocker = remember { mutableStateOf(false) }
     val topDeleteDockerHeight = remember { mutableStateOf(0) }
+    val showConfirmDialog = remember { mutableStateOf(false) }
 
     BackHandler( showDeleteTopDocker = showDeleteTopDocker )
+
+    if (!showDeleteTopDocker.value) {
+        viewModel.schedulesToDelete.clear()
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -147,9 +152,16 @@ fun scheduledInformation(
                     }
             ) {
                 topDeleteDocker(
+                    viewModel = viewModel,
                     modifier = Modifier,
-                    onCloseClick = { showDeleteTopDocker.value = false },
-                    onAddClick = onAddClick
+                    onCloseClick = {
+                        showDeleteTopDocker.value = false
+                        viewModel.schedulesToDelete.clear()
+                    },
+                    onDeleteClick = {
+                        if (viewModel.schedulesToDelete.isNotEmpty())
+                            showConfirmDialog.value = true
+                    }
                 )
             }
 
@@ -178,14 +190,31 @@ fun scheduledInformation(
                     }
                 }
 
-                items(items = list, key = { it.uuid }) {
+                items(items = list, key = { it.uuid }) {schedule ->
+                    val isSelected = mutableStateOf(
+                        viewModel.schedulesToDelete.contains(schedule.uuid)
+                    )
                     scheduleCard(
                         modifier = if (isCompact) Modifier else Modifier.animateItemPlacement(),
-                        it,
+                        schedule = schedule,
+                        isSelected = isSelected.value,
                         onCardClick = { uuid ->
-                            onScheduleCardClick(uuid)
+                            if (showDeleteTopDocker.value && !isSelected.value) {
+                                viewModel.schedulesToDelete.add(uuid)
+                            } else if (showDeleteTopDocker.value && isSelected.value) {
+                                viewModel.schedulesToDelete.remove(uuid)
+                            } else {
+                                onScheduleCardClick(uuid)
+                            }
                         },
-                        onCardLongClick = { showDeleteTopDocker.value = !showDeleteTopDocker.value }
+                        onCardLongClick = {
+                            if (isSelected.value) {
+                                viewModel.schedulesToDelete.clear()
+                            } else {
+                                viewModel.schedulesToDelete.add(it)
+                            }
+                            showDeleteTopDocker.value = !showDeleteTopDocker.value
+                        }
                     )
                 }
             }
@@ -205,6 +234,20 @@ fun scheduledInformation(
                     Icon(Icons.Filled.Add, contentDescription = "Add")
                 }
             }
+        }
+
+        if (showConfirmDialog.value) {
+            ConfirmDialog(
+                title = "删除日程",
+                content = "已选择${viewModel.schedulesToDelete.size}条日程\n" +
+                        "将同步删除本地和云端的日程，且删除后不可恢复\n确定要删除这些日程吗？",
+                onConfirm = {
+                    showConfirmDialog.value = false
+                    viewModel.deleteSchedules()
+                    viewModel.schedulesToDelete.clear()
+                },
+                onDismiss = { showConfirmDialog.value = false }
+            )
         }
     }
 }
@@ -326,9 +369,10 @@ fun topDocker(
  */
 @Composable
 fun topDeleteDocker(
+    viewModel: ScheduleViewModel,
     modifier: Modifier,
     onCloseClick: () -> Unit,
-    onAddClick: () -> Unit
+    onDeleteClick: () -> Unit
 ) {
     Column (
         modifier = modifier
@@ -354,7 +398,7 @@ fun topDeleteDocker(
             }
 
             Text(
-                text = "已选择0项日程",
+                text = "已选择${viewModel.schedulesToDelete.size}项日程",
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
                 color = MaterialTheme.colorScheme.error,
@@ -367,7 +411,7 @@ fun topDeleteDocker(
                     containerColor = MaterialTheme.colorScheme.onErrorContainer,
                     contentColor = MaterialTheme.colorScheme.errorContainer
                 ),
-                onClick = onAddClick
+                onClick = onDeleteClick
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,

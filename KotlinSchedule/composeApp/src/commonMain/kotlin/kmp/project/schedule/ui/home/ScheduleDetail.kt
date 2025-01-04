@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
@@ -45,22 +44,19 @@ import kotlinx.datetime.LocalDate
 
 /**
  * 日程详情页
- * @param sdk 日程SDK
  * @param uuid 日程UUID
  * @param navHostController 导航控制器
  * @param viewModel 日程ViewModel
  */
 @Composable
 fun ScheduleDetail(
-    sdk: ScheduleSDK,
     uuid: String,
     navHostController: NavHostController,
     viewModel: ScheduleViewModel,
-    scheduleViewModel: ScheduleViewModel
 ) {
     var schedule by remember { mutableStateOf<Schedule?>(null) }
     LaunchedEffect(uuid) {
-        schedule = sdk.getScheduleByUuid(uuid)
+        schedule = viewModel.schedules.find { it.uuid == uuid }
     }
 
     if (schedule != null) {
@@ -70,7 +66,7 @@ fun ScheduleDetail(
                 .statusBarsPadding()
         ) {
             ScheduleDetailTopBar(
-                delateSchedule = { scheduleViewModel.deleteSchedule(sdk, it) },
+                delateSchedule = { viewModel.deleteSchedule(it) },
                 navHostController,
                 viewModel,
                 schedule!!

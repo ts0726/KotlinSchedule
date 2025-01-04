@@ -2,6 +2,7 @@ package kmp.project.schedule.ui.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import kmp.project.schedule.database.Schedule
 fun scheduleCard(
     modifier: Modifier = Modifier,
     schedule: Schedule,
+    isSelected: Boolean,
     onCardClick: (String) -> Unit,
     onCardLongClick: (String) -> Unit
 ) {
@@ -49,6 +51,12 @@ fun scheduleCard(
                 onClick = { onCardClick(schedule.uuid) },
             )
             .background(MaterialTheme.colorScheme.surfaceContainer)
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surfaceContainer,
+                shape = RoundedCornerShape(16.dp)
+            )
     ) {
         scheduleCard_Content(schedule.title, schedule.content!!)
     }
