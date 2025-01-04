@@ -18,12 +18,15 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -146,6 +148,7 @@ fun scheduledInformation(
             ) {
                 topDeleteDocker(
                     modifier = Modifier,
+                    onCloseClick = { showDeleteTopDocker.value = false },
                     onAddClick = onAddClick
                 )
             }
@@ -324,7 +327,7 @@ fun topDocker(
 @Composable
 fun topDeleteDocker(
     modifier: Modifier,
-    bottomPadding: Dp = 30.dp,
+    onCloseClick: () -> Unit,
     onAddClick: () -> Unit
 ) {
     Column (
@@ -333,33 +336,41 @@ fun topDeleteDocker(
         horizontalAlignment = Alignment.Start
     ) {
         Row(
-            modifier = modifier.padding(top = bottomPadding, bottom = bottomPadding),
+            modifier = modifier
+                .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 30.dp)
+                .statusBarsPadding(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            //显示当前日期
+            IconButton(
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                ),
+                onClick = onCloseClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close"
+                )
+            }
+
             Text(
                 text = "已选择0项日程",
-                fontWeight = FontWeight.W800,
-                fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.error
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.error,
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
             IconButton(
-                onClick = {  },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.DateRange,
-                    contentDescription = "Select Repeat"
-                )
-            }
-
-            IconButton(
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.onErrorContainer,
+                    contentColor = MaterialTheme.colorScheme.errorContainer
+                ),
                 onClick = onAddClick
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = Icons.Default.Delete,
                     contentDescription = "Add"
                 )
             }
