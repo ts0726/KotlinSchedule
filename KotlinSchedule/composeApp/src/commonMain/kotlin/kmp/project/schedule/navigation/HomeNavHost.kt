@@ -21,7 +21,7 @@ import kmp.project.schedule.ui.home.ScheduleDetail
 import kmp.project.schedule.ui.home.otherInformation
 import kmp.project.schedule.ui.home.scheduledInformation
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
@@ -44,7 +44,8 @@ fun HomeNavHost(
     listState: LazyListState,
     scheduleList: List<Schedule>,
     date: MutableState<LocalDate>,
-    scheduleViewModel: ScheduleViewModel
+    scheduleViewModel: ScheduleViewModel,
+    coroutineScope: CoroutineScope
 ) {
     NavHost(
         navController = navController,
@@ -128,8 +129,12 @@ fun HomeNavHost(
                     if (scheduleViewModel.content.value.isEmpty()) {
                         scheduleViewModel.content.value = "无"
                     }
-                    CoroutineScope(Dispatchers.IO).launch {
+                    coroutineScope.launch {
                         scheduleViewModel.onSave(navController)
+                        // 延迟调用animateScrollToItem
+                        // 动画时间已经scheduleCard的animateItemPlacement匹配好了，别改！！
+                        delay(250)
+                        listState.animateScrollToItem(0)
                     }
                 },
                 viewModel = scheduleViewModel

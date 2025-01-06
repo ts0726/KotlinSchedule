@@ -1,6 +1,9 @@
 package kmp.project.schedule.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -50,6 +54,7 @@ import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.getCurrentDate
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
 
 /**
@@ -65,6 +70,7 @@ fun mainPage(
     listState: LazyListState,
     scheduleViewModel: ScheduleViewModel,
     date: MutableState<LocalDate>,
+    coroutineScope: CoroutineScope
 ) {
     val scheduleList = remember { scheduleViewModel.schedules }
 
@@ -105,7 +111,8 @@ fun mainPage(
             scheduleList = scheduleList,
             date = date,
 //            viewModel = viewModel,
-            scheduleViewModel = scheduleViewModel
+            scheduleViewModel = scheduleViewModel,
+            coroutineScope = coroutineScope
         )
     }
 }
@@ -195,7 +202,14 @@ fun scheduledInformation(
                         viewModel.schedulesToDelete.contains(schedule.uuid)
                     )
                     scheduleCard(
-                        modifier = if (isCompact) Modifier else Modifier.animateItemPlacement(),
+                        modifier = if (isCompact && !showDeleteTopDocker.value) Modifier
+                        else Modifier.animateItemPlacement(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = 650f,
+                                visibilityThreshold = IntOffset.VisibilityThreshold
+                            )
+                        ),
                         schedule = schedule,
                         isSelected = isSelected.value,
                         onCardClick = { uuid ->

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,6 +42,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +54,7 @@ import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.TestPage2
 import kmp.project.schedule.ui.home.mainPage
 import kmp.project.schedule.ui.userImage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -63,10 +66,14 @@ fun App() {
     val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
     val sdk = getScheduleSDK()
     val scheduleViewModel: ScheduleViewModel = viewModel{ ScheduleViewModel(sdk) }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     customTheme {
         CustomScaffold(
             viewModel = scheduleViewModel,
-            isCompact = isCompact
+            isCompact = isCompact,
+            listState = listState,
+            coroutineScope = coroutineScope
         )
     }
 }
@@ -81,7 +88,9 @@ fun App() {
 @Composable
 fun CustomScaffold(
     viewModel: ScheduleViewModel,
-    isCompact: Boolean
+    isCompact: Boolean,
+    listState: LazyListState,
+    coroutineScope: CoroutineScope
 ) {
     val pageID = remember{ mutableIntStateOf(0) }
     val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
@@ -103,8 +112,6 @@ fun CustomScaffold(
                 }
             },
             content = { innerPadding ->
-                //保存控件状态
-                val listState = rememberLazyListState()
                 contentContainer(
                     content = {
                         when (pageID.value) {
@@ -113,6 +120,7 @@ fun CustomScaffold(
                                 listState = listState,
                                 scheduleViewModel = viewModel,
                                 date = date,
+                                coroutineScope = coroutineScope
                             )
                             1 -> TestPage1()
                             2 -> TestPage2()
