@@ -41,7 +41,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,8 +53,6 @@ import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getOptions
 import kmp.project.schedule.util.getRepeat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 
@@ -72,7 +69,6 @@ fun NewSchedule(
     onSave: () -> Unit,
     viewModel: ScheduleViewModel
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember {
         BringIntoViewRequester()
     }
@@ -86,7 +82,7 @@ fun NewSchedule(
             onBack = onBack,
             onSave = onSave
         )
-        NewScheduleContent(viewModel, bringIntoViewRequester, coroutineScope)
+        NewScheduleContent(viewModel, bringIntoViewRequester)
     }
 }
 
@@ -142,16 +138,13 @@ fun NewScheduleTopBar(
 @Composable
 fun NewScheduleContent(
     viewModel: ScheduleViewModel,
-    bringIntoViewRequester: BringIntoViewRequester,
-    coroutineScope: CoroutineScope
+    bringIntoViewRequester: BringIntoViewRequester
 ) {
     var title by viewModel.title
     var content by viewModel.content
 
     LaunchedEffect(content) {
-        coroutineScope.launch {
-            bringIntoViewRequester.bringIntoView()
-        }
+        bringIntoViewRequester.bringIntoView()
     }
 
     LazyColumn(
