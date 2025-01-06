@@ -24,7 +24,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
-    suspend fun onSave(navController: NavController) {
+    suspend fun onSave(navController: NavController, currentDate: LocalDate) {
         val uuid = sdk.insertSchedule(
             title = title.value,
             content = content.value,
@@ -32,18 +32,21 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             repeatMode = repeatMode.value,
             location = location.value
         )
-        schedules.add(
-            0,
-            Schedule(
-                id = 0,
-                uuid = uuid,
-                title = title.value,
-                content = content.value,
-                date = date.value.toEpochDays().toLong(),
-                repeatMode = repeatMode.value.toLong(),
-                location = location.value
+        if (date.value.toEpochDays() == currentDate.toEpochDays()) {
+            schedules.add(
+                0,
+                Schedule(
+                    id = 0,
+                    uuid = uuid,
+                    title = title.value,
+                    content = content.value,
+                    date = date.value.toEpochDays().toLong(),
+                    repeatMode = repeatMode.value.toLong(),
+                    location = location.value
+                )
             )
-        )
+        }
+
         reset()
         withContext(Dispatchers.Main) {
             navController.popBackStack()

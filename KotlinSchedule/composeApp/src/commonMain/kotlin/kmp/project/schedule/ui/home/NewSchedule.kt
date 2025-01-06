@@ -1,5 +1,6 @@
 package kmp.project.schedule.ui.home
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -33,10 +36,12 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +54,8 @@ import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getOptions
 import kmp.project.schedule.util.getRepeat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 
@@ -58,12 +65,18 @@ import kotlinx.datetime.LocalDate
  * @param onSave 保存按钮点击事件
  * @param viewModel 新建日程ViewModel
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NewSchedule(
     onBack: () -> Unit,
     onSave: () -> Unit,
     viewModel: ScheduleViewModel
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val bringIntoViewRequester = remember {
+        BringIntoViewRequester()
+    }
+
     Column(
         modifier = Modifier
             .statusBarsPadding()
@@ -73,7 +86,7 @@ fun NewSchedule(
             onBack = onBack,
             onSave = onSave
         )
-        NewScheduleContent(viewModel)
+        NewScheduleContent(viewModel, bringIntoViewRequester, coroutineScope)
     }
 }
 
@@ -125,14 +138,26 @@ fun NewScheduleTopBar(
  * 新建日程页面内容
  * @param viewModel 新建日程ViewModel
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NewScheduleContent(viewModel: ScheduleViewModel) {
+fun NewScheduleContent(
+    viewModel: ScheduleViewModel,
+    bringIntoViewRequester: BringIntoViewRequester,
+    coroutineScope: CoroutineScope
+) {
     var title by viewModel.title
     var content by viewModel.content
+
+    LaunchedEffect(content) {
+        coroutineScope.launch {
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp),
+            .padding(start = 10.dp, end = 10.dp, top = 10.dp),
     ) {
         item{
             OutlinedTextField(
@@ -168,6 +193,7 @@ fun NewScheduleContent(viewModel: ScheduleViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 10.dp, bottom = 10.dp)
+                    .bringIntoViewRequester(bringIntoViewRequester)
             )
         }
     }

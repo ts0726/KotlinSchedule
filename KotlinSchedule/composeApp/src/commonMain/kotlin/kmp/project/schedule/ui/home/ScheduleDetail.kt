@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -274,11 +275,12 @@ fun ScheduleDetailContent(
             Icon(
                 imageVector = Icons.Filled.Edit,
                 contentDescription = "content",
-                modifier = Modifier.padding(end = 15.dp)
+                modifier = Modifier.padding(end = 15.dp).align(Alignment.Top),
             )
             Text(
                 text = schedule.content!!,
-                fontSize = 20.sp
+                fontSize = 20.sp,
+                textAlign = TextAlign.Justify
             )
         }
     }

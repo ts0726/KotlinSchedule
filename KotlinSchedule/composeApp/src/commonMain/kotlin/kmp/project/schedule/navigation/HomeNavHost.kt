@@ -130,7 +130,7 @@ fun HomeNavHost(
                         scheduleViewModel.content.value = "无"
                     }
                     coroutineScope.launch {
-                        scheduleViewModel.onSave(navController)
+                        scheduleViewModel.onSave(navController, date.value)
                         // 延迟调用animateScrollToItem
                         // 动画时间已经scheduleCard的animateItemPlacement匹配好了，别改！！
                         delay(250)
