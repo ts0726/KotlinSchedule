@@ -19,7 +19,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                 content = schedule.content,
                 date = schedule.date,
                 repeatMode = schedule.repeatMode,
-                location = schedule.location
+                location = schedule.location,
+                sequence = schedule.sequence
             )
         }
     }
@@ -38,9 +39,14 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                 date = schedule.date,
                 repeatMode = schedule.repeatMode,
                 location = schedule.location,
-                uuid = schedule.uuid
+                uuid = schedule.uuid,
+                sequence = schedule.sequence
             )
         }
+    }
+
+    internal fun countSchedulesByDate(date: Int): Long {
+        return dbQuery.countSchedulesByDate(date.toLong()).executeAsOne()
     }
 
     private fun mapResultToList(
@@ -50,7 +56,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         content: String?,
         date: Long,
         repeatMode: Long,
-        location: String?
+        location: String?,
+        sequence: Long
     ): Schedule {
         return Schedule(
             id = id,
@@ -59,7 +66,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
             content = content,
             date = date,
             repeatMode = repeatMode,
-            location = location
+            location = location,
+            sequence = sequence
         )
     }
 

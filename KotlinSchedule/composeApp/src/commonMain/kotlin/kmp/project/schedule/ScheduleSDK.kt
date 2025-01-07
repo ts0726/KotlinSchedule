@@ -16,7 +16,8 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
         content: String?,
         date: Long,
         repeatMode: Int,
-        location: String?
+        location: String?,
+        sequence: Int
     ): String {
         val uuid = Uuid.random().toString()
         database.createSchedule(
@@ -27,7 +28,8 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
                 content = content,
                 date = date,
                 repeatMode = repeatMode.toLong(),
-                location = location)
+                location = location,
+                sequence = sequence.toLong())
         )
         return uuid
     }
@@ -51,6 +53,10 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
 
     fun updateSchedule(schedule: Schedule) {
         database.updateSchedule(schedule)
+    }
+
+    fun getCountOfSchedulesByDate(date: Int): Int {
+        return database.countSchedulesByDate(date).toInt()
     }
 
     companion object {

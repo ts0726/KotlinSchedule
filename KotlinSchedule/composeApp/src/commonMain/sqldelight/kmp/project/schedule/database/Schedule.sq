@@ -5,13 +5,14 @@ CREATE TABLE Schedule (
     content TEXT, -- 内容
     date INTEGER NOT NULL, -- 时间
     repeatMode INTEGER NOT NULL, -- 重复模式
-    location TEXT -- 地点
+    location TEXT, -- 地点
+    sequence INTEGER NOT NULL -- 排序
 );
 
 -- 插入一条新的日程数据
 insertSchedule:
-INSERT INTO Schedule (uuid, title, content, date, repeatMode, location)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO Schedule (uuid, title, content, date, repeatMode, location, sequence)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- 查询所有的日程数据
 selectAllSchedules:
@@ -23,14 +24,18 @@ SELECT * FROM Schedule WHERE id = ?;
 
 -- 根据日期查询日程数据
 selectSchedulesByDate:
-SELECT * FROM Schedule WHERE date = ?;
+SELECT * FROM Schedule WHERE date = ? ORDER BY sequence;
 
 -- 更新一条日程数据
 updateSchedule:
 UPDATE Schedule
-SET title = ?, content = ?, date = ?, repeatMode = ?, location = ?
+SET title = ?, content = ?, date = ?, repeatMode = ?, location = ?, sequence = ?
 WHERE uuid = ?;
 
 -- 删除一条日程数据
 deleteSchedule:
 DELETE FROM Schedule WHERE uuid = ?;
+
+-- 获取对应日期的日程数量
+countSchedulesByDate:
+SELECT COUNT(*) FROM Schedule WHERE date = ?;
