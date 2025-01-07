@@ -41,12 +41,16 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
         return database.getAllSchedules().filter { it.date == date }.sortedByDescending { it.id }
     }
 
-//    fun getScheduleByUuid(uuid: String): Schedule {
-//        return database.getAllSchedules().filter { it.uuid == uuid }[0]
-//    }
+    fun getScheduleByUuid(uuid: String): Schedule? {
+        return database.getAllSchedules().firstOrNull { it.uuid == uuid }
+    }
 
     fun deleteSchedule(uuid: String) {
         database.deleteSchedule(uuid)
+    }
+
+    fun updateSchedule(schedule: Schedule) {
+        database.updateSchedule(schedule)
     }
 
     companion object {

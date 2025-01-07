@@ -30,6 +30,19 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         }
     }
 
+    internal fun updateSchedule(schedule: Schedule) {
+        dbQuery.transaction {
+            dbQuery.updateSchedule(
+                title = schedule.title,
+                content = schedule.content,
+                date = schedule.date,
+                repeatMode = schedule.repeatMode,
+                location = schedule.location,
+                uuid = schedule.uuid
+            )
+        }
+    }
+
     private fun mapResultToList(
         id: Long,
         uuid: String,

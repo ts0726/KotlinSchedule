@@ -23,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,9 +55,7 @@ fun ScheduleDetail(
     viewModel: ScheduleViewModel,
 ) {
     var schedule by remember { mutableStateOf<Schedule?>(null) }
-    LaunchedEffect(uuid) {
-        schedule = viewModel.schedules.find { it.uuid == uuid }
-    }
+    schedule = viewModel.loadScheduleByUUID(uuid)
 
     if (schedule != null) {
         Column(
@@ -75,8 +72,9 @@ fun ScheduleDetail(
             ScheduleDetailContent(schedule!!)
         }
     } else {
-        // 显示加载指示器或占位符
-        Text("Loading...")
+//        // 显示加载指示器或占位符
+//        Text("Loading...")
+        navHostController.popBackStack()
     }
 }
 
@@ -133,9 +131,12 @@ fun ScheduleDetailTopBar(
                 DropdownMenuItem(
                     onClick = {
                         expanded.value = false
+                        viewModel.id.value = schedule.id.toInt()
+                        viewModel.uuid.value = schedule.uuid
                         viewModel.date.value = LocalDate.fromEpochDays(schedule.date.toInt())
                         viewModel.title.value = schedule.title
                         viewModel.content.value = schedule.content!!
+                        viewModel.location.value = schedule.location!!
                         viewModel.repeatMode.value = schedule.repeatMode.toInt()
                         navHostController.navigate("home_add")
                     },
@@ -264,7 +265,7 @@ fun ScheduleDetailContent(
                 modifier = Modifier.padding(end = 15.dp)
             )
             Text(
-                text = "未设置地点",
+                text = schedule.location ?: "未知地点",
                 fontSize = 20.sp,
             )
         }
