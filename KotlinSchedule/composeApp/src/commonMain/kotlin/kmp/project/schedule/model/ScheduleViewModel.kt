@@ -24,7 +24,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val location = mutableStateOf("未设定")
     val sequence = mutableStateOf(0)
 
-    val schedules = mutableStateListOf<Schedule>()
+    var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
     suspend fun onSave(navController: NavController, currentDate: LocalDate) {

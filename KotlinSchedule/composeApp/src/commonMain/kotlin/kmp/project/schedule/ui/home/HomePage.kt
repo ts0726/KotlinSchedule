@@ -56,6 +56,8 @@ import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.getCurrentDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
  * 主页
@@ -139,6 +141,11 @@ fun scheduledInformation(
     val showDeleteTopDocker = remember { mutableStateOf(false) }
     val topDeleteDockerHeight = remember { mutableStateOf(0) }
     val showConfirmDialog = remember { mutableStateOf(false) }
+    val reorderableLazyColumnState = rememberReorderableLazyListState(listState) { from, to ->
+        viewModel.schedules = viewModel.schedules.apply {
+            add(to.index - 1, removeAt(from.index - 1))
+        }
+    }
 
     BackHandler( showDeleteTopDocker = showDeleteTopDocker )
 
@@ -198,38 +205,43 @@ fun scheduledInformation(
                 }
 
                 items(items = list, key = { it.uuid }) {schedule ->
-                    val isSelected = mutableStateOf(
-                        viewModel.schedulesToDelete.contains(schedule.uuid)
-                    )
-                    scheduleCard(
+                    ReorderableItem(
+                        reorderableLazyColumnState,
+                        schedule.sequence,
                         modifier = if (isCompact && !showDeleteTopDocker.value) Modifier
-                        else Modifier.animateItemPlacement(
-                            animationSpec = spring(
+                        else Modifier.animateItem(
+                            placementSpec = spring(
                                 dampingRatio = Spring.DampingRatioLowBouncy,
                                 stiffness = 650f,
                                 visibilityThreshold = IntOffset.VisibilityThreshold
                             )
-                        ),
-                        schedule = schedule,
-                        isSelected = isSelected.value,
-                        onCardClick = { uuid ->
-                            if (showDeleteTopDocker.value && !isSelected.value) {
-                                viewModel.schedulesToDelete.add(uuid)
-                            } else if (showDeleteTopDocker.value && isSelected.value) {
-                                viewModel.schedulesToDelete.remove(uuid)
-                            } else {
-                                onScheduleCardClick(uuid)
+                        )
+                    ) {
+                        val isSelected = mutableStateOf(
+                            viewModel.schedulesToDelete.contains(schedule.uuid)
+                        )
+                        scheduleCard(
+                            schedule = schedule,
+                            isSelected = isSelected.value,
+                            onCardClick = { uuid ->
+                                if (showDeleteTopDocker.value && !isSelected.value) {
+                                    viewModel.schedulesToDelete.add(uuid)
+                                } else if (showDeleteTopDocker.value && isSelected.value) {
+                                    viewModel.schedulesToDelete.remove(uuid)
+                                } else {
+                                    onScheduleCardClick(uuid)
+                                }
+                            },
+                            onCardLongClick = {
+                                if (isSelected.value) {
+                                    viewModel.schedulesToDelete.clear()
+                                } else {
+                                    viewModel.schedulesToDelete.add(it)
+                                }
+                                showDeleteTopDocker.value = !showDeleteTopDocker.value
                             }
-                        },
-                        onCardLongClick = {
-                            if (isSelected.value) {
-                                viewModel.schedulesToDelete.clear()
-                            } else {
-                                viewModel.schedulesToDelete.add(it)
-                            }
-                            showDeleteTopDocker.value = !showDeleteTopDocker.value
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
