@@ -3,6 +3,7 @@ package kmp.project.schedule.ui.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -18,7 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -35,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.database.Schedule
@@ -53,7 +56,9 @@ import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
+import kmp.project.schedule.util.ReorderHapticFeedbackType
 import kmp.project.schedule.util.getCurrentDate
+import kmp.project.schedule.util.rememberReorderHapticFeedback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
 import sh.calvin.reorderable.ReorderableItem
@@ -112,7 +117,6 @@ fun mainPage(
             listState = listState,
             scheduleList = scheduleList,
             date = date,
-//            viewModel = viewModel,
             scheduleViewModel = scheduleViewModel,
             coroutineScope = coroutineScope
         )
@@ -138,13 +142,17 @@ fun scheduledInformation(
     onScheduleCardClick: (String) -> Unit,
     onAddClick: () -> Unit
 ) {
+    val haptic = rememberReorderHapticFeedback()
+
     val showDeleteTopDocker = remember { mutableStateOf(false) }
     val topDeleteDockerHeight = remember { mutableStateOf(0) }
     val showConfirmDialog = remember { mutableStateOf(false) }
     val reorderableLazyColumnState = rememberReorderableLazyListState(listState) { from, to ->
         viewModel.schedules = viewModel.schedules.apply {
-            add(to.index - 1, removeAt(from.index - 1))
+            add(to.index, removeAt(from.index))
         }
+
+        haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
     }
 
     BackHandler( showDeleteTopDocker = showDeleteTopDocker )
@@ -204,11 +212,11 @@ fun scheduledInformation(
                     }
                 }
 
-                items(items = list, key = { it.uuid }) {schedule ->
+                itemsIndexed(items = list, key = { _, schedule -> schedule.uuid }) {index, schedule ->
                     ReorderableItem(
                         reorderableLazyColumnState,
-                        schedule.sequence,
-                        modifier = if (isCompact && !showDeleteTopDocker.value) Modifier
+                        key = schedule.uuid,
+                        animateItemModifier = if (isCompact && !showDeleteTopDocker.value) Modifier
                         else Modifier.animateItem(
                             placementSpec = spring(
                                 dampingRatio = Spring.DampingRatioLowBouncy,
@@ -216,11 +224,14 @@ fun scheduledInformation(
                                 visibilityThreshold = IntOffset.VisibilityThreshold
                             )
                         )
-                    ) {
+                    ) { isDragging ->
+                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
                         val isSelected = mutableStateOf(
                             viewModel.schedulesToDelete.contains(schedule.uuid)
                         )
                         scheduleCard(
+                            modifier = Modifier
+                                .zIndex(elevation.value),
                             schedule = schedule,
                             isSelected = isSelected.value,
                             onCardClick = { uuid ->
@@ -239,7 +250,9 @@ fun scheduledInformation(
                                     viewModel.schedulesToDelete.add(it)
                                 }
                                 showDeleteTopDocker.value = !showDeleteTopDocker.value
-                            }
+                            },
+                            scope = this,
+                            haptic = haptic
                         )
                     }
                 }

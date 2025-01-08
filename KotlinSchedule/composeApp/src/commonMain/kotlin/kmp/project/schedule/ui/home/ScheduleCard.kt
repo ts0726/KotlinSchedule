@@ -23,6 +23,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kmp.project.schedule.database.Schedule
+import kmp.project.schedule.util.ReorderHapticFeedback
+import kmp.project.schedule.util.ReorderHapticFeedbackType
+import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 /**
  * 日程显示卡片
@@ -36,27 +39,40 @@ fun scheduleCard(
     schedule: Schedule,
     isSelected: Boolean,
     onCardClick: (String) -> Unit,
-    onCardLongClick: (String) -> Unit
+    onCardLongClick: (String) -> Unit,
+    scope: ReorderableCollectionItemScope,
+    haptic: ReorderHapticFeedback
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 5.dp, bottom = 5.dp, start = 15.dp, end = 15.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .combinedClickable(
-                interactionSource = interactionSource,
-                indication = ripple(bounded = true),
-                onLongClick = { onCardLongClick(schedule.uuid) },
-                onClick = { onCardClick(schedule.uuid) },
-            )
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .border(
-                width = if (isSelected) 2.dp else 0.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(16.dp)
-            )
+        modifier = with(scope) {
+            modifier
+                .fillMaxWidth()
+                .padding(top = 5.dp, bottom = 5.dp, start = 15.dp, end = 15.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = ripple(bounded = true),
+                    onLongClick = { onCardLongClick(schedule.uuid) },
+                    onClick = { onCardClick(schedule.uuid) },
+                )
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .border(
+                    width = if (isSelected) 2.dp else 0.dp,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .draggableHandle(
+                    onDragStarted = {
+                        haptic.performHapticFeedback(ReorderHapticFeedbackType.START)
+                    },
+                    onDragStopped = {
+                        haptic.performHapticFeedback(ReorderHapticFeedbackType.END)
+                    },
+                )
+        }
+
     ) {
         scheduleCard_Content(schedule.title, schedule.content!!)
     }
@@ -69,7 +85,7 @@ fun scheduleCard(
 fun scheduleCard_Content(title: String, content: String) {
     Column(
         modifier = Modifier
-            .padding(10.dp)
+            .padding(10.dp),
     ) {
         Text(
             text = title,
