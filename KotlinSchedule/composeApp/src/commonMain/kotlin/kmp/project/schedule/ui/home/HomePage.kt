@@ -1,11 +1,11 @@
 package kmp.project.schedule.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -130,7 +130,6 @@ fun mainPage(
  * @param modifier 修饰符
  * @param listState 列表状态
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun scheduledInformation(
     viewModel: ScheduleViewModel,
@@ -149,7 +148,11 @@ fun scheduledInformation(
     val showConfirmDialog = remember { mutableStateOf(false) }
     val reorderableLazyColumnState = rememberReorderableLazyListState(listState) { from, to ->
         viewModel.schedules = viewModel.schedules.apply {
-            add(to.index, removeAt(from.index))
+            if (isCompact) {
+                add(to.index - 1, removeAt(from.index - 1))
+            } else {
+                add(to.index, removeAt(from.index))
+            }
         }
 
         haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
@@ -166,7 +169,7 @@ fun scheduledInformation(
     ) {
         Column {
             AnimatedVisibility(
-                visible = showDeleteTopDocker.value,
+                visible = showDeleteTopDocker.value && !isCompact,
                 modifier = Modifier
                     .fillMaxWidth()
                     .onGloballyPositioned { coordinates ->
@@ -195,18 +198,20 @@ fun scheduledInformation(
                 if (isCompact) {
                     item(key = "topDocker") {
                         AnimatedVisibility(
-                            visible = !showDeleteTopDocker.value,
+                            visible = true,
+//                            visible = !showDeleteTopDocker.value,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             topDocker(
-                                modifier = Modifier.padding(
-                                    start = 20.dp,
-                                    end = 20.dp,
-                                    top = 60.dp,
-                                    bottom = 10.dp
-                                ),
+//                                modifier = Modifier.padding(
+//                                    start = 20.dp,
+//                                    end = 20.dp,
+//                                    top = 60.dp,
+//                                    bottom = 10.dp
+//                                ),
                                 date = date,
-                                onAddClick = onAddClick
+                                onAddClick = onAddClick,
+                                showDeleteTopDocker = showDeleteTopDocker
                             )
                         }
                     }
@@ -216,8 +221,7 @@ fun scheduledInformation(
                     ReorderableItem(
                         reorderableLazyColumnState,
                         key = schedule.uuid,
-                        animateItemModifier = if (isCompact && !showDeleteTopDocker.value) Modifier
-                        else Modifier.animateItem(
+                        animateItemModifier = Modifier.animateItem(
                             placementSpec = spring(
                                 dampingRatio = Spring.DampingRatioLowBouncy,
                                 stiffness = 650f,
@@ -244,12 +248,9 @@ fun scheduledInformation(
                                 }
                             },
                             onCardLongClick = {
-                                if (isSelected.value) {
-                                    viewModel.schedulesToDelete.clear()
-                                } else {
+                                if (viewModel.schedulesToDelete.size == 0)
                                     viewModel.schedulesToDelete.add(it)
-                                }
-                                showDeleteTopDocker.value = !showDeleteTopDocker.value
+                                showDeleteTopDocker.value = true
                             },
                             scope = this,
                             haptic = haptic
@@ -351,46 +352,82 @@ fun otherInformation(
  */
 @Composable
 fun topDocker(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     date: MutableState<LocalDate>,
+    showDeleteTopDocker: MutableState<Boolean>,
     onAddClick: () -> Unit
 ) {
     val showDatePickerDialog = remember { mutableStateOf(false) }
+    val animateColor by animateColorAsState(
+        if (showDeleteTopDocker.value)
+            MaterialTheme.colorScheme.primaryContainer
+        else
+            MaterialTheme.colorScheme.background
+    )
 
     Column (
-        modifier = modifier,
+        modifier = modifier.background(animateColor),
         horizontalAlignment = Alignment.Start
     ) {
 
         Row(
+            modifier = Modifier.padding(
+                start = 20.dp,
+                end = 20.dp,
+                top = 60.dp,
+                bottom = 10.dp
+            ),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            AnimatedVisibility(
+                visible = showDeleteTopDocker.value
+            ) {
+                IconButton(
+                    onClick = { showDeleteTopDocker.value = false },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close"
+                    )
+                }
+            }
+
             //显示当前日期
             Text(
                 text = getCurrentDate(date.value),
                 fontWeight = FontWeight.W800,
                 fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            IconButton(
-                onClick = { showDatePickerDialog.value = !showDatePickerDialog.value },
+            AnimatedVisibility(
+                visible = !showDeleteTopDocker.value
             ) {
-                Icon(
-                    imageVector = Icons.Default.DateRange,
-                    contentDescription = "Select Repeat"
-                )
-            }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(
+                        onClick = { showDatePickerDialog.value = !showDatePickerDialog.value },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Select Repeat"
+                        )
+                    }
 
-            IconButton(
-                onClick = onAddClick
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
-                )
+                    IconButton(
+                        onClick = onAddClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add"
+                        )
+                    }
+                }
             }
         }
     }

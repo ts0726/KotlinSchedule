@@ -5,8 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -63,7 +66,7 @@ fun scheduleCard(
                     else MaterialTheme.colorScheme.surfaceContainer,
                     shape = RoundedCornerShape(16.dp)
                 )
-                .draggableHandle(
+                .longPressDraggableHandle(
                     onDragStarted = {
                         haptic.performHapticFeedback(ReorderHapticFeedbackType.START)
                     },
@@ -74,7 +77,29 @@ fun scheduleCard(
         }
 
     ) {
-        scheduleCard_Content(schedule.title, schedule.content!!)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            scheduleCard_Content(schedule.title, schedule.content!!)
+//            IconButton(
+//                modifier = with(scope) {
+//                    modifier
+//                        .longPressDraggableHandle(
+//                            onDragStarted = {
+//                                haptic.performHapticFeedback(ReorderHapticFeedbackType.START)
+//                            },
+//                            onDragStopped = {
+//                                haptic.performHapticFeedback(ReorderHapticFeedbackType.END)
+//                            },
+//                        )
+//                        .size(20.dp)
+//                },
+//                onClick = {}
+//            ) {
+//                Icon(Icons.Default.Menu, contentDescription = "Reorder")
+//            }
+        }
     }
 }
 
