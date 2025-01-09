@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +42,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
@@ -146,6 +147,7 @@ fun scheduledInformation(
     val showEditMode = remember { mutableStateOf(false) }
     val topDeleteDockerHeight = remember { mutableStateOf(0) }
     val showConfirmDialog = remember { mutableStateOf(false) }
+    val showDatePickerDialog = remember { mutableStateOf(false) }
     val reorderableLazyColumnState = rememberReorderableLazyListState(listState) { from, to ->
         viewModel.schedules = viewModel.schedules.apply {
             if (isCompact) {
@@ -188,7 +190,8 @@ fun scheduledInformation(
                     onMoveClick = {},
                     showEditMode = showEditMode,
                     viewModel = viewModel,
-                    isCompact = isCompact
+                    isCompact = isCompact,
+                    showDatePickerDialog = showDatePickerDialog
                 )
             }
 
@@ -201,7 +204,6 @@ fun scheduledInformation(
                     item(key = "topDocker") {
                         AnimatedVisibility(
                             visible = true,
-//                            visible = !showDeleteTopDocker.value,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             topBar(
@@ -218,7 +220,8 @@ fun scheduledInformation(
                                 onMoveClick = {},
                                 showEditMode = showEditMode,
                                 viewModel = viewModel,
-                                isCompact = isCompact
+                                isCompact = isCompact,
+                                showDatePickerDialog = showDatePickerDialog
                             )
                         }
                     }
@@ -270,41 +273,20 @@ fun scheduledInformation(
 
         if (isCompact) {
             AnimatedVisibility(
-                modifier = Modifier.align(Alignment.BottomEnd),
+                modifier = Modifier.align(Alignment.TopCenter),
                 visible = listState.firstVisibleItemIndex >= 1,
             ) {
-                FloatingActionButton(
-                    onClick = {
-                        if (viewModel.schedulesToDelete.isNotEmpty()) {
+                floatingActionBar(
+                    showEditMode = showEditMode,
+                    onAddClick = onAddClick,
+                    onCloseClick = { showEditMode.value = false },
+                    onMoveClick = {},
+                    onDeleteClick = {
+                        if (viewModel.schedulesToDelete.isNotEmpty())
                             showConfirmDialog.value = true
-                        } else {
-                            onAddClick()
-                        }
                     },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(20.dp)
-                ) {
-                    AnimatedContent(targetState = showEditMode.value) {
-                        if (it) {
-                            Row {
-                                Icon(
-                                    Icons.Filled.Delete,
-                                    contentDescription = "Delete",
-                                    modifier = Modifier.padding(start = 5.dp, end = 5.dp)
-                                )
-                                Text(
-                                    text = "已选${viewModel.schedulesToDelete.size}项",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(start = 5.dp, end = 10.dp)
-                                )
-                            }
-                        } else {
-                            Icon(Icons.Filled.Add, contentDescription = "Add")
-                        }
-                    }
-                }
+                    onCalendarPickerClick = { showDatePickerDialog.value = !showDatePickerDialog.value }
+                )
             }
         }
 
@@ -319,6 +301,14 @@ fun scheduledInformation(
                     viewModel.schedulesToDelete.clear()
                 },
                 onDismiss = { showConfirmDialog.value = false }
+            )
+        }
+
+        if (showDatePickerDialog.value) {
+            CalendarPickerDialog(
+                onDismiss = { showDatePickerDialog.value = false },
+                onDateSelected = {date.value = it},
+                date = date
             )
         }
     }
@@ -388,6 +378,7 @@ fun topBar(
     modifier: Modifier = Modifier,
     date: MutableState<LocalDate>,
     showEditMode: MutableState<Boolean>,
+    showDatePickerDialog: MutableState<Boolean>,
     onAddClick: () -> Unit,
     onCloseClick: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -395,7 +386,7 @@ fun topBar(
     viewModel: ScheduleViewModel,
     isCompact: Boolean
 ) {
-    val showDatePickerDialog = remember { mutableStateOf(false) }
+
     val animateColor by animateColorAsState(
         if (showEditMode.value)
             MaterialTheme.colorScheme.primaryContainer
@@ -439,6 +430,18 @@ fun topBar(
                 Text(
                     text = "离线模式",
                     modifier = Modifier.padding(start = 10.dp)
+                )
+            }
+
+            AnimatedVisibility(
+                visible = showEditMode.value && !isCompact
+            ) {
+                Text(
+                    text = "已选择${viewModel.schedulesToDelete.size}项日程",
+                    fontWeight = FontWeight.W800,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp)
                 )
             }
 
@@ -494,7 +497,7 @@ fun topBar(
         }
 
         //顶栏标题
-        AnimatedContent(targetState = showEditMode.value) {
+        AnimatedContent(targetState = showEditMode.value && isCompact) {
             if (it) {
                 Text(
                     text = "已选择${viewModel.schedulesToDelete.size}项日程",
@@ -503,7 +506,7 @@ fun topBar(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
                 )
-            } else {
+            } else if (isCompact) {
                 Text(
                     text =  getCurrentDate(date.value),
                     fontWeight = FontWeight.W800,
@@ -514,13 +517,78 @@ fun topBar(
             }
         }
     }
-    if (showDatePickerDialog.value) {
-        CalendarPickerDialog(
-            onDismiss = { showDatePickerDialog.value = false },
-            onDateSelected = {date.value = it},
-            date = date
-        )
+}
+
+@Composable
+fun floatingActionBar(
+    showEditMode: MutableState<Boolean>,
+    onAddClick: () -> Unit,
+    onCloseClick: () -> Unit,
+    onCalendarPickerClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onMoveClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .padding(top = 10.dp)
+            .statusBarsPadding()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(
+                onClick = onCalendarPickerClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "Date"
+                )
+            }
+            IconButton(
+                onClick = onAddClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add"
+                )
+            }
+            AnimatedVisibility(visible = showEditMode.value) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onMoveClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Move"
+                        )
+                    }
+                    IconButton(
+                        onClick = onDeleteClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete"
+                        )
+                    }
+                    IconButton(
+                        onClick = onCloseClick,
+                        modifier = Modifier.background(MaterialTheme.colorScheme.inversePrimary)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close"
+                        )
+                    }
+                }
+            }
+        }
     }
+
 }
 
 @Composable
