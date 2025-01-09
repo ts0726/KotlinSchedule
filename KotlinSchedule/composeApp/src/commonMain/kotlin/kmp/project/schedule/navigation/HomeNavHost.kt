@@ -111,7 +111,8 @@ fun HomeNavHost(
                 otherInformation(
                     modifier,
                     navController,
-                    date
+                    date,
+                    scheduleList.size
                 )
             }
 

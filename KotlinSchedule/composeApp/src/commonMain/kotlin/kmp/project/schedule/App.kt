@@ -176,7 +176,7 @@ fun sideNavRail(pageID: MutableIntState) {
             modifier = Modifier
                 .padding(top = 10.dp)
         ) {
-            userImage("testURL")
+            userImage("testURL", 40.dp)
         }
 
         items.forEachIndexed { index, _ ->

@@ -1,5 +1,6 @@
 package kmp.project.schedule.ui.home
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -56,6 +57,7 @@ import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
+import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.util.getCurrentDate
 import kmp.project.schedule.util.rememberReorderHapticFeedback
 import kotlinx.coroutines.CoroutineScope
@@ -185,7 +187,8 @@ fun scheduledInformation(
                     },
                     onMoveClick = {},
                     showEditMode = showEditMode,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    isCompact = isCompact
                 )
             }
 
@@ -214,7 +217,8 @@ fun scheduledInformation(
                                 },
                                 onMoveClick = {},
                                 showEditMode = showEditMode,
-                                viewModel = viewModel
+                                viewModel = viewModel,
+                                isCompact = isCompact
                             )
                         }
                     }
@@ -267,15 +271,39 @@ fun scheduledInformation(
         if (isCompact) {
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = listState.firstVisibleItemIndex >= 1 && !showEditMode.value,
+                visible = listState.firstVisibleItemIndex >= 1,
             ) {
                 FloatingActionButton(
-                    onClick = onAddClick,
+                    onClick = {
+                        if (viewModel.schedulesToDelete.isNotEmpty()) {
+                            showConfirmDialog.value = true
+                        } else {
+                            onAddClick()
+                        }
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(20.dp)
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                    AnimatedContent(targetState = showEditMode.value) {
+                        if (it) {
+                            Row {
+                                Icon(
+                                    Icons.Filled.Delete,
+                                    contentDescription = "Delete",
+                                    modifier = Modifier.padding(start = 5.dp, end = 5.dp)
+                                )
+                                Text(
+                                    text = "已选${viewModel.schedulesToDelete.size}项",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(start = 5.dp, end = 10.dp)
+                                )
+                            }
+                        } else {
+                            Icon(Icons.Filled.Add, contentDescription = "Add")
+                        }
+                    }
                 }
             }
         }
@@ -303,7 +331,8 @@ fun scheduledInformation(
 fun otherInformation(
     modifier: Modifier,
     navController: NavHostController,
-    date: MutableState<LocalDate>
+    date: MutableState<LocalDate>,
+    scheduleCount: Int
 ) {
     LazyColumn(
         modifier = modifier
@@ -319,7 +348,7 @@ fun otherInformation(
                     .padding(start = 10.dp, end = 10.dp, top = 20.dp),
             ) {
                 Text(
-                    text = "宜看窗外云卷云舒~",
+                    text = "今日剩余${scheduleCount}项日程",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.primary,
@@ -363,7 +392,8 @@ fun topBar(
     onCloseClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onMoveClick: () -> Unit,
-    viewModel: ScheduleViewModel
+    viewModel: ScheduleViewModel,
+    isCompact: Boolean
 ) {
     val showDatePickerDialog = remember { mutableStateOf(false) }
     val animateColor by animateColorAsState(
@@ -372,17 +402,11 @@ fun topBar(
         else
             MaterialTheme.colorScheme.background
     )
-    val topBarTitle = if (!showEditMode.value) {
-        getCurrentDate(date.value)
-    } else {
-        "已选择${viewModel.schedulesToDelete.size}项日程"
-    }
 
     Column (
         modifier = modifier.background(animateColor),
         horizontalAlignment = Alignment.Start
     ) {
-
         Row(
             modifier = Modifier.padding(
                 start = 20.dp,
@@ -405,41 +429,40 @@ fun topBar(
                 }
             }
 
-            //顶栏标题
-            Text(
-                text = topBarTitle,
-                fontWeight = FontWeight.W800,
-                fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
+            if (isCompact) {
+                userImage("TEST URL", 30.dp)
+            }
 
             AnimatedVisibility(
                 visible = !showEditMode.value
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(
-                        onClick = { showDatePickerDialog.value = !showDatePickerDialog.value },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Select Repeat"
-                        )
-                    }
+                Text(
+                    text = "离线模式",
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+            }
 
-                    IconButton(
-                        onClick = onAddClick
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add"
-                        )
-                    }
+            Spacer(modifier = Modifier.weight(1f))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(
+                    onClick = { showDatePickerDialog.value = !showDatePickerDialog.value },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Select Repeat"
+                    )
+                }
+
+                IconButton(
+                    onClick = onAddClick
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add"
+                    )
                 }
             }
 
@@ -448,7 +471,6 @@ fun topBar(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     IconButton(
                         onClick = onMoveClick,
@@ -468,6 +490,27 @@ fun topBar(
                         )
                     }
                 }
+            }
+        }
+
+        //顶栏标题
+        AnimatedContent(targetState = showEditMode.value) {
+            if (it) {
+                Text(
+                    text = "已选择${viewModel.schedulesToDelete.size}项日程",
+                    fontWeight = FontWeight.W800,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
+                )
+            } else {
+                Text(
+                    text =  getCurrentDate(date.value),
+                    fontWeight = FontWeight.W800,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
+                )
             }
         }
     }
