@@ -56,7 +56,6 @@ import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
-import kmp.project.schedule.util.ReorderHapticFeedbackType
 import kmp.project.schedule.util.getCurrentDate
 import kmp.project.schedule.util.rememberReorderHapticFeedback
 import kotlinx.coroutines.CoroutineScope
@@ -142,7 +141,6 @@ fun scheduledInformation(
     onAddClick: () -> Unit
 ) {
     val haptic = rememberReorderHapticFeedback()
-
     val showEditMode = remember { mutableStateOf(false) }
     val topDeleteDockerHeight = remember { mutableStateOf(0) }
     val showConfirmDialog = remember { mutableStateOf(false) }
@@ -154,8 +152,6 @@ fun scheduledInformation(
                 add(to.index, removeAt(from.index))
             }
         }
-
-        haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
     }
 
     BackHandler( showDeleteTopDocker = showEditMode )
@@ -260,7 +256,8 @@ fun scheduledInformation(
                                 showEditMode.value = true
                             },
                             scope = this,
-                            haptic = haptic
+                            haptic = haptic,
+                            onDragStopped = { viewModel.reorderSchedules() }
                         )
                     }
                 }
@@ -485,3 +482,15 @@ fun topBar(
 
 @Composable
 expect fun BackHandler(showDeleteTopDocker: MutableState<Boolean>)
+
+//class ReorderHandler(val viewModel: ScheduleViewModel): ReorderHapticFeedback() {
+//    override fun performHapticFeedback(type: ReorderHapticFeedbackType) {
+//        when (type) {
+//            ReorderHapticFeedbackType.END -> {
+//                viewModel.updateSequence()
+//            }
+//            ReorderHapticFeedbackType.START -> {}
+//            ReorderHapticFeedbackType.MOVE -> {}
+//        }
+//    }
+//}

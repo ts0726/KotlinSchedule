@@ -11,6 +11,10 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         return dbQuery.selectAllSchedules(::mapResultToList).executeAsList()
     }
 
+    internal fun getAllSchedulesbyDate(date: Long): List<Schedule> {
+        return dbQuery.selectSchedulesByDate(date).executeAsList()
+    }
+
     internal fun createSchedule(schedule: Schedule) {
         dbQuery.transaction {
             dbQuery.insertSchedule(
@@ -42,6 +46,22 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                 uuid = schedule.uuid,
                 sequence = schedule.sequence
             )
+        }
+    }
+
+    internal fun updateSchedules(schedules: List<Schedule>) {
+        dbQuery.transaction {
+            schedules.forEach { schedule ->
+                dbQuery.updateSchedule(
+                    title = schedule.title,
+                    content = schedule.content,
+                    date = schedule.date,
+                    repeatMode = schedule.repeatMode,
+                    location = schedule.location,
+                    uuid = schedule.uuid,
+                    sequence = schedule.sequence
+                )
+            }
         }
     }
 

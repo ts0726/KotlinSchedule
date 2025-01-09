@@ -44,7 +44,8 @@ fun scheduleCard(
     onCardClick: (String) -> Unit,
     onCardLongClick: (String) -> Unit,
     scope: ReorderableCollectionItemScope,
-    haptic: ReorderHapticFeedback
+    haptic: ReorderHapticFeedback,
+    onDragStopped: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
@@ -71,7 +72,7 @@ fun scheduleCard(
                         haptic.performHapticFeedback(ReorderHapticFeedbackType.START)
                     },
                     onDragStopped = {
-                        haptic.performHapticFeedback(ReorderHapticFeedbackType.END)
+                        onDragStopped()
                     },
                 )
         }

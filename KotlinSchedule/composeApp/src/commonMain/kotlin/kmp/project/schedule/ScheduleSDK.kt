@@ -40,7 +40,7 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
 
     fun getScheduleByDate(date: Long): List<Schedule> {
 //        return database.getAllSchedules().filter { it.date == date }
-        return database.getAllSchedules().filter { it.date == date }.sortedByDescending { it.id }
+        return database.getAllSchedulesbyDate(date)
     }
 
     fun getScheduleByUuid(uuid: String): Schedule? {
@@ -53,6 +53,10 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
 
     fun updateSchedule(schedule: Schedule) {
         database.updateSchedule(schedule)
+    }
+
+    fun updateSchedules(schedules: List<Schedule>) {
+        database.updateSchedules(schedules)
     }
 
     fun getCountOfSchedulesByDate(date: Int): Int {

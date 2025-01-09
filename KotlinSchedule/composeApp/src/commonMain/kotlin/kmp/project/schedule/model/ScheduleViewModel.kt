@@ -22,7 +22,6 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val date = mutableStateOf( Clock.System.todayIn(TimeZone.currentSystemDefault()) )
     val repeatMode = mutableStateOf(0)
     val location = mutableStateOf("未设定")
-    val sequence = mutableStateOf(0)
 
     var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
@@ -36,7 +35,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             date = date.value.toEpochDays().toLong(),
             repeatMode = repeatMode.value.toLong(),
             location = location.value,
-            sequence = sequence.value.toLong()
+            sequence = sdk.getCountOfSchedulesByDate(date.value.toEpochDays()).toLong()
         )
         if (loadScheduleByUUID(uuid.value) != null) {
             updateSchedule(schedule, currentDate)
@@ -103,6 +102,12 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             println("current date: " + currentDate)
             schedules.removeIf { schedule.uuid == it.uuid }
         }
+    }
 
+    fun reorderSchedules() {
+        val updatedSchedules = schedules.mapIndexed{ index, schedule ->
+            schedule.copy(sequence = index.toLong())
+        }
+        sdk.updateSchedules(updatedSchedules)
     }
 }
