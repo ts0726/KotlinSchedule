@@ -80,7 +80,8 @@ fun NewSchedule(
     ) {
         NewScheduleTopBar(
             onBack = onBack,
-            onSave = onSave
+            onSave = onSave,
+            topBarTitle = if (viewModel.id.value == -1) "创建日程" else "编辑日程"
         )
         NewScheduleContent(viewModel, bringIntoViewRequester)
     }
@@ -94,7 +95,8 @@ fun NewSchedule(
 @Composable
 fun NewScheduleTopBar(
     onBack: () -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    topBarTitle: String
 ) {
     Row(
         modifier = Modifier
@@ -113,7 +115,7 @@ fun NewScheduleTopBar(
         }
 
         Text(
-            text = "创建新日程",
+            text = topBarTitle,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp

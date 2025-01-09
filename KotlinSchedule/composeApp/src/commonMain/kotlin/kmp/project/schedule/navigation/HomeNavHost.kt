@@ -127,7 +127,7 @@ fun HomeNavHost(
                         scheduleViewModel.title.value = "未命名事件"
                     }
                     if (scheduleViewModel.content.value.isEmpty()) {
-                        scheduleViewModel.content.value = "无"
+                        scheduleViewModel.content.value = "无备注"
                     }
                     coroutineScope.launch {
                         scheduleViewModel.onSave(navController, date.value)

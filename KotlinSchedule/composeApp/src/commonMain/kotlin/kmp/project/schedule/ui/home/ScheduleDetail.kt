@@ -138,6 +138,7 @@ fun ScheduleDetailTopBar(
                         viewModel.content.value = schedule.content!!
                         viewModel.location.value = schedule.location!!
                         viewModel.repeatMode.value = schedule.repeatMode.toInt()
+                        viewModel.sequence.value = schedule.sequence.toInt()
                         navHostController.navigate("home_add")
                     },
                     text = {

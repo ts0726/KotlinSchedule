@@ -15,14 +15,14 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
 class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
-    val id = mutableStateOf(0)
+    val id = mutableStateOf(-1)
     val uuid = mutableStateOf("")
     val title = mutableStateOf("")
     val content = mutableStateOf("")
     val date = mutableStateOf( Clock.System.todayIn(TimeZone.currentSystemDefault()) )
     val repeatMode = mutableStateOf(0)
     val location = mutableStateOf("未设定")
-
+    val sequence = mutableStateOf(0)
     var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
@@ -35,7 +35,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             date = date.value.toEpochDays().toLong(),
             repeatMode = repeatMode.value.toLong(),
             location = location.value,
-            sequence = sdk.getCountOfSchedulesByDate(date.value.toEpochDays()).toLong()
+            sequence = sequence.value.toLong()
         )
         if (loadScheduleByUUID(uuid.value) != null) {
             updateSchedule(schedule, currentDate)
@@ -46,7 +46,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
                 date = date.value.toEpochDays().toLong(),
                 repeatMode = repeatMode.value,
                 location = location.value,
-                sequence = sdk.getCountOfSchedulesByDate(date.value.toEpochDays())
+                sequence = id.value
             )
             if (date.value.toEpochDays() == currentDate.toEpochDays()) {
                 schedules.add(0, schedule.copy(uuid = uuid))
@@ -60,7 +60,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     }
 
     fun reset() {
-        id.value = 0
+        id.value = -1
         uuid.value = ""
         title.value = ""
         content.value = ""
