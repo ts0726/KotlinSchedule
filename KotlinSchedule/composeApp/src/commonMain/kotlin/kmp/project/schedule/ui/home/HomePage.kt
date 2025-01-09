@@ -59,6 +59,7 @@ import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.ui.userImage
+import kmp.project.schedule.util.ReorderHapticFeedbackType
 import kmp.project.schedule.util.getCurrentDate
 import kmp.project.schedule.util.rememberReorderHapticFeedback
 import kotlinx.coroutines.CoroutineScope
@@ -156,6 +157,8 @@ fun scheduledInformation(
                 add(to.index, removeAt(from.index))
             }
         }
+
+        haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
     }
 
     BackHandler( showDeleteTopDocker = showEditMode )
