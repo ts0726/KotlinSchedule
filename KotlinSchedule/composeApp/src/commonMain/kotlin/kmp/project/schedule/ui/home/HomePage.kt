@@ -164,7 +164,7 @@ fun scheduledInformation(
         haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
     }
 
-    BackHandler( showDeleteTopDocker = showEditMode )
+    EditModeBackHandler( showDeleteTopDocker = showEditMode )
 
     if (!showEditMode.value) {
         viewModel.schedulesToDelete.clear()
@@ -615,4 +615,4 @@ fun floatingActionBar(
 }
 
 @Composable
-expect fun BackHandler(showDeleteTopDocker: MutableState<Boolean>)
+expect fun EditModeBackHandler(showDeleteTopDocker: MutableState<Boolean>)

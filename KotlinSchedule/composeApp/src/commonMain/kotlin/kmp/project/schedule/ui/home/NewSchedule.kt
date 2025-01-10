@@ -73,6 +73,8 @@ fun NewSchedule(
         BringIntoViewRequester()
     }
 
+    NewScheduleBackHandler(viewModel, onBack)
+
     Column(
         modifier = Modifier
             .statusBarsPadding()
@@ -552,3 +554,5 @@ fun locationPickerModal(
     }
 }
 
+@Composable
+expect fun NewScheduleBackHandler(viewModel: ScheduleViewModel, onBack: () -> Unit)

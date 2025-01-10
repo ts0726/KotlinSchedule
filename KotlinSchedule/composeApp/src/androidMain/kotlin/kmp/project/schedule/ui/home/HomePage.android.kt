@@ -5,10 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 
 @Composable
-actual fun BackHandler(
+actual fun EditModeBackHandler(
     showDeleteTopDocker: MutableState<Boolean>
 ) {
-    println("backHandler: " + showDeleteTopDocker.value)
     BackHandler(enabled = showDeleteTopDocker.value) {
         if (showDeleteTopDocker.value) {
             showDeleteTopDocker.value = !showDeleteTopDocker.value
