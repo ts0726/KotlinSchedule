@@ -7,6 +7,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -397,6 +400,12 @@ fun topBar(
             MaterialTheme.colorScheme.background
     )
 
+    val animationSpec = spring(
+        stiffness = Spring.StiffnessMediumLow,
+        dampingRatio = 0.65f,
+        visibilityThreshold = IntSize.VisibilityThreshold
+    )
+
     Column (
         modifier = modifier.background(animateColor),
         horizontalAlignment = Alignment.Start
@@ -411,7 +420,8 @@ fun topBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AnimatedVisibility(
-                visible = showEditMode.value
+                visible = showEditMode.value,
+                enter = fadeIn() + expandHorizontally(animationSpec),
             ) {
                 IconButton(
                     onClick = onCloseClick,
@@ -428,7 +438,7 @@ fun topBar(
             }
 
             AnimatedVisibility(
-                visible = !showEditMode.value
+                visible = !showEditMode.value,
             ) {
                 Text(
                     text = "离线模式",
@@ -473,7 +483,8 @@ fun topBar(
             }
 
             AnimatedVisibility(
-                visible = showEditMode.value
+                visible = showEditMode.value,
+                enter = fadeIn() + expandHorizontally(animationSpec),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -511,7 +522,7 @@ fun topBar(
                 )
             } else if (isCompact) {
                 Text(
-                    text =  getCurrentDate(date.value),
+                    text = getCurrentDate(date.value),
                     fontWeight = FontWeight.W800,
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.primary,
@@ -531,6 +542,12 @@ fun floatingActionBar(
     onDeleteClick: () -> Unit,
     onMoveClick: () -> Unit
 ) {
+    val animationSpec = spring(
+        stiffness = Spring.StiffnessMediumLow,
+        dampingRatio = 0.65f,
+        visibilityThreshold = IntSize.VisibilityThreshold
+    )
+
     Box(
         modifier = Modifier
             .padding(top = 10.dp)
@@ -558,7 +575,10 @@ fun floatingActionBar(
                     contentDescription = "Add"
                 )
             }
-            AnimatedVisibility(visible = showEditMode.value) {
+            AnimatedVisibility(
+                visible = showEditMode.value,
+                enter = fadeIn() + expandHorizontally(animationSpec),
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -596,15 +616,3 @@ fun floatingActionBar(
 
 @Composable
 expect fun BackHandler(showDeleteTopDocker: MutableState<Boolean>)
-
-//class ReorderHandler(val viewModel: ScheduleViewModel): ReorderHapticFeedback() {
-//    override fun performHapticFeedback(type: ReorderHapticFeedbackType) {
-//        when (type) {
-//            ReorderHapticFeedbackType.END -> {
-//                viewModel.updateSequence()
-//            }
-//            ReorderHapticFeedbackType.START -> {}
-//            ReorderHapticFeedbackType.MOVE -> {}
-//        }
-//    }
-//}
