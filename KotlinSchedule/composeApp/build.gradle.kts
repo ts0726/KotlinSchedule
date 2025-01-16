@@ -95,7 +95,14 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "kmp.project.schedule"
             packageVersion = "1.0.0"
-            modules("schedule.sql")
+            modules("java.compiler", "java.instrument" , "java.sql", "jdk.unsupported")
+//            modules("schedule.sql")
+        }
+
+        buildTypes.release.proguard {
+            version = "7.6.1"
+            obfuscate.set(true)
+            configurationFiles.from("./build/compose/compose-desktop.pro")
         }
     }
 }
