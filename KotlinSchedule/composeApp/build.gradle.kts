@@ -95,7 +95,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "kmp.project.schedule"
             packageVersion = "1.0.0"
-            modules("java.compiler", "java.instrument" , "java.sql", "jdk.unsupported")
+            modules("java.instrument", "java.prefs", "java.sql", "jdk.unsupported","jdk.crypto.ec","jdk.localedata")
 //            modules("schedule.sql")
         }
 
