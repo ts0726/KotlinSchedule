@@ -46,14 +46,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kmp.project.schedule.model.HomePageStateViewModel
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.TestPage1
-import kmp.project.schedule.ui.TestPage2
+import kmp.project.schedule.ui.auth.LoginPage
 import kmp.project.schedule.ui.home.mainPage
 import kmp.project.schedule.ui.userImage
 import kotlinx.coroutines.CoroutineScope
@@ -68,12 +67,13 @@ fun App() {
     val windowSize = calculateWindowSizeClass()
     val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
     val sdk = getScheduleSDK()
-    val scheduleViewModel: ScheduleViewModel = viewModel{ ScheduleViewModel(sdk) }
+    val scheduleViewModel: ScheduleViewModel = viewModel { ScheduleViewModel(sdk) }
     val homePageStateViewModel: HomePageStateViewModel = viewModel()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val pageID = remember{ mutableIntStateOf(0) }
+    val pageID = remember { mutableIntStateOf(0) }
     val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
+
     customTheme {
         CustomScaffold(
             scheduleViewModel = scheduleViewModel,
@@ -85,6 +85,7 @@ fun App() {
             date = date,
         )
     }
+
 }
 
 /**
@@ -133,7 +134,7 @@ fun CustomScaffold(
                                 coroutineScope = coroutineScope
                             )
                             1 -> TestPage1(onButtonClick = {})
-                            2 -> TestPage2()
+                            2 -> LoginPage {  }
                         }
                     },
                     padding = innerPadding
@@ -282,12 +283,12 @@ fun customTheme(
 ) {
     val colorScheme = when {
         darkTheme -> darkColorScheme(
-            background = Color(0xFF212028),
-            surfaceContainer = Color(0xFF141318)
+//            background = Color(0xFF212028),
+//            surfaceContainer = Color(0xFF141318)
         )
         else -> lightColorScheme(
-            background = Color(0xFFF3EDF7),
-            surfaceContainer = Color(0xFFFDF8FF)
+//            background = Color(0xFFF3EDF7),
+//            surfaceContainer = Color(0xFFFDF8FF)
         )
     }
     MaterialTheme(
