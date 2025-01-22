@@ -38,6 +38,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kmp.project.schedule.model.HomePageStateViewModel
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.TestPage2
@@ -56,6 +58,7 @@ import kmp.project.schedule.ui.home.mainPage
 import kmp.project.schedule.ui.userImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
@@ -66,14 +69,20 @@ fun App() {
     val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
     val sdk = getScheduleSDK()
     val scheduleViewModel: ScheduleViewModel = viewModel{ ScheduleViewModel(sdk) }
+    val homePageStateViewModel: HomePageStateViewModel = viewModel()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val pageID = remember{ mutableIntStateOf(0) }
+    val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     customTheme {
         CustomScaffold(
-            viewModel = scheduleViewModel,
+            scheduleViewModel = scheduleViewModel,
+            homePageStateViewModel = homePageStateViewModel,
             isCompact = isCompact,
             listState = listState,
-            coroutineScope = coroutineScope
+            coroutineScope = coroutineScope,
+            pageID = pageID,
+            date = date,
         )
     }
 }
@@ -87,16 +96,16 @@ fun App() {
  */
 @Composable
 fun CustomScaffold(
-    viewModel: ScheduleViewModel,
+    scheduleViewModel: ScheduleViewModel,
+    homePageStateViewModel: HomePageStateViewModel,
     isCompact: Boolean,
     listState: LazyListState,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    pageID: MutableIntState,
+    date: MutableState<LocalDate>,
 ) {
-    val pageID = remember{ mutableIntStateOf(0) }
-    val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     Row (
         Modifier
-//            .statusBarsPadding()
             .fillMaxSize()
     ) {
         if (!isCompact) {
@@ -118,11 +127,12 @@ fun CustomScaffold(
                             0 -> mainPage(
                                 isCompact = isCompact,
                                 listState = listState,
-                                scheduleViewModel = viewModel,
+                                scheduleViewModel = scheduleViewModel,
+                                homePageStateViewModel = homePageStateViewModel,
                                 date = date,
                                 coroutineScope = coroutineScope
                             )
-                            1 -> TestPage1()
+                            1 -> TestPage1(onButtonClick = {})
                             2 -> TestPage2()
                         }
                     },

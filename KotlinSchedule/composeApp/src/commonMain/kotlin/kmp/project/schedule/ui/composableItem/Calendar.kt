@@ -98,7 +98,6 @@ fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun pageSwitcher(
     pagerState: PagerState,
@@ -222,9 +221,12 @@ fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState
                 fontSize = 13.sp,
             )
             if (day.isCurrentMonth) {
-                val dateTime = LocalDate(date.year, date.monthNumber, day.day).atStartOfDayIn(TimeZone.UTC).toLocalDateTime(TimeZone.UTC)
                 Text(
-                    text = LunarUtil(dateTime).getChineseLunarDay(),
+                    text = LunarUtil(
+                        LocalDate(date.year, date.monthNumber, day.day)
+                            .atStartOfDayIn(TimeZone.UTC)
+                            .toLocalDateTime(TimeZone.UTC)
+                    ).getChineseLunarDay(),
                     color = calendarTextColor(day, isSelected),
                     textAlign = TextAlign.Center,
                     lineHeight = 9.sp,

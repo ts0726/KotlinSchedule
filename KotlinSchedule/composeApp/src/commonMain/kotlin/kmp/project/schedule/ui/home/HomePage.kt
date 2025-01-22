@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -56,6 +56,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.database.Schedule
+import kmp.project.schedule.model.HomePageStateViewModel
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
@@ -82,6 +83,7 @@ fun mainPage(
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
     scheduleViewModel: ScheduleViewModel,
+    homePageStateViewModel: HomePageStateViewModel,
     date: MutableState<LocalDate>,
     coroutineScope: CoroutineScope
 ) {
@@ -98,12 +100,13 @@ fun mainPage(
         //横屏模式下显示日程信息，通过listState同步竖屏时的滚动位置
         if (!isCompact) {
             scheduledInformation(
-                scheduleViewModel,
-                isCompact,
-                Modifier.weight(1f),
-                listState,
-                scheduleList,
-                date,
+                scheduleViewModel = scheduleViewModel,
+                homePageStateViewModel = homePageStateViewModel,
+                isCompact = isCompact,
+                modifier = Modifier.weight(1f),
+                listState = listState,
+                list = scheduleList,
+                date = date,
                 onScheduleCardClick = { uuid ->
                     navController.navigate("scheduleDetail/$uuid") {
                         //清除栈中的日程详情页面，防止叠加
@@ -124,6 +127,7 @@ fun mainPage(
             scheduleList = scheduleList,
             date = date,
             scheduleViewModel = scheduleViewModel,
+            homePageStateViewModel = homePageStateViewModel,
             coroutineScope = coroutineScope
         )
     }
@@ -138,7 +142,8 @@ fun mainPage(
  */
 @Composable
 fun scheduledInformation(
-    viewModel: ScheduleViewModel,
+    scheduleViewModel: ScheduleViewModel,
+    homePageStateViewModel: HomePageStateViewModel,
     isCompact: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState,
@@ -148,12 +153,11 @@ fun scheduledInformation(
     onAddClick: () -> Unit
 ) {
     val haptic = rememberReorderHapticFeedback()
-    val showEditMode = remember { mutableStateOf(false) }
-    val topDeleteDockerHeight = remember { mutableStateOf(0) }
-    val showConfirmDialog = remember { mutableStateOf(false) }
-    val showDatePickerDialog = remember { mutableStateOf(false) }
+    val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
+    val showConfirmDialog by homePageStateViewModel.showConfirmDialog.collectAsState()
+    val showDatePickerDialog by homePageStateViewModel.showDatePickerDialog.collectAsState()
     val reorderableLazyColumnState = rememberReorderableLazyListState(listState) { from, to ->
-        viewModel.schedules = viewModel.schedules.apply {
+        scheduleViewModel.schedules = scheduleViewModel.schedules.apply {
             if (isCompact) {
                 add(to.index - 1, removeAt(from.index - 1))
             } else {
@@ -164,10 +168,13 @@ fun scheduledInformation(
         haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
     }
 
-    EditModeBackHandler( showDeleteTopDocker = showEditMode )
+    EditModeBackHandler(
+        showDeleteTopDocker = showEditMode,
+        closeEditMode = { homePageStateViewModel.setShowEditMode(false) }
+    )
 
-    if (!showEditMode.value) {
-        viewModel.schedulesToDelete.clear()
+    if (!showEditMode) {
+        scheduleViewModel.schedulesToDelete.clear()
     }
 
     Box(
@@ -175,29 +182,30 @@ fun scheduledInformation(
     ) {
         Column {
             AnimatedVisibility(
-                visible = showEditMode.value && !isCompact,
+                visible = showEditMode && !isCompact,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .onGloballyPositioned { coordinates ->
-                        topDeleteDockerHeight.value = coordinates.size.height
-                    }
+//                    .onGloballyPositioned { coordinates ->
+//                        homePageStateViewModel.setTopDeleteDockerHeight(coordinates.size.height)
+//                    }
             ) {
                 topBar(
                     date = date,
+                    homePageStateViewModel = homePageStateViewModel,
                     onAddClick = onAddClick,
                     onCloseClick = {
-                        showEditMode.value = false
-                        viewModel.schedulesToDelete.clear()
+                        homePageStateViewModel.setShowEditMode(false)
+                        scheduleViewModel.schedulesToDelete.clear()
                     },
                     onDeleteClick = {
-                        if (viewModel.schedulesToDelete.isNotEmpty())
-                            showConfirmDialog.value = true
+                        if (scheduleViewModel.schedulesToDelete.isNotEmpty())
+                            homePageStateViewModel.setShowConfirmDialog(true)
                     },
                     onMoveClick = {},
-                    showEditMode = showEditMode,
-                    viewModel = viewModel,
+//                    showEditMode = showEditMode,
+                    viewModel = scheduleViewModel,
                     isCompact = isCompact,
-                    showDatePickerDialog = showDatePickerDialog
+//                    showDatePickerDialog = showDatePickerDialog
                 )
             }
 
@@ -214,20 +222,21 @@ fun scheduledInformation(
                         ) {
                             topBar(
                                 date = date,
+                                homePageStateViewModel = homePageStateViewModel,
                                 onAddClick = onAddClick,
                                 onCloseClick = {
-                                    showEditMode.value = false
-                                    viewModel.schedulesToDelete.clear()
+                                    homePageStateViewModel.setShowEditMode(false)
+                                    scheduleViewModel.schedulesToDelete.clear()
                                 },
                                 onDeleteClick = {
-                                    if (viewModel.schedulesToDelete.isNotEmpty())
-                                        showConfirmDialog.value = true
+                                    if (scheduleViewModel.schedulesToDelete.isNotEmpty())
+                                        homePageStateViewModel.setShowConfirmDialog(true)
                                 },
                                 onMoveClick = {},
-                                showEditMode = showEditMode,
-                                viewModel = viewModel,
+//                                showEditMode = showEditMode,
+                                viewModel = scheduleViewModel,
                                 isCompact = isCompact,
-                                showDatePickerDialog = showDatePickerDialog
+//                                showDatePickerDialog = showDatePickerDialog
                             )
                         }
                     }
@@ -247,7 +256,7 @@ fun scheduledInformation(
                     ) { isDragging ->
                         val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
                         val isSelected = mutableStateOf(
-                            viewModel.schedulesToDelete.contains(schedule.uuid)
+                            scheduleViewModel.schedulesToDelete.contains(schedule.uuid)
                         )
                         scheduleCard(
                             modifier = Modifier
@@ -255,22 +264,22 @@ fun scheduledInformation(
                             schedule = schedule,
                             isSelected = isSelected.value,
                             onCardClick = { uuid ->
-                                if (showEditMode.value && !isSelected.value) {
-                                    viewModel.schedulesToDelete.add(uuid)
-                                } else if (showEditMode.value && isSelected.value) {
-                                    viewModel.schedulesToDelete.remove(uuid)
+                                if (showEditMode && !isSelected.value) {
+                                    scheduleViewModel.schedulesToDelete.add(uuid)
+                                } else if (showEditMode && isSelected.value) {
+                                    scheduleViewModel.schedulesToDelete.remove(uuid)
                                 } else {
                                     onScheduleCardClick(uuid)
                                 }
                             },
                             onCardLongClick = {
-                                if (viewModel.schedulesToDelete.size == 0)
-                                    viewModel.schedulesToDelete.add(it)
-                                showEditMode.value = true
+                                if (scheduleViewModel.schedulesToDelete.isEmpty())
+                                    scheduleViewModel.schedulesToDelete.add(it)
+                                homePageStateViewModel.setShowEditMode(true)
                             },
                             scope = this,
                             haptic = haptic,
-                            onDragStopped = { viewModel.reorderSchedules() }
+                            onDragStopped = { scheduleViewModel.reorderSchedules() }
                         )
                     }
                 }
@@ -283,37 +292,38 @@ fun scheduledInformation(
                 visible = listState.firstVisibleItemIndex >= 1,
             ) {
                 floatingActionBar(
-                    showEditMode = showEditMode,
+//                    showEditMode = showEditMode,
+                    homePageStateViewModel = homePageStateViewModel,
                     onAddClick = onAddClick,
-                    onCloseClick = { showEditMode.value = false },
+                    onCloseClick = { homePageStateViewModel.setShowEditMode(false) },
                     onMoveClick = {},
                     onDeleteClick = {
-                        if (viewModel.schedulesToDelete.isNotEmpty())
-                            showConfirmDialog.value = true
+                        if (scheduleViewModel.schedulesToDelete.isNotEmpty())
+                            homePageStateViewModel.setShowConfirmDialog(true)
                     },
-                    onCalendarPickerClick = { showDatePickerDialog.value = !showDatePickerDialog.value }
+                    onCalendarPickerClick = { homePageStateViewModel.setShowDatePickerDialog(!showDatePickerDialog) }
                 )
             }
         }
 
-        if (showConfirmDialog.value) {
+        if (showConfirmDialog) {
             ConfirmDialog(
                 title = "删除日程",
-                content = "已选择${viewModel.schedulesToDelete.size}条日程\n" +
+                content = "已选择${scheduleViewModel.schedulesToDelete.size}条日程\n" +
                         "将同步删除本地和云端的日程，且删除后不可恢复\n确定要删除这些日程吗？",
                 onConfirm = {
-                    showConfirmDialog.value = false
-                    viewModel.deleteSchedules()
-                    viewModel.schedulesToDelete.clear()
+                    homePageStateViewModel.setShowConfirmDialog(false)
+                    scheduleViewModel.deleteSchedules()
+                    scheduleViewModel.schedulesToDelete.clear()
                 },
-                onDismiss = { showConfirmDialog.value = false }
+                onDismiss = { homePageStateViewModel.setShowConfirmDialog(false) }
             )
         }
 
-        if (showDatePickerDialog.value) {
+        if (showDatePickerDialog) {
             CalendarPickerDialog(
-                onDismiss = { showDatePickerDialog.value = false },
-                onDateSelected = {date.value = it},
+                onDismiss = { homePageStateViewModel.setShowDatePickerDialog(false) },
+                onDateSelected = { date.value = it },
                 date = date
             )
         }
@@ -383,8 +393,7 @@ fun otherInformation(
 fun topBar(
     modifier: Modifier = Modifier,
     date: MutableState<LocalDate>,
-    showEditMode: MutableState<Boolean>,
-    showDatePickerDialog: MutableState<Boolean>,
+    homePageStateViewModel: HomePageStateViewModel,
     onAddClick: () -> Unit,
     onCloseClick: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -392,9 +401,11 @@ fun topBar(
     viewModel: ScheduleViewModel,
     isCompact: Boolean
 ) {
+    val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
+    val showDatePickerDialog by homePageStateViewModel.showDatePickerDialog.collectAsState()
 
     val animateColor by animateColorAsState(
-        if (showEditMode.value)
+        if (showEditMode)
             MaterialTheme.colorScheme.primaryContainer
         else
             MaterialTheme.colorScheme.background
@@ -420,7 +431,7 @@ fun topBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AnimatedVisibility(
-                visible = showEditMode.value,
+                visible = showEditMode,
                 enter = fadeIn() + expandHorizontally(animationSpec),
             ) {
                 IconButton(
@@ -438,7 +449,7 @@ fun topBar(
             }
 
             AnimatedVisibility(
-                visible = !showEditMode.value,
+                visible = !showEditMode,
             ) {
                 Text(
                     text = "离线模式",
@@ -447,7 +458,7 @@ fun topBar(
             }
 
             AnimatedVisibility(
-                visible = showEditMode.value && !isCompact
+                visible = showEditMode && !isCompact
             ) {
                 Text(
                     text = "已选择${viewModel.schedulesToDelete.size}项日程",
@@ -464,7 +475,7 @@ fun topBar(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
-                    onClick = { showDatePickerDialog.value = !showDatePickerDialog.value },
+                    onClick = { homePageStateViewModel.setShowDatePickerDialog(!showDatePickerDialog) },
                 ) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
@@ -483,7 +494,7 @@ fun topBar(
             }
 
             AnimatedVisibility(
-                visible = showEditMode.value,
+                visible = showEditMode,
                 enter = fadeIn() + expandHorizontally(animationSpec),
             ) {
                 Row(
@@ -511,7 +522,7 @@ fun topBar(
         }
 
         //顶栏标题
-        AnimatedContent(targetState = showEditMode.value && isCompact) {
+        AnimatedContent(targetState = showEditMode && isCompact) {
             if (it) {
                 Text(
                     text = "已选择${viewModel.schedulesToDelete.size}项日程",
@@ -535,13 +546,14 @@ fun topBar(
 
 @Composable
 fun floatingActionBar(
-    showEditMode: MutableState<Boolean>,
+    homePageStateViewModel: HomePageStateViewModel,
     onAddClick: () -> Unit,
     onCloseClick: () -> Unit,
     onCalendarPickerClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onMoveClick: () -> Unit
 ) {
+    val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
     val animationSpec = spring(
         stiffness = Spring.StiffnessMediumLow,
         dampingRatio = 0.65f,
@@ -576,7 +588,7 @@ fun floatingActionBar(
                 )
             }
             AnimatedVisibility(
-                visible = showEditMode.value,
+                visible = showEditMode,
                 enter = fadeIn() + expandHorizontally(animationSpec),
             ) {
                 Row(
@@ -611,8 +623,7 @@ fun floatingActionBar(
             }
         }
     }
-
 }
 
 @Composable
-expect fun EditModeBackHandler(showDeleteTopDocker: MutableState<Boolean>)
+expect fun EditModeBackHandler(showDeleteTopDocker: Boolean, closeEditMode: () -> Unit)

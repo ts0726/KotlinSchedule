@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import kmp.project.schedule.database.Schedule
+import kmp.project.schedule.model.HomePageStateViewModel
 import kmp.project.schedule.model.ScheduleViewModel
 import kmp.project.schedule.ui.home.NewSchedule
 import kmp.project.schedule.ui.home.ScheduleDetail
@@ -45,6 +46,7 @@ fun HomeNavHost(
     scheduleList: List<Schedule>,
     date: MutableState<LocalDate>,
     scheduleViewModel: ScheduleViewModel,
+    homePageStateViewModel: HomePageStateViewModel,
     coroutineScope: CoroutineScope
 ) {
     NavHost(
@@ -91,12 +93,13 @@ fun HomeNavHost(
         composable("home") {
             if (isCompact) {
                 scheduledInformation(
-                    scheduleViewModel,
-                    isCompact,
-                    modifier,
-                    listState,
-                    scheduleList,
-                    date,
+                    scheduleViewModel = scheduleViewModel,
+                    homePageStateViewModel = homePageStateViewModel,
+                    isCompact = isCompact,
+                    modifier = modifier,
+                    listState = listState,
+                    list = scheduleList,
+                    date = date,
                     onScheduleCardClick = { uuid ->
                         navController.navigate("scheduleDetail/$uuid") {
                             //清除栈中的日程详情页面，防止叠加
