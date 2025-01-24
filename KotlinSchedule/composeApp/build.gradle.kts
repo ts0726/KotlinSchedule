@@ -28,6 +28,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.android.driver)
             implementation(libs.koin.androidx.compose)
+            implementation(libs.ktor.client.cio)//平台特定ktor engine
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -43,12 +44,15 @@ kotlin {
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.7.0-alpha07")
             implementation(libs.okio)
             implementation(libs.reorderable)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.logging)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.sqlite.driver)
             implementation(libs.koin.core)
+            implementation(libs.ktor.client.cio)//平台特定ktor engine
         }
     }
 }
