@@ -1,4 +1,4 @@
-package kmp.project.schedule.model
+package kmp.project.schedule.viewModel
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

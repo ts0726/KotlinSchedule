@@ -15,8 +15,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.model.HomePageStateViewModel
-import kmp.project.schedule.model.ScheduleViewModel
+import kmp.project.schedule.viewModel.HomePageStateViewModel
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.home.NewSchedule
 import kmp.project.schedule.ui.home.ScheduleDetail
 import kmp.project.schedule.ui.home.otherInformation

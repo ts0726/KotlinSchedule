@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.model.ScheduleViewModel
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getDaysFromToday

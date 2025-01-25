@@ -3,11 +3,16 @@ package kmp.project.schedule
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.db.Database
 import kmp.project.schedule.db.DatabaseDriverFactory
+import kmp.project.schedule.db.SettingsFactory
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
+class ScheduleSDK(
+    databaseDriverFactory: DatabaseDriverFactory,
+    settingsFactory: SettingsFactory
+) {
     private val database = Database(databaseDriverFactory)
+    private val settings = settingsFactory.createSettings()
 
     @OptIn(ExperimentalUuidApi::class)
     @Throws(Exception::class)
@@ -63,13 +68,24 @@ class ScheduleSDK(databaseDriverFactory: DatabaseDriverFactory) {
         return database.countSchedulesByDate(date).toInt()
     }
 
+    fun saveToken(key: String, token: String) {
+        settings.putString(key, token)
+    }
+
+    fun getToken(key: String): String? {
+        return settings.getStringOrNull(key)
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: ScheduleSDK? = null
 
-        fun getInstance(databaseDriverFactory: DatabaseDriverFactory): ScheduleSDK {
+        fun getInstance(
+            databaseDriverFactory: DatabaseDriverFactory,
+            settingsFactory: SettingsFactory
+        ): ScheduleSDK {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: ScheduleSDK(databaseDriverFactory).also { INSTANCE = it }
+                INSTANCE ?: ScheduleSDK(databaseDriverFactory, settingsFactory).also { INSTANCE = it }
             }
         }
     }

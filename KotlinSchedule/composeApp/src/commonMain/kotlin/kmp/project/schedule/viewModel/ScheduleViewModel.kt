@@ -1,4 +1,4 @@
-package kmp.project.schedule.model
+package kmp.project.schedule.viewModel
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf

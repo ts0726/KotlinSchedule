@@ -48,7 +48,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kmp.project.schedule.model.ScheduleViewModel
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.util.convertLocalDateToDate
 import kmp.project.schedule.util.getOptions

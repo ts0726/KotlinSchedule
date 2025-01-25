@@ -56,8 +56,8 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.model.HomePageStateViewModel
-import kmp.project.schedule.model.ScheduleViewModel
+import kmp.project.schedule.viewModel.HomePageStateViewModel
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog

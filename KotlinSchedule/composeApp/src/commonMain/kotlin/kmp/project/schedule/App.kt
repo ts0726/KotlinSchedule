@@ -49,8 +49,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kmp.project.schedule.model.HomePageStateViewModel
-import kmp.project.schedule.model.ScheduleViewModel
+import kmp.project.schedule.viewModel.HomePageStateViewModel
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.auth.LoginPage
 import kmp.project.schedule.ui.home.mainPage
@@ -83,6 +83,7 @@ fun App() {
             coroutineScope = coroutineScope,
             pageID = pageID,
             date = date,
+            sdk = sdk
         )
     }
 
@@ -104,6 +105,7 @@ fun CustomScaffold(
     coroutineScope: CoroutineScope,
     pageID: MutableIntState,
     date: MutableState<LocalDate>,
+    sdk: ScheduleSDK
 ) {
     Row (
         Modifier
@@ -133,7 +135,7 @@ fun CustomScaffold(
                                 date = date,
                                 coroutineScope = coroutineScope
                             )
-                            1 -> TestPage1(onButtonClick = {})
+                            1 -> TestPage1(onButtonClick = {}, sdk = sdk)
                             2 -> LoginPage {  }
                         }
                     },
