@@ -20,3 +20,11 @@ data class LoginEntity(
     @SerialName("password")
     val password: String
 )
+
+@Serializable
+data class TokenEntity(
+    @SerialName("access_token")
+    val accessToken: String,
+    @SerialName("refresh_token")
+    val refreshToken: String
+)
