@@ -49,12 +49,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kmp.project.schedule.ui.TestPage1
+import kmp.project.schedule.ui.home.mainPage
+import kmp.project.schedule.ui.my.myPage
+import kmp.project.schedule.ui.userImage
+import kmp.project.schedule.viewModel.AuthViewModel
 import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
-import kmp.project.schedule.ui.TestPage1
-import kmp.project.schedule.ui.auth.LoginPage
-import kmp.project.schedule.ui.home.mainPage
-import kmp.project.schedule.ui.userImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -68,6 +69,7 @@ fun App() {
     val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
     val sdk = getScheduleSDK()
     val scheduleViewModel: ScheduleViewModel = viewModel { ScheduleViewModel(sdk) }
+    val authViewModel: AuthViewModel = viewModel { AuthViewModel(sdk) }
     val homePageStateViewModel: HomePageStateViewModel = viewModel()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -77,6 +79,7 @@ fun App() {
     customTheme {
         CustomScaffold(
             scheduleViewModel = scheduleViewModel,
+            authViewModel = authViewModel,
             homePageStateViewModel = homePageStateViewModel,
             isCompact = isCompact,
             listState = listState,
@@ -99,6 +102,7 @@ fun App() {
 @Composable
 fun CustomScaffold(
     scheduleViewModel: ScheduleViewModel,
+    authViewModel: AuthViewModel,
     homePageStateViewModel: HomePageStateViewModel,
     isCompact: Boolean,
     listState: LazyListState,
@@ -136,7 +140,7 @@ fun CustomScaffold(
                                 coroutineScope = coroutineScope
                             )
                             1 -> TestPage1(onButtonClick = {}, sdk = sdk)
-                            2 -> LoginPage {  }
+                            2 -> myPage(sdk, authViewModel = authViewModel)
                         }
                     },
                     padding = innerPadding

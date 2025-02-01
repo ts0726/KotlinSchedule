@@ -83,23 +83,6 @@ fun scheduleCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             scheduleCard_Content(schedule.title, schedule.content!!)
-//            IconButton(
-//                modifier = with(scope) {
-//                    modifier
-//                        .longPressDraggableHandle(
-//                            onDragStarted = {
-//                                haptic.performHapticFeedback(ReorderHapticFeedbackType.START)
-//                            },
-//                            onDragStopped = {
-//                                haptic.performHapticFeedback(ReorderHapticFeedbackType.END)
-//                            },
-//                        )
-//                        .size(20.dp)
-//                },
-//                onClick = {}
-//            ) {
-//                Icon(Icons.Default.Menu, contentDescription = "Reorder")
-//            }
         }
     }
 }

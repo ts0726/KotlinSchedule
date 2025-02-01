@@ -68,12 +68,16 @@ class ScheduleSDK(
         return database.countSchedulesByDate(date).toInt()
     }
 
-    fun saveToken(key: String, token: String) {
+    fun addSetting(key: String, token: String) {
         settings.putString(key, token)
     }
 
-    fun getToken(key: String): String? {
+    fun getSetting(key: String): String? {
         return settings.getStringOrNull(key)
+    }
+
+    fun removeSetting(key: String) {
+        settings.remove(key)
     }
 
     companion object {

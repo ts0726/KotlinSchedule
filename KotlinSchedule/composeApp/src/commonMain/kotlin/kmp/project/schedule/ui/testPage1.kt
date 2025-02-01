@@ -11,12 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import kmp.project.schedule.ScheduleSDK
-import kmp.project.schedule.net.ScheduleApi
+import kmp.project.schedule.entity.RegisterEntity
+import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.util.LunarUtil
+import kmp.project.schedule.util.SettingsName
+import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.*
 
 
@@ -31,6 +35,39 @@ fun TestPage1(
     val lunar = LunarUtil(today).getChineseLunarDay()
     val receivedData = remember { mutableStateOf("") }
     val token = remember { mutableStateOf("") }
+    val authViewModel = AuthViewModel(sdk)
+
+    authViewModel.tokenState
+        .onEach { result ->
+            when(result) {
+                is ApiResult.Success -> {
+                    println("success")
+                    sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.data.accessToken)
+                }
+                is ApiResult.Error -> {
+                    sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.status.toString())
+                }
+                null -> {
+
+                }
+            }
+        }
+        .launchIn(CoroutineScope(Dispatchers.IO))
+    authViewModel.registerState
+        .onEach { result ->
+            when(result) {
+                is ApiResult.Success -> {
+                    println("注册成功")
+                }
+                is ApiResult.Error -> {
+                    sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.message!!)
+                }
+                null -> {
+
+                }
+            }
+        }
+        .launchIn(CoroutineScope(Dispatchers.IO))
     Column {
 //        Text(text = convertLocalDateToDate(time.value))
         Text(text = "农历${lunar}")
@@ -56,17 +93,17 @@ fun TestPage1(
         }
 
         Button(onClick = {
-            CoroutineScope(Dispatchers.IO).launch {
-                receivedData.value = ScheduleApi.getAllSchedules("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvc2NoZWR1bGVzIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwibmFtZSI6InRlc3QiLCJleHAiOjE3Mzc3Nzg4NDF9.7_ifo7wwwfG9H8XKaD9btmAqU-HaT90UOdFIaGsAges")
-                    .toString()
-            }
+            println("test")
+//            authViewModel.login(LoginEntity("test", "tt111"))
+            authViewModel.register(RegisterEntity("test", "tt11", "kt"))
+//                .launchIn(Dispatchers.IO)
         }) {
             Text("发送测试")
         }
 
         Button(
             onClick = {
-                sdk.saveToken("access-token", "test token")
+                sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), "test token")
             }
         ) {
             Text("save token")
@@ -74,7 +111,7 @@ fun TestPage1(
 
         Button(
             onClick = {
-                token.value = sdk.getToken("access-token").toString()
+                token.value = sdk.getSetting(SettingsName.ACCESS_TOKEN.toString()).toString()
             }
         ) {
             Text("get token")

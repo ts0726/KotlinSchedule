@@ -1,4 +1,4 @@
-package kmp.project.schedule.ui.auth
+package kmp.project.schedule.ui.my
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,16 +32,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kmp.project.schedule.entity.LoginEntity
 import kmp.project.schedule.ui.userImage
 import kotlinschedule.composeapp.generated.resources.Res
 import kotlinschedule.composeapp.generated.resources.mdieye
 import kotlinschedule.composeapp.generated.resources.mdieyeoff
 import org.jetbrains.compose.resources.painterResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginPage(
-    onLoginClick: () -> Unit
+    onLoginClick: (LoginEntity) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -107,7 +106,7 @@ fun LoginPage(
         )
 
         Button(
-            onClick = onLoginClick,
+            onClick = { onLoginClick(LoginEntity(username, password)) },
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .width(300.dp)

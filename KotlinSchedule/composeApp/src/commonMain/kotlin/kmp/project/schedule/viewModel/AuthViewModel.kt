@@ -41,4 +41,8 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
     }
 
+    fun resetTokenState() {
+        _tokenState.value = null
+    }
+
 }
