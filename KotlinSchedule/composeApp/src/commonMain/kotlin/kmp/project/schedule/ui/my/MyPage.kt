@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,9 +56,7 @@ fun myPage(
                 sdk.addSetting(SettingsName.REFRESH_TOKEN.toString(), result.data.refreshToken)
                 sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.data.accessToken)
                 withContext(Dispatchers.Main) {
-                    navHostController.navigate("my") {
-                        popUpTo("login") { inclusive = true }
-                    }
+                    navHostController.navigateUp()
                 }
                 authViewModel.resetTokenState()
             }
@@ -80,14 +77,13 @@ fun myPage(
 @Composable
 fun myPageContent(
     hello: String,
-    onLoginClick: () -> Unit,
-    onLogOutClick: () -> Unit,
-    onSettingClicked: () -> Unit
+    onSettingClicked: () -> Unit,
+    onAccountClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 16.dp, top = 30.dp)
+            .padding(start = 16.dp, top = 60.dp)
     ) {
         Column(
             modifier = Modifier
@@ -118,24 +114,12 @@ fun myPageContent(
                 myCard(
                     icon = Icons.Filled.AccountCircle,
                     title = "账号管理",
-                    myCardClicked = onSettingClicked
+                    myCardClicked = onAccountClicked
                 )
             }
         }
 
         Spacer(modifier = Modifier.weight(1f))
-
-        Button(
-            onClick = onLogOutClick
-        ) {
-            Text("退出登录")
-        }
-
-        Button(
-            onClick = onLoginClick
-        ) {
-            Text("登录")
-        }
 
         Text(
             text = "版本：0.0.1 alpha",

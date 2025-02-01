@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -41,16 +42,29 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun LoginPage(
-    onLoginClick: (LoginEntity) -> Unit
+    onLoginClick: (LoginEntity) -> Unit,
+    onBackClicked: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var showPassword by remember { mutableStateOf(false) }
+
+        IconButton(
+            onClick = onBackClicked,
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "返回"
+            )
+        }
 
         Spacer(modifier = Modifier.weight(1f))
         userImage("test", 100.dp)

@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.ui.my.LoginPage
+import kmp.project.schedule.ui.my.accountPage
 import kmp.project.schedule.ui.my.myPageContent
 import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.util.getUsernameFromToken
@@ -73,18 +74,28 @@ fun MyNavHost(
                 hello = sayHello() + "，" + getUsernameFromToken(token)
             myPageContent(
                 hello,
-                onLoginClick = {navController.navigate("login")},
-                onLogOutClick = {
-                    sdk.removeSetting(SettingsName.ACCESS_TOKEN.toString())
-                    sdk.removeSetting(SettingsName.REFRESH_TOKEN.toString())
-                },
-                onSettingClicked = {}
+                onSettingClicked = {},
+                onAccountClicked = { navController.navigate("account") }
             )
         }
         composable("login") {
-            LoginPage(onLoginClick = { loginEntity ->
-                authViewModel.login(loginEntity)
-            })
+            LoginPage(
+                onLoginClick = { loginEntity ->
+                    authViewModel.login(loginEntity)
+                },
+                onBackClicked = { navController.navigateUp() }
+            )
+        }
+        composable("account") {
+            val token = sdk.getSetting(SettingsName.REFRESH_TOKEN.toString())
+            var username = "未登录"
+            if (token != null)
+                username = getUsernameFromToken(token).toString()
+            accountPage(
+                onBackClicked = { navController.navigateUp() },
+                username = username,
+                onSwitchAccountClicked = { navController.navigate("login") }
+            )
         }
     }
 }
