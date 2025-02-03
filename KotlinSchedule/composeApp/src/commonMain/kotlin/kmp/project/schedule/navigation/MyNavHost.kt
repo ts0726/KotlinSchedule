@@ -75,7 +75,12 @@ fun MyNavHost(
             myPageContent(
                 hello,
                 onSettingClicked = {},
-                onAccountClicked = { navController.navigate("account") }
+                onAccountClicked = {
+                    if (token != null)
+                        navController.navigate("account")
+                    else
+                        navController.navigate("login")
+                }
             )
         }
         composable("login") {
@@ -94,7 +99,12 @@ fun MyNavHost(
             accountPage(
                 onBackClicked = { navController.navigateUp() },
                 username = username,
-                onSwitchAccountClicked = { navController.navigate("login") }
+                onSwitchAccountClicked = { navController.navigate("login") },
+                onLogoutClicked = {
+                    sdk.removeSetting(SettingsName.ACCESS_TOKEN.toString())
+                    sdk.removeSetting(SettingsName.REFRESH_TOKEN.toString())
+                    navController.navigateUp()
+                }
             )
         }
     }

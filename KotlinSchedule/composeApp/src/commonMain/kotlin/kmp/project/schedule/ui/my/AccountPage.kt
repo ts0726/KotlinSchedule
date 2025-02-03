@@ -29,7 +29,8 @@ import androidx.compose.ui.unit.dp
 fun accountPage(
     onBackClicked: () -> Unit,
     username: String,
-    onSwitchAccountClicked: () -> Unit
+    onSwitchAccountClicked: () -> Unit,
+    onLogoutClicked: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
@@ -56,7 +57,12 @@ fun accountPage(
             )
         }
     ) {innerPadding ->
-        accountSettings(innerPadding, username, onSwitchAccountClicked)
+        accountSettings(
+            innerPadding = innerPadding,
+            username = username,
+            onSwitchAccountClicked = onSwitchAccountClicked,
+            onLogoutClicked = onLogoutClicked
+        )
     }
 }
 
@@ -65,7 +71,8 @@ fun accountPage(
 fun accountSettings(
     innerPadding: PaddingValues,
     username: String,
-    onSwitchAccountClicked: () -> Unit
+    onSwitchAccountClicked: () -> Unit,
+    onLogoutClicked: () -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.padding(innerPadding)
@@ -97,7 +104,12 @@ fun accountSettings(
             }
         }
         item {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .combinedClickable(
+                        onClick = onLogoutClicked
+                    )
+            ) {
                 Text(
                     text = "退出登录",
                     modifier = Modifier.padding(16.dp)
