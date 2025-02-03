@@ -55,6 +55,7 @@ fun myPage(
             is ApiResult.Success -> {
                 sdk.addSetting(SettingsName.REFRESH_TOKEN.toString(), result.data.refreshToken)
                 sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.data.accessToken)
+                sdk.addSetting(SettingsName.NICKNAME.toString(), result.data.nickname)
                 withContext(Dispatchers.Main) {
                     navHostController.navigateUp()
                 }

@@ -71,7 +71,7 @@ fun MyNavHost(
             var hello by mutableStateOf("未登录")
             val token = sdk.getSetting(SettingsName.REFRESH_TOKEN.toString())
             if (token != null)
-                hello = sayHello() + "，" + getUsernameFromToken(token)
+                hello = sayHello() + "，" + sdk.getSetting(SettingsName.NICKNAME.toString())
             myPageContent(
                 hello,
                 onSettingClicked = {},
@@ -94,11 +94,15 @@ fun MyNavHost(
         composable("account") {
             val token = sdk.getSetting(SettingsName.REFRESH_TOKEN.toString())
             var username = "未登录"
-            if (token != null)
+            var nickname = "未登录"
+            if (token != null) {
                 username = getUsernameFromToken(token).toString()
+                nickname = sdk.getSetting(SettingsName.NICKNAME.toString())!!
+            }
             accountPage(
                 onBackClicked = { navController.navigateUp() },
                 username = username,
+                nickname = nickname,
                 onSwitchAccountClicked = { navController.navigate("login") },
                 onLogoutClicked = {
                     sdk.removeSetting(SettingsName.ACCESS_TOKEN.toString())

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 fun accountPage(
     onBackClicked: () -> Unit,
     username: String,
+    nickname: String,
     onSwitchAccountClicked: () -> Unit,
     onLogoutClicked: () -> Unit
 ) {
@@ -60,6 +61,7 @@ fun accountPage(
         accountSettings(
             innerPadding = innerPadding,
             username = username,
+            nickname = nickname,
             onSwitchAccountClicked = onSwitchAccountClicked,
             onLogoutClicked = onLogoutClicked
         )
@@ -71,6 +73,7 @@ fun accountPage(
 fun accountSettings(
     innerPadding: PaddingValues,
     username: String,
+    nickname: String,
     onSwitchAccountClicked: () -> Unit,
     onLogoutClicked: () -> Unit
 ) {
@@ -86,6 +89,19 @@ fun accountSettings(
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = username,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+        item {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "昵称",
+                    modifier = Modifier.padding(16.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = nickname,
                     modifier = Modifier.padding(16.dp)
                 )
             }

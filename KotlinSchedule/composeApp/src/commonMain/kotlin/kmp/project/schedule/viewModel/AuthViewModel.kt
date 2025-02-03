@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kmp.project.schedule.entity.LoginEntity
 import kmp.project.schedule.entity.RegisterEntity
-import kmp.project.schedule.entity.TokenEntity
+import kmp.project.schedule.entity.AuthEntity
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.net.authApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
-    private val _tokenState = MutableStateFlow<ApiResult<TokenEntity>?>(null)
-    val tokenState: StateFlow<ApiResult<TokenEntity>?> = _tokenState.asStateFlow()
+    private val _tokenState = MutableStateFlow<ApiResult<AuthEntity>?>(null)
+    val tokenState: StateFlow<ApiResult<AuthEntity>?> = _tokenState.asStateFlow()
 
     private val _registerState = MutableStateFlow<ApiResult<Unit>?>(null)
     val registerState: StateFlow<ApiResult<Unit>?> = _registerState.asStateFlow()

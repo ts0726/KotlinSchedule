@@ -10,14 +10,14 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import kmp.project.schedule.entity.LoginEntity
 import kmp.project.schedule.entity.RegisterEntity
-import kmp.project.schedule.entity.TokenEntity
+import kmp.project.schedule.entity.AuthEntity
 import java.net.ConnectException
 
 class AuthApi(
     private val client: HttpClient,
     private val baseUrl: String
 ) {
-    suspend fun login(loginEntity: LoginEntity): ApiResult<TokenEntity> {
+    suspend fun login(loginEntity: LoginEntity): ApiResult<AuthEntity> {
         return executeRequest {
             val response = client.post("$baseUrl/auth/login") {
                 contentType(ContentType.Application.Json)
@@ -45,7 +45,7 @@ class AuthApi(
         }
     }
 
-    suspend fun refresh(refreshToken: String): ApiResult<TokenEntity> {
+    suspend fun refresh(refreshToken: String): ApiResult<AuthEntity> {
         return executeRequest {
             val response = client.post("$baseUrl/refresh") {
                 headers { append(HttpHeaders.Authorization, "Bearer $refreshToken") }
