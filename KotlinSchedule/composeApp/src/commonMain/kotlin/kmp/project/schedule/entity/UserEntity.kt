@@ -30,3 +30,9 @@ data class AuthEntity(
     @SerialName("nickname")
     val nickname: String
 )
+
+@Serializable
+data class NicknameRequest(
+    @SerialName("nickname")
+    val nickname: String
+)

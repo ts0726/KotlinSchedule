@@ -56,6 +56,7 @@ fun myPage(
                 sdk.addSetting(SettingsName.REFRESH_TOKEN.toString(), result.data.refreshToken)
                 sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.data.accessToken)
                 sdk.addSetting(SettingsName.NICKNAME.toString(), result.data.nickname)
+                authViewModel.resetNickname()   //每次登录手动更新一下nickname，不然在账号管理界面中昵称会不更新
                 withContext(Dispatchers.Main) {
                     navHostController.navigateUp()
                 }

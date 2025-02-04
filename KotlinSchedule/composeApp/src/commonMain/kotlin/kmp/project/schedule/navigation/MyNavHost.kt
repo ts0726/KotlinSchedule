@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import kmp.project.schedule.ScheduleSDK
+import kmp.project.schedule.entity.NicknameRequest
 import kmp.project.schedule.ui.my.LoginPage
 import kmp.project.schedule.ui.my.accountPage
 import kmp.project.schedule.ui.my.myPageContent
@@ -92,12 +94,11 @@ fun MyNavHost(
             )
         }
         composable("account") {
-            val token = sdk.getSetting(SettingsName.REFRESH_TOKEN.toString())
+            val token = sdk.getSetting(SettingsName.ACCESS_TOKEN.toString())
             var username = "未登录"
-            var nickname = "未登录"
+            val nickname by authViewModel.nicknameState.collectAsState()
             if (token != null) {
                 username = getUsernameFromToken(token).toString()
-                nickname = sdk.getSetting(SettingsName.NICKNAME.toString())!!
             }
             accountPage(
                 onBackClicked = { navController.navigateUp() },
@@ -107,7 +108,14 @@ fun MyNavHost(
                 onLogoutClicked = {
                     sdk.removeSetting(SettingsName.ACCESS_TOKEN.toString())
                     sdk.removeSetting(SettingsName.REFRESH_TOKEN.toString())
+                    sdk.removeSetting(SettingsName.NICKNAME.toString())
                     navController.navigateUp()
+                },
+                onUpdateNickname = {changedNickname ->
+                    val request = NicknameRequest(nickname = changedNickname)
+                    if (token != null) {
+                        authViewModel.updateNickname(nicknameRequest = request, token = token)
+                    }
                 }
             )
         }

@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import kmp.project.schedule.entity.LoginEntity
 import kmp.project.schedule.entity.RegisterEntity
 import kmp.project.schedule.entity.AuthEntity
+import kmp.project.schedule.entity.NicknameRequest
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.net.authApi
+import kmp.project.schedule.util.SettingsName
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,10 +22,19 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     private val _registerState = MutableStateFlow<ApiResult<Unit>?>(null)
     val registerState: StateFlow<ApiResult<Unit>?> = _registerState.asStateFlow()
 
+    private val _nicknameState = MutableStateFlow(
+        sdk.getSetting(SettingsName.NICKNAME.toString()) ?: "未登录"
+    )
+    val nicknameState: StateFlow<String> = _nicknameState.asStateFlow()
+
     fun login(loginEntity: LoginEntity) {
         viewModelScope.launch {
             val result = authApi.login(loginEntity)
             _tokenState.value = result
+            if (result is ApiResult.Success) {
+                val nickname = sdk.getSetting(SettingsName.NICKNAME.toString()) ?: "未登录"
+                _nicknameState.value = nickname
+            }
         }
     }
 
@@ -41,8 +52,24 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
     }
 
+    fun updateNickname(nicknameRequest: NicknameRequest, token: String) {
+        viewModelScope.launch {
+            val result = authApi.updateNickname(nicknameRequest, token)
+            if (result is ApiResult.Success) {
+                sdk.addSetting(SettingsName.NICKNAME.toString(), nicknameRequest.nickname)
+                _nicknameState.value = nicknameRequest.nickname
+            }
+        }
+    }
+
+
     fun resetTokenState() {
         _tokenState.value = null
+    }
+
+    fun resetNickname() {
+        val nickname = sdk.getSetting(SettingsName.NICKNAME.toString()) ?: "未登录"
+        _nicknameState.value = nickname
     }
 
 }

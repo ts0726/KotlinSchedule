@@ -11,6 +11,7 @@ import io.ktor.http.contentType
 import kmp.project.schedule.entity.LoginEntity
 import kmp.project.schedule.entity.RegisterEntity
 import kmp.project.schedule.entity.AuthEntity
+import kmp.project.schedule.entity.NicknameRequest
 import java.net.ConnectException
 
 class AuthApi(
@@ -53,6 +54,21 @@ class AuthApi(
             when (response.status.value) {
                 200 -> ApiResult.Success(response.body())
                 401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "登录过期，请重新登陆")
+                else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
+            }
+        }
+    }
+
+    suspend fun updateNickname(nicknameRequest: NicknameRequest, token: String): ApiResult<Unit> {
+        return executeRequest {
+            val response = client.post("$baseUrl/auth/updateNickname") {
+                contentType(ContentType.Application.Json)
+                headers { append(HttpHeaders.Authorization, "Bearer $token") }
+                setBody(nicknameRequest)
+            }
+            println(response.toString())
+            when (response.status.value) {
+                200 -> ApiResult.Success(response.body())
                 else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
             }
         }
