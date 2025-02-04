@@ -30,6 +30,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -75,6 +77,7 @@ fun App() {
     val coroutineScope = rememberCoroutineScope()
     val pageID = remember { mutableIntStateOf(0) }
     val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     customTheme {
         CustomScaffold(
@@ -83,6 +86,7 @@ fun App() {
             homePageStateViewModel = homePageStateViewModel,
             isCompact = isCompact,
             listState = listState,
+            snackbarHostState = snackbarHostState,
             coroutineScope = coroutineScope,
             pageID = pageID,
             date = date,
@@ -106,6 +110,7 @@ fun CustomScaffold(
     homePageStateViewModel: HomePageStateViewModel,
     isCompact: Boolean,
     listState: LazyListState,
+    snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
     pageID: MutableIntState,
     date: MutableState<LocalDate>,
@@ -127,6 +132,9 @@ fun CustomScaffold(
                     bottomNavBar(pageID)
                 }
             },
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            },
             content = { innerPadding ->
                 contentContainer(
                     content = {
@@ -140,7 +148,12 @@ fun CustomScaffold(
                                 coroutineScope = coroutineScope
                             )
                             1 -> TestPage1(onButtonClick = {}, sdk = sdk)
-                            2 -> myPage(sdk, authViewModel = authViewModel)
+                            2 -> myPage(
+                                sdk = sdk,
+                                authViewModel = authViewModel,
+                                snackbarHostState = snackbarHostState,
+                                coroutineScope = coroutineScope
+                            )
                         }
                     },
                     padding = innerPadding

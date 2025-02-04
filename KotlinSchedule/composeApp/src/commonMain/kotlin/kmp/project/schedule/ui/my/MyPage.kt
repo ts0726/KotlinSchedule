@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,17 +37,22 @@ import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.navigation.MyNavHost
 import kmp.project.schedule.net.ApiResult
+import kmp.project.schedule.net.toResultString
 import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.viewModel.AuthViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
 fun myPage(
     sdk: ScheduleSDK,
     navHostController: NavHostController = rememberNavController(),
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope
 ) {
     val tokenState by authViewModel.tokenState.collectAsState()
 
@@ -57,13 +63,22 @@ fun myPage(
                 sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.data.accessToken)
                 sdk.addSetting(SettingsName.NICKNAME.toString(), result.data.nickname)
                 authViewModel.resetNickname()   //每次登录手动更新一下nickname，不然在账号管理界面中昵称会不更新
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(message = "登录成功", withDismissAction = true)
+                }
                 withContext(Dispatchers.Main) {
                     navHostController.navigateUp()
                 }
-                authViewModel.resetTokenState()
+                authViewModel.resetTokenState() //刷新登录状态
             }
             is ApiResult.Error -> {
-                sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.status.toString())
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "登录失败：${result.status.toResultString()}",
+                        withDismissAction = true
+                    )
+                }
+                authViewModel.resetTokenState() //刷新登录状态
             }
             null -> {}
         }
