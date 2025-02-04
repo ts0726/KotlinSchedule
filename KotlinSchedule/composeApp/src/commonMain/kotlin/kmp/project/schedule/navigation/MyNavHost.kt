@@ -5,6 +5,7 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,12 +23,16 @@ import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.util.getUsernameFromToken
 import kmp.project.schedule.util.sayHello
 import kmp.project.schedule.viewModel.AuthViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun MyNavHost(
     navController: NavHostController,
     sdk: ScheduleSDK,
     authViewModel: AuthViewModel,
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope
 ) {
     NavHost(
         navController = navController,
@@ -114,7 +119,18 @@ fun MyNavHost(
                 onUpdateNickname = {changedNickname ->
                     val request = NicknameRequest(nickname = changedNickname)
                     if (token != null) {
-                        authViewModel.updateNickname(nicknameRequest = request, token = token)
+                        authViewModel.updateNickname(
+                            nicknameRequest = request,
+                            token = token,
+                            showSnackBar = { message ->
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = message,
+                                        withDismissAction = true
+                                    )
+                                }
+                            }
+                        )
                     }
                 }
             )

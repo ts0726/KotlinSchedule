@@ -52,12 +52,19 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
     }
 
-    fun updateNickname(nicknameRequest: NicknameRequest, token: String) {
+    fun updateNickname(
+        nicknameRequest: NicknameRequest,
+        token: String,
+        showSnackBar: (String) -> Unit
+    ) {
         viewModelScope.launch {
             val result = authApi.updateNickname(nicknameRequest, token)
             if (result is ApiResult.Success) {
                 sdk.addSetting(SettingsName.NICKNAME.toString(), nicknameRequest.nickname)
                 _nicknameState.value = nicknameRequest.nickname
+                showSnackBar("昵称修改成功")
+            } else if (result is ApiResult.Error) {
+                showSnackBar("昵称修改失败：${result.message}")
             }
         }
     }

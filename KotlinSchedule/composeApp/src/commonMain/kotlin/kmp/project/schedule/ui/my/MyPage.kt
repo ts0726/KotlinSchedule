@@ -37,7 +37,6 @@ import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.navigation.MyNavHost
 import kmp.project.schedule.net.ApiResult
-import kmp.project.schedule.net.toResultString
 import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.viewModel.AuthViewModel
@@ -74,7 +73,7 @@ fun myPage(
             is ApiResult.Error -> {
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(
-                        message = "登录失败：${result.status.toResultString()}",
+                        message = "登录失败：${result.message}",
                         withDismissAction = true
                     )
                 }
@@ -88,6 +87,8 @@ fun myPage(
         navController = navHostController,
         sdk = sdk,
         authViewModel = authViewModel,
+        snackbarHostState = snackbarHostState,
+        coroutineScope = coroutineScope
     )
 }
 

@@ -26,7 +26,7 @@ class AuthApi(
             }
             when (response.status.value) {
                 200 -> ApiResult.Success(response.body())
-                401 -> ApiResult.Error(NetStatus.INVALID_USER, "用户名已存在")
+                401 -> ApiResult.Error(NetStatus.INVALID_USER, "用户名或密码错误")
                 else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
             }
         }
@@ -69,6 +69,7 @@ class AuthApi(
             println(response.toString())
             when (response.status.value) {
                 200 -> ApiResult.Success(response.body())
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未经授权的访问或token已过期")
                 else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
             }
         }
