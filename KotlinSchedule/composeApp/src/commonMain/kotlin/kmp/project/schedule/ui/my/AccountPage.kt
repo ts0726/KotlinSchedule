@@ -190,15 +190,24 @@ fun editNicknameDialog(
                 Text(
                     text = "编辑昵称",
                     fontSize = 20.sp,
-//                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 10.dp, top = 20.dp, bottom = 20.dp)
+                    modifier = Modifier.padding(start = 5.dp, top = 20.dp, bottom = 20.dp)
                 )
                 OutlinedTextField(
                     value = tempNickname,
-                    onValueChange = { tempNickname = it },
+                    onValueChange = {
+                        tempNickname = it.substring(0, it.length.coerceAtMost(15))
+                     },
+                    maxLines = 1,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp)
+                        .padding(bottom = 20.dp),
+                    supportingText = {
+                        Text(
+                            text = "${15 - tempNickname.length}",
+                            color = if (tempNickname.length >= 15) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 )
 
                 Row(

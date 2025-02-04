@@ -85,7 +85,7 @@ fun myPageContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 16.dp, top = 60.dp)
+            .padding(start = 16.dp, top = 60.dp, end = 16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -97,7 +97,8 @@ fun myPageContent(
                 text = hello,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(top = 30.dp)
+                modifier = Modifier.padding(top = 30.dp),
+                lineHeight = 40.sp
             )
         }
 
@@ -142,7 +143,7 @@ fun myCard(
 ) {
     Box(
         modifier = modifier.fillMaxWidth()
-            .padding(top = 5.dp, bottom = 5.dp, end = 15.dp)
+            .padding(top = 5.dp, bottom = 5.dp)
             .clip(RoundedCornerShape(16.dp))
             .combinedClickable(
                 onClick = myCardClicked
