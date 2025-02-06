@@ -66,7 +66,6 @@ class AuthApi(
                 headers { append(HttpHeaders.Authorization, "Bearer $token") }
                 setBody(nicknameRequest)
             }
-            println(response.toString())
             when (response.status.value) {
                 200 -> ApiResult.Success(response.body())
                 401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未经授权的访问或token已过期")

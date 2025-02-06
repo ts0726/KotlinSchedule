@@ -14,12 +14,10 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.entity.NicknameRequest
 import kmp.project.schedule.ui.my.LoginPage
 import kmp.project.schedule.ui.my.accountPage
 import kmp.project.schedule.ui.my.myPageContent
-import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.util.getUsernameFromToken
 import kmp.project.schedule.util.sayHello
 import kmp.project.schedule.viewModel.AuthViewModel
@@ -29,7 +27,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun MyNavHost(
     navController: NavHostController,
-    sdk: ScheduleSDK,
     authViewModel: AuthViewModel,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope
@@ -76,9 +73,9 @@ fun MyNavHost(
     ) {
         composable("my") {
             var hello by mutableStateOf("未登录")
-            val token = sdk.getSetting(SettingsName.REFRESH_TOKEN.toString())
+            val token = authViewModel.getRefreshToken()
             if (token != null)
-                hello = sayHello() + "，" + sdk.getSetting(SettingsName.NICKNAME.toString())
+                hello = sayHello() + "，" + authViewModel.getNickname()
             myPageContent(
                 hello,
                 onSettingClicked = {},
@@ -99,7 +96,7 @@ fun MyNavHost(
             )
         }
         composable("account") {
-            val token = sdk.getSetting(SettingsName.ACCESS_TOKEN.toString())
+            val token = authViewModel.getAccessToken()
             var username = "未登录"
             val nickname by authViewModel.nicknameState.collectAsState()
             if (token != null) {
@@ -111,9 +108,8 @@ fun MyNavHost(
                 nickname = nickname,
                 onSwitchAccountClicked = { navController.navigate("login") },
                 onLogoutClicked = {
-                    sdk.removeSetting(SettingsName.ACCESS_TOKEN.toString())
-                    sdk.removeSetting(SettingsName.REFRESH_TOKEN.toString())
-                    sdk.removeSetting(SettingsName.NICKNAME.toString())
+                    authViewModel.clearTokens()
+                    authViewModel.clearNickname()
                     navController.navigateUp()
                 },
                 onUpdateNickname = {changedNickname ->

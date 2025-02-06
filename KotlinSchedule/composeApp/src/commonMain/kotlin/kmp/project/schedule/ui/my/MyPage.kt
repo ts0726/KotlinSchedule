@@ -34,11 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.navigation.MyNavHost
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.ui.userImage
-import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +45,6 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun myPage(
-    sdk: ScheduleSDK,
     navHostController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel,
     snackbarHostState: SnackbarHostState,
@@ -58,9 +55,8 @@ fun myPage(
     LaunchedEffect(tokenState) {
         when (val result = tokenState) {
             is ApiResult.Success -> {
-                sdk.addSetting(SettingsName.REFRESH_TOKEN.toString(), result.data.refreshToken)
-                sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.data.accessToken)
-                sdk.addSetting(SettingsName.NICKNAME.toString(), result.data.nickname)
+                authViewModel.updateTokens(result.data.accessToken, result.data.refreshToken)
+                authViewModel.updateNickname(result.data.nickname)
                 authViewModel.resetNickname()   //每次登录手动更新一下nickname，不然在账号管理界面中昵称会不更新
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(message = "登录成功", withDismissAction = true)
@@ -85,7 +81,6 @@ fun myPage(
 
     MyNavHost(
         navController = navHostController,
-        sdk = sdk,
         authViewModel = authViewModel,
         snackbarHostState = snackbarHostState,
         coroutineScope = coroutineScope

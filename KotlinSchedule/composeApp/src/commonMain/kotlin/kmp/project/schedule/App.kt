@@ -149,7 +149,6 @@ fun CustomScaffold(
                             )
                             1 -> TestPage1(onButtonClick = {}, sdk = sdk)
                             2 -> myPage(
-                                sdk = sdk,
                                 authViewModel = authViewModel,
                                 snackbarHostState = snackbarHostState,
                                 coroutineScope = coroutineScope

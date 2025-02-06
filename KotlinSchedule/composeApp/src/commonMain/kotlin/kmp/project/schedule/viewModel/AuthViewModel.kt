@@ -52,6 +52,9 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
     }
 
+    /**
+     * update nickname from network
+     */
     fun updateNickname(
         nicknameRequest: NicknameRequest,
         token: String,
@@ -79,4 +82,36 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
         _nicknameState.value = nickname
     }
 
+    fun getAccessToken(): String? {
+        return sdk.getSetting(SettingsName.ACCESS_TOKEN.toString())
+    }
+
+    fun getRefreshToken(): String? {
+        return sdk.getSetting(SettingsName.REFRESH_TOKEN.toString())
+    }
+
+    fun updateTokens(accessToken: String, refreshToken: String) {
+        sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), accessToken)
+        sdk.addSetting(SettingsName.REFRESH_TOKEN.toString(), refreshToken)
+    }
+
+    fun clearTokens() {
+        sdk.removeSetting(SettingsName.ACCESS_TOKEN.toString())
+        sdk.removeSetting(SettingsName.REFRESH_TOKEN.toString())
+    }
+
+    fun getNickname(): String? {
+        return sdk.getSetting(SettingsName.NICKNAME.toString())
+    }
+
+    /**
+     * update settings nickname
+     */
+    fun updateNickname(nickname: String) {
+        sdk.addSetting(SettingsName.NICKNAME.toString(), nickname)
+    }
+
+    fun clearNickname() {
+        sdk.removeSetting(SettingsName.NICKNAME.toString())
+    }
 }
