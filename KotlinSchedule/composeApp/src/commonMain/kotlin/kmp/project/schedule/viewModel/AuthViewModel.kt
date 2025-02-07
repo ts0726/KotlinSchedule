@@ -23,7 +23,7 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val registerState: StateFlow<ApiResult<Unit>?> = _registerState.asStateFlow()
 
     private val _nicknameState = MutableStateFlow(
-        sdk.getSetting(SettingsName.NICKNAME.toString()) ?: "未登录"
+        sdk.getSetting(SettingsName.NICKNAME.toString(), "") ?: "未登录"
     )
     val nicknameState: StateFlow<String> = _nicknameState.asStateFlow()
 
@@ -32,7 +32,7 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
             val result = authApi.login(loginEntity)
             _tokenState.value = result
             if (result is ApiResult.Success) {
-                val nickname = sdk.getSetting(SettingsName.NICKNAME.toString()) ?: "未登录"
+                val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), "") ?: "未登录"
                 _nicknameState.value = nickname
             }
         }
@@ -78,16 +78,16 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     }
 
     fun resetNickname() {
-        val nickname = sdk.getSetting(SettingsName.NICKNAME.toString()) ?: "未登录"
+        val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), "") ?: "未登录"
         _nicknameState.value = nickname
     }
 
     fun getAccessToken(): String? {
-        return sdk.getSetting(SettingsName.ACCESS_TOKEN.toString())
+        return sdk.getSetting(SettingsName.ACCESS_TOKEN.toString(), "OFFLINE")
     }
 
     fun getRefreshToken(): String? {
-        return sdk.getSetting(SettingsName.REFRESH_TOKEN.toString())
+        return sdk.getSetting(SettingsName.REFRESH_TOKEN.toString(), "OFFLINE")
     }
 
     fun updateTokens(accessToken: String, refreshToken: String) {
@@ -101,7 +101,7 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     }
 
     fun getNickname(): String? {
-        return sdk.getSetting(SettingsName.NICKNAME.toString())
+        return sdk.getSetting(SettingsName.NICKNAME.toString(), "OFFLINE")
     }
 
     /**

@@ -111,7 +111,7 @@ fun TestPage1(
 
         Button(
             onClick = {
-                token.value = sdk.getSetting(SettingsName.ACCESS_TOKEN.toString()).toString()
+                token.value = sdk.getSetting(SettingsName.ACCESS_TOKEN.toString(), "null").toString()
             }
         ) {
             Text("get token")

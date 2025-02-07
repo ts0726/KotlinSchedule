@@ -68,12 +68,27 @@ class ScheduleSDK(
         return database.countSchedulesByDate(date).toInt()
     }
 
-    fun addSetting(key: String, token: String) {
-        settings.putString(key, token)
+    fun addSetting(key: String, value: Any) {
+        when (value) {
+            is String -> settings.putString(key, value)
+            is Int -> settings.putInt(key, value)
+            is Boolean -> settings.putBoolean(key, value)
+            is Float -> settings.putFloat(key, value)
+            is Long -> settings.putLong(key, value)
+            else -> throw IllegalArgumentException("Unsupported types: ${value::class}")
+        }
     }
 
-    fun getSetting(key: String): String? {
-        return settings.getStringOrNull(key)
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getSetting(key: String, defaultValue: T? = null): T? {
+        return when (defaultValue) {
+            is String -> settings.getString(key, defaultValue) as T
+            is Int -> settings.getInt(key, defaultValue) as T
+            is Boolean -> settings.getBoolean(key, defaultValue) as T
+            is Float -> settings.getFloat(key, defaultValue) as T
+            is Long -> settings.getLong(key, defaultValue) as T
+            else -> null
+        }
     }
 
     fun removeSetting(key: String) {

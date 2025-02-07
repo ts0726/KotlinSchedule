@@ -8,10 +8,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import kmp.project.schedule.entity.LoginEntity
-import kmp.project.schedule.entity.RegisterEntity
 import kmp.project.schedule.entity.AuthEntity
+import kmp.project.schedule.entity.LoginEntity
 import kmp.project.schedule.entity.NicknameRequest
+import kmp.project.schedule.entity.RegisterEntity
 import java.net.ConnectException
 
 class AuthApi(
