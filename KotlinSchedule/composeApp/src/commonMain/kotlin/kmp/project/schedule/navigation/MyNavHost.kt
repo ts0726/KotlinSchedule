@@ -18,8 +18,8 @@ import kmp.project.schedule.entity.NicknameRequest
 import kmp.project.schedule.ui.my.LoginPage
 import kmp.project.schedule.ui.my.accountPage
 import kmp.project.schedule.ui.my.myPageContent
-import kmp.project.schedule.util.getUsernameFromToken
-import kmp.project.schedule.util.sayHello
+import kmp.project.schedule.util.tokenUtil.getUsernameFromToken
+import kmp.project.schedule.util.viewUtil.sayHello
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

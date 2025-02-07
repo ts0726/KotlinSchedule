@@ -14,7 +14,7 @@ import kmp.project.schedule.ScheduleSDK
 import kmp.project.schedule.entity.RegisterEntity
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
-import kmp.project.schedule.util.LunarUtil
+import kmp.project.schedule.util.timeUtil.LunarUtil
 import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -111,7 +111,7 @@ fun TestPage1(
 
         Button(
             onClick = {
-                token.value = sdk.getSetting(SettingsName.ACCESS_TOKEN.toString(), "null").toString()
+//                token.value = sdk.getSetting(SettingsName.ACCESS_TOKEN.toString(), String::class.java).toString()
             }
         ) {
             Text("get token")

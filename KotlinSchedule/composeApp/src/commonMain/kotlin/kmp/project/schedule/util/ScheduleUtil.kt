@@ -1,5 +1,6 @@
 package kmp.project.schedule.util
 
+import kmp.project.schedule.util.timeUtil.convertDayOfWeekToChinese
 import kotlinx.datetime.LocalDate
 
 /**

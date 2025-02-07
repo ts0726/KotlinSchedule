@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.CalendarPager
-import kmp.project.schedule.util.convertLocalDateToDate
+import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.util.getOptions
 import kmp.project.schedule.util.getRepeat
 import kotlinx.datetime.LocalDate

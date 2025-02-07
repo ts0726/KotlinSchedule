@@ -37,8 +37,8 @@ import androidx.navigation.NavHostController
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
-import kmp.project.schedule.util.convertLocalDateToDate
-import kmp.project.schedule.util.getDaysFromToday
+import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
+import kmp.project.schedule.util.timeUtil.getDaysFromToday
 import kmp.project.schedule.util.getRepeat
 import kotlinx.datetime.LocalDate
 

@@ -19,9 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kmp.project.schedule.util.LunarUtil
-import kmp.project.schedule.util.convertLocalDateToDate
-import kmp.project.schedule.util.convertMonthOfYearToChinese
+import kmp.project.schedule.util.timeUtil.LunarUtil
+import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
+import kmp.project.schedule.util.timeUtil.convertMonthOfYearToChinese
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 

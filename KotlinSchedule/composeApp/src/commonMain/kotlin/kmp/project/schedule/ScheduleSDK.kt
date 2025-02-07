@@ -80,13 +80,14 @@ class ScheduleSDK(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> getSetting(key: String, defaultValue: T? = null): T? {
-        return when (defaultValue) {
-            is String -> settings.getString(key, defaultValue) as T
-            is Int -> settings.getInt(key, defaultValue) as T
-            is Boolean -> settings.getBoolean(key, defaultValue) as T
-            is Float -> settings.getFloat(key, defaultValue) as T
-            is Long -> settings.getLong(key, defaultValue) as T
+    fun <T> getSetting(key: String, classType: Class<T>): T? {
+        println("getSetting")
+        return when (classType) {
+            String::class.java -> settings.getStringOrNull(key) as T
+            Int::class.java -> settings.getIntOrNull(key) as T
+            Boolean::class.java -> settings.getBooleanOrNull(key) as T
+            Float::class.java -> settings.getFloatOrNull(key) as T
+            Long::class.java -> settings.getLongOrNull(key) as T
             else -> null
         }
     }

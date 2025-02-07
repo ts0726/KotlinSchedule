@@ -1,4 +1,4 @@
-package kmp.project.schedule.util
+package kmp.project.schedule.util.viewUtil
 
 import androidx.compose.runtime.Composable
 

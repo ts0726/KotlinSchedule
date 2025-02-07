@@ -1,4 +1,4 @@
-package kmp.project.schedule.util
+package kmp.project.schedule.util.timeUtil
 
 import kotlinx.datetime.*
 

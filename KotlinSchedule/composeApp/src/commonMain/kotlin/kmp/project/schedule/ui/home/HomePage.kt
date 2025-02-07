@@ -63,9 +63,9 @@ import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.ui.userImage
-import kmp.project.schedule.util.ReorderHapticFeedbackType
-import kmp.project.schedule.util.getCurrentDate
-import kmp.project.schedule.util.rememberReorderHapticFeedback
+import kmp.project.schedule.util.viewUtil.ReorderHapticFeedbackType
+import kmp.project.schedule.util.timeUtil.getCurrentDate
+import kmp.project.schedule.util.viewUtil.rememberReorderHapticFeedback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
 import sh.calvin.reorderable.ReorderableItem

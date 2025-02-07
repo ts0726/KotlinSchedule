@@ -1,4 +1,4 @@
-package kmp.project.schedule.util
+package kmp.project.schedule.util.tokenUtil
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject

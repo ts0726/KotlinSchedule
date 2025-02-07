@@ -26,8 +26,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.util.ReorderHapticFeedback
-import kmp.project.schedule.util.ReorderHapticFeedbackType
+import kmp.project.schedule.util.viewUtil.ReorderHapticFeedback
+import kmp.project.schedule.util.viewUtil.ReorderHapticFeedbackType
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 /**

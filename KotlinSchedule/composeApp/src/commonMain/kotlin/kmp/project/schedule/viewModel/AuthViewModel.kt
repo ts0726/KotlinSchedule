@@ -10,29 +10,34 @@ import kmp.project.schedule.entity.NicknameRequest
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.net.authApi
 import kmp.project.schedule.util.SettingsName
+import kmp.project.schedule.util.tokenUtil.AuthTokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
+    private val tokenManager = AuthTokenManager(sdk)
+
     private val _tokenState = MutableStateFlow<ApiResult<AuthEntity>?>(null)
     val tokenState: StateFlow<ApiResult<AuthEntity>?> = _tokenState.asStateFlow()
 
     private val _registerState = MutableStateFlow<ApiResult<Unit>?>(null)
     val registerState: StateFlow<ApiResult<Unit>?> = _registerState.asStateFlow()
 
-    private val _nicknameState = MutableStateFlow(
-        sdk.getSetting(SettingsName.NICKNAME.toString(), "") ?: "未登录"
-    )
-    val nicknameState: StateFlow<String> = _nicknameState.asStateFlow()
+    private val _nicknameState by lazy {
+        MutableStateFlow(
+            sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
+        )
+    }
+    val nicknameState: StateFlow<String> get() = _nicknameState.asStateFlow()
 
     fun login(loginEntity: LoginEntity) {
         viewModelScope.launch {
             val result = authApi.login(loginEntity)
             _tokenState.value = result
             if (result is ApiResult.Success) {
-                val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), "") ?: "未登录"
+                val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
                 _nicknameState.value = nickname
             }
         }
@@ -78,30 +83,28 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     }
 
     fun resetNickname() {
-        val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), "") ?: "未登录"
+        val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
         _nicknameState.value = nickname
     }
 
     fun getAccessToken(): String? {
-        return sdk.getSetting(SettingsName.ACCESS_TOKEN.toString(), "OFFLINE")
+        return tokenManager.getAccessToken()
     }
 
     fun getRefreshToken(): String? {
-        return sdk.getSetting(SettingsName.REFRESH_TOKEN.toString(), "OFFLINE")
+        return tokenManager.getRefreshToken()
     }
 
     fun updateTokens(accessToken: String, refreshToken: String) {
-        sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), accessToken)
-        sdk.addSetting(SettingsName.REFRESH_TOKEN.toString(), refreshToken)
+        tokenManager.addToken(accessToken, refreshToken)
     }
 
     fun clearTokens() {
-        sdk.removeSetting(SettingsName.ACCESS_TOKEN.toString())
-        sdk.removeSetting(SettingsName.REFRESH_TOKEN.toString())
+        tokenManager.removeToken()
     }
 
     fun getNickname(): String? {
-        return sdk.getSetting(SettingsName.NICKNAME.toString(), "OFFLINE")
+        return sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java)
     }
 
     /**
