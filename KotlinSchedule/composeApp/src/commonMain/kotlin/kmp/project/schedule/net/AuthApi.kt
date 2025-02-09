@@ -2,11 +2,9 @@ package kmp.project.schedule.net
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import kmp.project.schedule.entity.AuthEntity
 import kmp.project.schedule.entity.LoginEntity
@@ -15,12 +13,13 @@ import kmp.project.schedule.entity.RegisterEntity
 import java.net.ConnectException
 
 class AuthApi(
-    private val client: HttpClient,
+    private val clientWithoutToken: HttpClient,
+    private val clientWithToken: HttpClient,
     private val baseUrl: String
 ) {
     suspend fun login(loginEntity: LoginEntity): ApiResult<AuthEntity> {
         return executeRequest {
-            val response = client.post("$baseUrl/auth/login") {
+            val response = clientWithoutToken.post("$baseUrl/auth/login") {
                 contentType(ContentType.Application.Json)
                 setBody(loginEntity)
             }
@@ -34,7 +33,7 @@ class AuthApi(
 
     suspend fun register(registerEntity: RegisterEntity): ApiResult<Unit> {
         return executeRequest {
-            val response = client.post("$baseUrl/auth/register") {
+            val response = clientWithoutToken.post("$baseUrl/auth/register") {
                 contentType(ContentType.Application.Json)
                 setBody(registerEntity)
             }
@@ -46,24 +45,26 @@ class AuthApi(
         }
     }
 
-    suspend fun refresh(refreshToken: String): ApiResult<AuthEntity> {
-        return executeRequest {
-            val response = client.post("$baseUrl/refresh") {
-                headers { append(HttpHeaders.Authorization, "Bearer $refreshToken") }
-            }
-            when (response.status.value) {
-                200 -> ApiResult.Success(response.body())
-                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "登录过期，请重新登陆")
-                else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
-            }
-        }
-    }
+//    suspend fun refresh(refreshToken: String): ApiResult<RefreshTokenEntity> {
+//        println("refresh")
+//        return executeRequest {
+//            val response = clientWithToken.post("$baseUrl/refresh") {
+//                println("refresh token: Bearer $refreshToken")
+//                headers { append(HttpHeaders.Authorization, "Bearer ${refreshToken}") }
+//                println("headers: " + headers.get(HttpHeaders.Authorization))
+//            }
+//            when (response.status.value) {
+//                200 -> ApiResult.Success(response.body())
+//                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "登录过期，请重新登陆")
+//                else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
+//            }
+//        }
+//    }
 
     suspend fun updateNickname(nicknameRequest: NicknameRequest, token: String): ApiResult<Unit> {
         return executeRequest {
-            val response = client.post("$baseUrl/auth/updateNickname") {
+            val response = clientWithToken.post("$baseUrl/auth/updateNickname") {
                 contentType(ContentType.Application.Json)
-                headers { append(HttpHeaders.Authorization, "Bearer $token") }
                 setBody(nicknameRequest)
             }
             when (response.status.value) {

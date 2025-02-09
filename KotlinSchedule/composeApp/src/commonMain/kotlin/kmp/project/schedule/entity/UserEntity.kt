@@ -32,6 +32,14 @@ data class AuthEntity(
 )
 
 @Serializable
+data class RefreshTokenEntity(
+    @SerialName("access_token")
+    val accessToken: String,
+    @SerialName("refresh_token")
+    val refreshToken: String,
+)
+
+@Serializable
 data class NicknameRequest(
     @SerialName("nickname")
     val nickname: String

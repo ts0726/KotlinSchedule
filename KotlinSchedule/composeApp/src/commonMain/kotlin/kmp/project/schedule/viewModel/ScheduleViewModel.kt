@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import kmp.project.schedule.ScheduleSDK
+import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

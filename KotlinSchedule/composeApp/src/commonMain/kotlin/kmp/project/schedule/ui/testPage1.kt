@@ -10,8 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import kmp.project.schedule.ScheduleSDK
-import kmp.project.schedule.entity.RegisterEntity
+import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.util.timeUtil.LunarUtil
@@ -37,7 +36,7 @@ fun TestPage1(
     val token = remember { mutableStateOf("") }
     val authViewModel = AuthViewModel(sdk)
 
-    authViewModel.tokenState
+    authViewModel.authState
         .onEach { result ->
             when(result) {
                 is ApiResult.Success -> {
@@ -95,7 +94,7 @@ fun TestPage1(
         Button(onClick = {
             println("test")
 //            authViewModel.login(LoginEntity("test", "tt111"))
-            authViewModel.register(RegisterEntity("test", "tt11", "kt"))
+//            authViewModel.refresh("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsIm5hbWUiOiJ0ZXN0IiwiZXhwIjoxNzM5NTg4NTYzfQ.nXRV-bEkFiEBx6r7ZVKRjV5qw26b2W6WIhSS9Cp3eug")
 //                .launchIn(Dispatchers.IO)
         }) {
             Text("发送测试")

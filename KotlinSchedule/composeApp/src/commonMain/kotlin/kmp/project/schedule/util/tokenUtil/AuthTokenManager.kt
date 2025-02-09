@@ -1,6 +1,6 @@
 package kmp.project.schedule.util.tokenUtil
 
-import kmp.project.schedule.ScheduleSDK
+import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.util.SettingsName
 
 class AuthTokenManager(private val sdk: ScheduleSDK) {
@@ -14,7 +14,7 @@ class AuthTokenManager(private val sdk: ScheduleSDK) {
 
     fun addToken(accessToken: String, refreshToken: String) {
         sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), accessToken)
-        sdk.addSetting(SettingsName.REFRESH_TOKEN.toString(), accessToken)
+        sdk.addSetting(SettingsName.REFRESH_TOKEN.toString(), refreshToken)
     }
 
     fun removeToken() {

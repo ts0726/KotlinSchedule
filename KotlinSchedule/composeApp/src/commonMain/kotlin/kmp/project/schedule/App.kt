@@ -51,6 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kmp.project.schedule.sdk.ScheduleSDK
+import kmp.project.schedule.sdk.ScheduleSDKHolder
 import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.home.mainPage
 import kmp.project.schedule.ui.my.myPage
@@ -70,6 +72,7 @@ fun App() {
     val windowSize = calculateWindowSizeClass()
     val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
     val sdk = getScheduleSDK()
+    ScheduleSDKHolder.instance = sdk
     val scheduleViewModel: ScheduleViewModel = viewModel { ScheduleViewModel(sdk) }
     val authViewModel: AuthViewModel = viewModel { AuthViewModel(sdk) }
     val homePageStateViewModel: HomePageStateViewModel = viewModel()

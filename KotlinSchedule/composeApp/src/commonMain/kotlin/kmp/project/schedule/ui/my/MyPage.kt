@@ -50,10 +50,10 @@ fun myPage(
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope
 ) {
-    val tokenState by authViewModel.tokenState.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
 
-    LaunchedEffect(tokenState) {
-        when (val result = tokenState) {
+    LaunchedEffect(authState) {
+        when (val result = authState) {
             is ApiResult.Success -> {
                 authViewModel.updateTokens(result.data.accessToken, result.data.refreshToken)
                 authViewModel.updateNickname(result.data.nickname)

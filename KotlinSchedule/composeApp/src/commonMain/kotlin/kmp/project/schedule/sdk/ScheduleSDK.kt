@@ -1,4 +1,4 @@
-package kmp.project.schedule
+package kmp.project.schedule.sdk
 
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.db.Database
@@ -81,7 +81,6 @@ class ScheduleSDK(
 
     @Suppress("UNCHECKED_CAST")
     fun <T> getSetting(key: String, classType: Class<T>): T? {
-        println("getSetting")
         return when (classType) {
             String::class.java -> settings.getStringOrNull(key) as T
             Int::class.java -> settings.getIntOrNull(key) as T
