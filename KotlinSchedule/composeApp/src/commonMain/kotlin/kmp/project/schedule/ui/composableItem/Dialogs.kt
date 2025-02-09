@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -182,12 +181,12 @@ fun loadingDialog(
                     Text(
                         text = "等待响应中",
                         fontSize = 15.sp,
-                        color = Color.LightGray
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 CircularProgressIndicator(
                     modifier = Modifier.padding(end = 15.dp),
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
