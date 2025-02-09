@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +30,8 @@ fun MyNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     snackbarHostState: SnackbarHostState,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    showLoadingDialog: MutableState<Boolean>
 ) {
     NavHost(
         navController = navController,
@@ -71,6 +73,7 @@ fun MyNavHost(
             )
         }
     ) {
+
         composable("my") {
             var hello by mutableStateOf("未登录")
             val token = authViewModel.getRefreshToken()
@@ -89,8 +92,13 @@ fun MyNavHost(
         }
         composable("login") {
             LoginPage(
+                showLoadingDialog = showLoadingDialog,
                 onLoginClick = { loginEntity ->
-                    authViewModel.login(loginEntity)
+                    showLoadingDialog.value = true
+                    authViewModel.login(
+                        loginEntity = loginEntity,
+                        requestFinished = { showLoadingDialog.value = false }
+                    )
                 },
                 onBackClicked = { navController.navigateUp() }
             )
@@ -106,6 +114,7 @@ fun MyNavHost(
                 onBackClicked = { navController.navigateUp() },
                 username = username,
                 nickname = nickname,
+                showLoadingDialog = showLoadingDialog,
                 onSwitchAccountClicked = { navController.navigate("login") },
                 onLogoutClicked = {
                     authViewModel.clearTokens()
@@ -113,6 +122,7 @@ fun MyNavHost(
                     navController.navigateUp()
                 },
                 onUpdateNickname = {changedNickname ->
+                    showLoadingDialog.value = true
                     val request = NicknameRequest(nickname = changedNickname)
                     if (token != null) {
                         authViewModel.updateNickname(
@@ -125,7 +135,8 @@ fun MyNavHost(
                                         withDismissAction = true
                                     )
                                 }
-                            }
+                            },
+                            requestFinished = { showLoadingDialog.value = false }
                         )
                     }
                 }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +52,7 @@ fun myPage(
     coroutineScope: CoroutineScope
 ) {
     val authState by authViewModel.authState.collectAsState()
+    val showLoadingDialog = mutableStateOf(false)
 
     LaunchedEffect(authState) {
         when (val result = authState) {
@@ -62,6 +64,7 @@ fun myPage(
                     snackbarHostState.showSnackbar(message = "登录成功", withDismissAction = true)
                 }
                 withContext(Dispatchers.Main) {
+                    showLoadingDialog.value = false
                     navHostController.navigateUp()
                 }
                 authViewModel.resetTokenState() //刷新登录状态
@@ -83,7 +86,8 @@ fun myPage(
         navController = navHostController,
         authViewModel = authViewModel,
         snackbarHostState = snackbarHostState,
-        coroutineScope = coroutineScope
+        coroutineScope = coroutineScope,
+        showLoadingDialog = showLoadingDialog
     )
 }
 

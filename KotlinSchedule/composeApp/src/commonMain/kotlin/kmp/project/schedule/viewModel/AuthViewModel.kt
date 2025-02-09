@@ -36,7 +36,10 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     }
     val nicknameState: StateFlow<String> get() = _nicknameState.asStateFlow()
 
-    fun login(loginEntity: LoginEntity) {
+    fun login(
+        loginEntity: LoginEntity,
+        requestFinished: () -> Unit
+    ) {
         viewModelScope.launch {
             val result = authApi.login(loginEntity)
             _authState.value = result
@@ -44,6 +47,7 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
                 val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
                 _nicknameState.value = nickname
             }
+            requestFinished()
         }
     }
 
@@ -67,10 +71,12 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     fun updateNickname(
         nicknameRequest: NicknameRequest,
         token: String,
-        showSnackBar: (String) -> Unit
+        showSnackBar: (String) -> Unit,
+        requestFinished: () -> Unit
     ) {
         viewModelScope.launch {
             val result = authApi.updateNickname(nicknameRequest, token)
+            requestFinished()
             if (result is ApiResult.Success) {
                 sdk.addSetting(SettingsName.NICKNAME.toString(), nicknameRequest.nickname)
                 _nicknameState.value = nicknameRequest.nickname

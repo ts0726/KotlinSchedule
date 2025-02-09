@@ -10,17 +10,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.net.ApiResult
+import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
-import kmp.project.schedule.util.timeUtil.LunarUtil
 import kmp.project.schedule.util.SettingsName
+import kmp.project.schedule.util.timeUtil.LunarUtil
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 
 
 @Composable
@@ -35,6 +39,12 @@ fun TestPage1(
     val receivedData = remember { mutableStateOf("") }
     val token = remember { mutableStateOf("") }
     val authViewModel = AuthViewModel(sdk)
+
+//    loadingDialog(
+//        title = "正在登录",
+//        content = "等待响应中",
+//        onDismiss = {}
+//    )
 
     authViewModel.authState
         .onEach { result ->

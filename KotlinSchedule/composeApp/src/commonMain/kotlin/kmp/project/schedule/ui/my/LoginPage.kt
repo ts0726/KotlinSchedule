@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kmp.project.schedule.entity.LoginEntity
+import kmp.project.schedule.ui.composableItem.loadingDialog
 import kmp.project.schedule.ui.userImage
 import kotlinschedule.composeapp.generated.resources.Res
 import kotlinschedule.composeapp.generated.resources.mdieye
@@ -42,6 +44,7 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun LoginPage(
+    showLoadingDialog: MutableState<Boolean>,
     onLoginClick: (LoginEntity) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -146,6 +149,13 @@ fun LoginPage(
             modifier = Modifier.padding(top = 30.dp)
         )
         Spacer(modifier = Modifier.weight(1f))
+    }
+
+    if (showLoadingDialog.value) {
+        loadingDialog(
+            title = "正在登录",
+            onDismiss = {}
+        )
     }
 
 }

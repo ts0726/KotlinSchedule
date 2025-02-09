@@ -27,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kmp.project.schedule.ui.composableItem.loadingDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +47,7 @@ fun accountPage(
     onBackClicked: () -> Unit,
     username: String,
     nickname: String,
+    showLoadingDialog: MutableState<Boolean>,
     onSwitchAccountClicked: () -> Unit,
     onLogoutClicked: () -> Unit,
     onUpdateNickname: (String) -> Unit
@@ -90,6 +93,13 @@ fun accountPage(
             nickname = nickname,
             onDismiss = { showEditNicknameDialog = false },
             onUpdateNickname = onUpdateNickname
+        )
+    }
+
+    if (showLoadingDialog.value) {
+        loadingDialog(
+            title = "正在更新昵称",
+            onDismiss = {}
         )
     }
 }
@@ -223,7 +233,10 @@ fun editNicknameDialog(
                         )
                     }
 
-                    TextButton(onClick = { onUpdateNickname(tempNickname) }) {
+                    TextButton(onClick = {
+                        onUpdateNickname(tempNickname)
+                        onDismiss()
+                    }) {
                         Text(
                             text = "确定",
                             fontWeight = FontWeight.Bold,
