@@ -127,7 +127,6 @@ fun MyNavHost(
                     if (token != null) {
                         authViewModel.updateNickname(
                             nicknameRequest = request,
-                            token = token,
                             showSnackBar = { message ->
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar(

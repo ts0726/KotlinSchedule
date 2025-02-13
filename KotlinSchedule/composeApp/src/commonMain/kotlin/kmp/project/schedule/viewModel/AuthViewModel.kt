@@ -1,15 +1,13 @@
 package kmp.project.schedule.viewModel
 
-import kmp.project.schedule.sdk.ScheduleSDK
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kmp.project.schedule.entity.LoginEntity
-//import kmp.project.schedule.entity.RegisterEntity
 import kmp.project.schedule.entity.AuthEntity
+import kmp.project.schedule.entity.LoginEntity
 import kmp.project.schedule.entity.NicknameRequest
-//import kmp.project.schedule.entity.RefreshTokenEntity
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.net.authApi
+import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.util.tokenUtil.AuthTokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,12 +68,11 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
      */
     fun updateNickname(
         nicknameRequest: NicknameRequest,
-        token: String,
         showSnackBar: (String) -> Unit,
         requestFinished: () -> Unit
     ) {
         viewModelScope.launch {
-            val result = authApi.updateNickname(nicknameRequest, token)
+            val result = authApi.updateNickname(nicknameRequest)
             requestFinished()
             if (result is ApiResult.Success) {
                 sdk.addSetting(SettingsName.NICKNAME.toString(), nicknameRequest.nickname)

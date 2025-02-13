@@ -2,6 +2,8 @@ package kmp.project.schedule.net
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.auth.authProviders
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -18,6 +20,10 @@ class AuthApi(
     private val baseUrl: String
 ) {
     suspend fun login(loginEntity: LoginEntity): ApiResult<AuthEntity> {
+        //重置client中的token
+        clientWithToken.authProviders
+            .filterIsInstance<BearerAuthProvider>()
+            .singleOrNull()?.clearToken()
         return executeRequest {
             val response = clientWithoutToken.post("$baseUrl/auth/login") {
                 contentType(ContentType.Application.Json)
@@ -61,7 +67,7 @@ class AuthApi(
 //        }
 //    }
 
-    suspend fun updateNickname(nicknameRequest: NicknameRequest, token: String): ApiResult<Unit> {
+    suspend fun updateNickname(nicknameRequest: NicknameRequest): ApiResult<Unit> {
         return executeRequest {
             val response = clientWithToken.post("$baseUrl/auth/updateNickname") {
                 contentType(ContentType.Application.Json)
