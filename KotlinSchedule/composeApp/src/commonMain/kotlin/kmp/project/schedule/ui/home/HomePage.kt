@@ -66,6 +66,7 @@ import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.util.viewUtil.ReorderHapticFeedbackType
 import kmp.project.schedule.util.timeUtil.getCurrentDate
 import kmp.project.schedule.util.viewUtil.rememberReorderHapticFeedback
+import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
 import sh.calvin.reorderable.ReorderableItem
@@ -84,13 +85,14 @@ fun mainPage(
     listState: LazyListState,
     scheduleViewModel: ScheduleViewModel,
     homePageStateViewModel: HomePageStateViewModel,
+    authViewModel: AuthViewModel,
     date: MutableState<LocalDate>,
     coroutineScope: CoroutineScope
 ) {
     val scheduleList = remember { scheduleViewModel.schedules }
 
     LaunchedEffect(date.value) {
-        scheduleViewModel.loadSchedules(date)
+        scheduleViewModel.loadSchedules(authViewModel.getUserName()?:"", date)
     }
 
     Row(
@@ -127,6 +129,7 @@ fun mainPage(
             scheduleList = scheduleList,
             date = date,
             scheduleViewModel = scheduleViewModel,
+            authViewModel = authViewModel,
             homePageStateViewModel = homePageStateViewModel,
             coroutineScope = coroutineScope
         )

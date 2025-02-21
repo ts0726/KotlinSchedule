@@ -146,6 +146,7 @@ fun CustomScaffold(
                                 isCompact = isCompact,
                                 listState = listState,
                                 scheduleViewModel = scheduleViewModel,
+                                authViewModel = authViewModel,
                                 homePageStateViewModel = homePageStateViewModel,
                                 date = date,
                                 coroutineScope = coroutineScope

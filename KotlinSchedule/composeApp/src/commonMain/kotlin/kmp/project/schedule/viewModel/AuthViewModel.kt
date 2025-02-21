@@ -10,6 +10,7 @@ import kmp.project.schedule.net.authApi
 import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.util.tokenUtil.AuthTokenManager
+import kmp.project.schedule.util.tokenUtil.getUsernameFromToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -123,5 +124,9 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
 
     fun clearNickname() {
         sdk.removeSetting(SettingsName.NICKNAME.toString())
+    }
+
+    fun getUserName(): String? {
+        return getUsernameFromToken(sdk.getSetting(SettingsName.REFRESH_TOKEN.toString(), String::class.java)?:"")
     }
 }

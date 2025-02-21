@@ -17,12 +17,14 @@ import kotlinx.datetime.todayIn
 class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val id = mutableStateOf(-1)
     val uuid = mutableStateOf("")
+    val userName = mutableStateOf("")
     val title = mutableStateOf("")
     val content = mutableStateOf("")
     val date = mutableStateOf( Clock.System.todayIn(TimeZone.currentSystemDefault()) )
-    val repeatMode = mutableStateOf(0)
+    val repeatMode = mutableStateOf(RepeatMode.NONE)
     val location = mutableStateOf("未设定")
     val sequence = mutableStateOf(0)
+    val finished = mutableStateOf(false)
     var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
@@ -30,23 +32,27 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         val schedule = Schedule(
             id = id.value.toLong(),
             uuid = uuid.value,
+            username = userName.value,
             title = title.value,
             content = content.value,
             date = date.value.toEpochDays().toLong(),
-            repeatMode = repeatMode.value.toLong(),
+            repeatMode = repeatMode.value.toString(),
             location = location.value,
-            sequence = sequence.value.toLong()
+            sequence = sequence.value.toLong(),
+            finished = finished.value.toString()
         )
         if (loadScheduleByUUID(uuid.value) != null) {
             updateSchedule(schedule, currentDate)
         } else {
             val uuid = sdk.insertSchedule(
+                username = userName.value,
                 title = title.value,
                 content = content.value,
                 date = date.value.toEpochDays().toLong(),
-                repeatMode = repeatMode.value,
+                repeatMode = repeatMode.value.toString(),
                 location = location.value,
-                sequence = id.value
+                sequence = id.value,
+                finished = finished.value.toString()
             )
             if (date.value.toEpochDays() == currentDate.toEpochDays()) {
                 schedules.add(0, schedule.copy(uuid = uuid))
@@ -62,20 +68,23 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     fun reset() {
         id.value = -1
         uuid.value = ""
+        userName.value = ""
         title.value = ""
         content.value = ""
         date.value = Clock.System.todayIn(TimeZone.currentSystemDefault())
-        repeatMode.value = 0
+        repeatMode.value = RepeatMode.NONE
         location.value = "未设定"
+        finished.value = false
     }
 
     fun loadScheduleByUUID(uuid: String): Schedule? {
         return sdk.getScheduleByUuid(uuid)
     }
 
-    fun loadSchedules(date: MutableState<LocalDate>) {
+    fun loadSchedules(userName: String, date: MutableState<LocalDate>) {
+        println(userName)
         schedules.clear()
-        schedules.addAll(sdk.getScheduleByDate(date.value.toEpochDays().toLong()))
+        schedules.addAll(sdk.getScheduleByDate(userName, date.value.toEpochDays().toLong()))
     }
 
     fun deleteSchedule(uuid: String) {
@@ -95,11 +104,8 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
         sdk.updateSchedule(schedule)
         if (date.value.toEpochDays() == currentDate.toEpochDays()) {
-            println("TEST")
             schedules.set(index = index, element = schedule)
         } else {
-            println("new date: " + LocalDate.fromEpochDays(schedule.date.toInt()))
-            println("current date: " + currentDate)
             schedules.removeIf { schedule.uuid == it.uuid }
         }
     }
@@ -110,4 +116,12 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
         sdk.updateSchedules(updatedSchedules)
     }
+}
+
+enum class RepeatMode {
+    NONE,
+    DAILY,
+    WEEKLY,
+    MONTHLY,
+    YEARLY
 }

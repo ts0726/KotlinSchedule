@@ -48,11 +48,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.CalendarPager
-import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.util.getOptions
 import kmp.project.schedule.util.getRepeat
+import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
+import kmp.project.schedule.viewModel.RepeatMode
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.datetime.LocalDate
 
 
@@ -339,7 +340,8 @@ fun repeatPicker(
             RepeatPickerModal(
                 onDismiss = { showRepeatPicker = false },
                 viewModel = viewModel,
-                options = getOptions(viewModel.date.value)
+                options = getOptions(),
+                date = viewModel.date.value
             )
         }
     }
@@ -356,7 +358,8 @@ fun repeatPicker(
 fun RepeatPickerModal(
     onDismiss: () -> Unit,
     viewModel: ScheduleViewModel,
-    options: List<String>
+    options: List<RepeatMode>,
+    date: LocalDate
 ) {
 
     //预览选中的重复模式，确认后才将值赋给viewModel中的repeatMode
@@ -382,22 +385,22 @@ fun RepeatPickerModal(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(10.dp)
                 )
-                options.forEachIndexed { index, text ->
+                options.forEachIndexed { index, repeatMode ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 5.dp, bottom = 5.dp)
                             .clickable {
-                                i.value = index
+                                i.value = options[index]
                             },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = i.value == index,
-                            onClick = { i.value = index }
+                            selected = i.value == options[index],
+                            onClick = { i.value = options[index] }
                         )
                         Text(
-                            text = text,
+                            text = getRepeat(date, repeatMode),
                             fontSize = 15.sp,
                             modifier = Modifier.padding(start = 10.dp)
                         )

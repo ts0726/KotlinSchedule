@@ -17,24 +17,28 @@ class ScheduleSDK(
     @OptIn(ExperimentalUuidApi::class)
     @Throws(Exception::class)
     fun insertSchedule(
+        username: String,
         title: String,
         content: String?,
         date: Long,
-        repeatMode: Int,
+        repeatMode: String,
         location: String?,
-        sequence: Int
+        sequence: Int,
+        finished: String
     ): String {
         val uuid = Uuid.random().toString()
         database.createSchedule(
             Schedule(
                 id = 0,
                 uuid = uuid,
+                username = username,
                 title = title,
                 content = content,
                 date = date,
-                repeatMode = repeatMode.toLong(),
+                repeatMode = repeatMode,
                 location = location,
-                sequence = sequence.toLong())
+                finished = finished,
+                sequence = sequence.toLong()),
         )
         return uuid
     }
@@ -43,9 +47,9 @@ class ScheduleSDK(
 //        return database.getAllSchedules()
 //    }
 
-    fun getScheduleByDate(date: Long): List<Schedule> {
+    fun getScheduleByDate(username: String, date: Long): List<Schedule> {
 //        return database.getAllSchedules().filter { it.date == date }
-        return database.getAllSchedulesbyDate(date)
+        return database.getAllSchedulesbyDate(username, date)
     }
 
     fun getScheduleByUuid(uuid: String): Schedule? {
@@ -62,10 +66,6 @@ class ScheduleSDK(
 
     fun updateSchedules(schedules: List<Schedule>) {
         database.updateSchedules(schedules)
-    }
-
-    fun getCountOfSchedulesByDate(date: Int): Int {
-        return database.countSchedulesByDate(date).toInt()
     }
 
     fun addSetting(key: String, value: Any) {

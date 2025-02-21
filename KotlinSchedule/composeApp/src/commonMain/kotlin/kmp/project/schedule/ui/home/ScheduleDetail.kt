@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -40,6 +41,7 @@ import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.util.timeUtil.getDaysFromToday
 import kmp.project.schedule.util.getRepeat
+import kmp.project.schedule.viewModel.RepeatMode
 import kotlinx.datetime.LocalDate
 
 /**
@@ -137,7 +139,7 @@ fun ScheduleDetailTopBar(
                         viewModel.title.value = schedule.title
                         viewModel.content.value = schedule.content!!
                         viewModel.location.value = schedule.location!!
-                        viewModel.repeatMode.value = schedule.repeatMode.toInt()
+                        viewModel.repeatMode.value = RepeatMode.valueOf(schedule.repeatMode)
                         viewModel.sequence.value = schedule.sequence.toInt()
                         navHostController.navigate("home_add")
                     },
@@ -216,6 +218,20 @@ fun ScheduleDetailContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
+                imageVector = Icons.Filled.AccountBox,
+                contentDescription = "Account",
+                modifier = Modifier.padding(end = 15.dp)
+            )
+            Text(
+                text = if (schedule.username == "") "游客" else schedule.username,
+                fontSize = 20.sp
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
                 imageVector = Icons.Filled.DateRange,
                 contentDescription = "Date",
                 modifier = Modifier.padding(end = 15.dp)
@@ -251,7 +267,7 @@ fun ScheduleDetailContent(
             Text(
                 text = getRepeat(
                     LocalDate.fromEpochDays(schedule.date.toInt()),
-                    schedule.repeatMode.toInt()
+                    RepeatMode.valueOf(schedule.repeatMode)
                 ),
                 fontSize = 20.sp
             )

@@ -11,8 +11,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         return dbQuery.selectAllSchedules(::mapResultToList).executeAsList()
     }
 
-    internal fun getAllSchedulesbyDate(date: Long): List<Schedule> {
-        return dbQuery.selectSchedulesByDate(date).executeAsList()
+    internal fun getAllSchedulesbyDate(username: String, date: Long): List<Schedule> {
+        return dbQuery.selectSchedulesByDate(username, date).executeAsList()
     }
 
     internal fun createSchedule(schedule: Schedule) {
@@ -20,11 +20,13 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
             dbQuery.insertSchedule(
                 title = schedule.title,
                 uuid = schedule.uuid,
+                username = schedule.username,
                 content = schedule.content,
                 date = schedule.date,
                 repeatMode = schedule.repeatMode,
                 location = schedule.location,
-                sequence = schedule.sequence
+                sequence = schedule.sequence,
+                finished = schedule.finished
             )
         }
     }
@@ -65,29 +67,29 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         }
     }
 
-    internal fun countSchedulesByDate(date: Int): Long {
-        return dbQuery.countSchedulesByDate(date.toLong()).executeAsOne()
-    }
-
     private fun mapResultToList(
         id: Long,
         uuid: String,
+        username: String,
         title: String,
         content: String?,
         date: Long,
-        repeatMode: Long,
+        repeatMode: String,
         location: String?,
-        sequence: Long
+        sequence: Long,
+        finished: String
     ): Schedule {
         return Schedule(
             id = id,
             uuid = uuid,
+            username = username,
             title = title,
             content = content,
             date = date,
             repeatMode = repeatMode,
             location = location,
-            sequence = sequence
+            sequence = sequence,
+            finished = finished
         )
     }
 

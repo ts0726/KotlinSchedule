@@ -21,6 +21,7 @@ import kmp.project.schedule.ui.home.NewSchedule
 import kmp.project.schedule.ui.home.ScheduleDetail
 import kmp.project.schedule.ui.home.otherInformation
 import kmp.project.schedule.ui.home.scheduledInformation
+import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,6 +47,7 @@ fun HomeNavHost(
     scheduleList: List<Schedule>,
     date: MutableState<LocalDate>,
     scheduleViewModel: ScheduleViewModel,
+    authViewModel: AuthViewModel,
     homePageStateViewModel: HomePageStateViewModel,
     coroutineScope: CoroutineScope
 ) {
@@ -133,6 +135,7 @@ fun HomeNavHost(
                     if (scheduleViewModel.content.value.isEmpty()) {
                         scheduleViewModel.content.value = "无备注"
                     }
+                    scheduleViewModel.userName.value = authViewModel.getUserName() ?: ""
                     coroutineScope.launch {
                         scheduleViewModel.onSave(navController, date.value)
                         // 延迟调用animateScrollToItem
