@@ -21,9 +21,9 @@ import kmp.project.schedule.ui.my.accountPage
 import kmp.project.schedule.ui.my.myPageContent
 import kmp.project.schedule.util.tokenUtil.getUsernameFromToken
 import kmp.project.schedule.util.viewUtil.sayHello
+import kmp.project.schedule.util.viewUtil.showSnackBar
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun MyNavHost(
@@ -127,14 +127,7 @@ fun MyNavHost(
                     if (token != null) {
                         authViewModel.updateNickname(
                             nicknameRequest = request,
-                            showSnackBar = { message ->
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = message,
-                                        withDismissAction = true
-                                    )
-                                }
-                            },
+                            showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) },
                             requestFinished = { showLoadingDialog.value = false }
                         )
                     }

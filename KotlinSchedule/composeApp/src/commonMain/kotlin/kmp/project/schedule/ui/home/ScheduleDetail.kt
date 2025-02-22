@@ -36,12 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
+import kmp.project.schedule.util.getRepeat
 import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.util.timeUtil.getDaysFromToday
-import kmp.project.schedule.util.getRepeat
 import kmp.project.schedule.viewModel.RepeatMode
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.datetime.LocalDate
 
 /**
@@ -55,6 +55,7 @@ fun ScheduleDetail(
     uuid: String,
     navHostController: NavHostController,
     viewModel: ScheduleViewModel,
+    showSnackBar: (String) -> Unit
 ) {
     var schedule by remember { mutableStateOf<Schedule?>(null) }
     schedule = viewModel.loadScheduleByUUID(uuid)
@@ -66,7 +67,12 @@ fun ScheduleDetail(
                 .statusBarsPadding()
         ) {
             ScheduleDetailTopBar(
-                delateSchedule = { viewModel.deleteSchedule(it) },
+                delateSchedule = {
+                    viewModel.deleteSchedule(
+                        uuid = it,
+                        showSnackBar = showSnackBar
+                    )
+                },
                 navHostController,
                 viewModel,
                 schedule!!

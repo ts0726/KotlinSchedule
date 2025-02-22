@@ -25,3 +25,11 @@ data class ScheduleEntity(
     @SerialName("isFinished")
     val finished: Boolean
 )
+
+@Serializable
+data class ScheduleResult(
+    @SerialName("success")
+    val success: Int,
+    @SerialName("failure")
+    val failure: Int
+)

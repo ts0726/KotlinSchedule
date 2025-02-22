@@ -57,17 +57,18 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.viewModel.HomePageStateViewModel
-import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.navigation.HomeNavHost
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.ui.userImage
-import kmp.project.schedule.util.viewUtil.ReorderHapticFeedbackType
 import kmp.project.schedule.util.timeUtil.getCurrentDate
+import kmp.project.schedule.util.viewUtil.ReorderHapticFeedbackType
 import kmp.project.schedule.util.viewUtil.rememberReorderHapticFeedback
+import kmp.project.schedule.util.viewUtil.showSnackBar
 import kmp.project.schedule.viewModel.AuthViewModel
+import kmp.project.schedule.viewModel.HomePageStateViewModel
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
 import sh.calvin.reorderable.ReorderableItem
@@ -119,7 +120,8 @@ fun mainPage(
                         }
                     }
                 },
-                onAddClick = { navController.navigate("home_add") }
+                onAddClick = { navController.navigate("home_add") },
+                showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) }
             )
         }
         //竖屏模式下显示日程信息，横屏模式下作为操作页显示其他信息
@@ -156,7 +158,8 @@ fun scheduledInformation(
     list: List<Schedule>,
     date: MutableState<LocalDate>,
     onScheduleCardClick: (String) -> Unit,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    showSnackBar: (String) -> Unit
 ) {
     val haptic = rememberReorderHapticFeedback()
     val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
@@ -319,7 +322,7 @@ fun scheduledInformation(
                         "将同步删除本地和云端的日程，且删除后不可恢复\n确定要删除这些日程吗？",
                 onConfirm = {
                     homePageStateViewModel.setShowConfirmDialog(false)
-                    scheduleViewModel.deleteSchedules()
+                    scheduleViewModel.deleteSchedules(showSnackBar)
                     scheduleViewModel.schedulesToDelete.clear()
                 },
                 onDismiss = { homePageStateViewModel.setShowConfirmDialog(false) }

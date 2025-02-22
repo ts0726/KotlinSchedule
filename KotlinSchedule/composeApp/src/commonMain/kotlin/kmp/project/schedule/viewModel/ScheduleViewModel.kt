@@ -105,12 +105,37 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         schedules.addAll(sdk.getScheduleByDate(userName, date.value.toEpochDays().toLong()))
     }
 
-    fun deleteSchedule(uuid: String) {
+    fun deleteSchedule(
+        uuid: String,
+        showSnackBar: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = scheduleApi.deleteSchedule(uuid)
+            if (result is ApiResult.Success) {
+                showSnackBar("已同步删除云端日程")
+            } else if (result is ApiResult.Error) {
+                showSnackBar("云端日程删除失败：${result.message}")
+            }
+        }
         sdk.deleteSchedule(uuid)
         schedules.removeIf { it.uuid == uuid }
     }
 
-    fun deleteSchedules() {
+    fun deleteSchedules(showSnackBar: (String) -> Unit) {
+        viewModelScope.launch {
+            val result = scheduleApi.deleteSchedules(schedulesToDelete)
+            if (result is ApiResult.Success) {
+                val message: String = if (result.data.failure == 0) {
+                    "日程同步删除成功${result.data.success}条"
+                } else {
+                    "日程同步删除成功${result.data.success}条，失败${result.data.failure}条\n" +
+                            "原因：待删除日程中包含离线日程，此类日程不存在于云端"
+                }
+                showSnackBar(message)
+            } else if (result is ApiResult.Error) {
+                showSnackBar("云端日程删除失败：${result.message}")
+            }
+        }
         schedulesToDelete.forEach {
             sdk.deleteSchedule(it)
             schedules.removeIf { schedule -> schedule.uuid == it }

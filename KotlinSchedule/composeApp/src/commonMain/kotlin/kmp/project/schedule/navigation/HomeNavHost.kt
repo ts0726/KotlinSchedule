@@ -22,6 +22,7 @@ import kmp.project.schedule.ui.home.NewSchedule
 import kmp.project.schedule.ui.home.ScheduleDetail
 import kmp.project.schedule.ui.home.otherInformation
 import kmp.project.schedule.ui.home.scheduledInformation
+import kmp.project.schedule.util.viewUtil.showSnackBar
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -112,7 +113,8 @@ fun HomeNavHost(
                             }
                         }
                     },
-                    onAddClick = { navController.navigate("home_add") }
+                    onAddClick = { navController.navigate("home_add") },
+                    showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) }
                 )
             } else {
                 otherInformation(
@@ -142,14 +144,7 @@ fun HomeNavHost(
                         scheduleViewModel.onSave(
                             navController,
                             date.value,
-                            showSnackBar = { message ->
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = message,
-                                        withDismissAction = true
-                                    )
-                                }
-                            }
+                            showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) }
                         )
                         // 延迟调用animateScrollToItem
                         // 动画时间已经scheduleCard的animateItemPlacement匹配好了，别改！！
@@ -170,7 +165,12 @@ fun HomeNavHost(
             )
         ) { backStackEntry ->
             val uuid = backStackEntry.arguments?.getString("uuid") ?: ""
-            ScheduleDetail(uuid, navController, scheduleViewModel)
+            ScheduleDetail(
+                uuid = uuid,
+                navHostController = navController,
+                viewModel = scheduleViewModel,
+                showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) }
+            )
         }
     }
 }
