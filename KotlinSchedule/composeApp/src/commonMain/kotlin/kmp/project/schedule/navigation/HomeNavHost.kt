@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
@@ -49,7 +50,8 @@ fun HomeNavHost(
     scheduleViewModel: ScheduleViewModel,
     authViewModel: AuthViewModel,
     homePageStateViewModel: HomePageStateViewModel,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
 ) {
     NavHost(
         navController = navController,
@@ -137,7 +139,18 @@ fun HomeNavHost(
                     }
                     scheduleViewModel.userName.value = authViewModel.getUserName() ?: ""
                     coroutineScope.launch {
-                        scheduleViewModel.onSave(navController, date.value)
+                        scheduleViewModel.onSave(
+                            navController,
+                            date.value,
+                            showSnackBar = { message ->
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = message,
+                                        withDismissAction = true
+                                    )
+                                }
+                            }
+                        )
                         // 延迟调用animateScrollToItem
                         // 动画时间已经scheduleCard的animateItemPlacement匹配好了，别改！！
                         delay(250)

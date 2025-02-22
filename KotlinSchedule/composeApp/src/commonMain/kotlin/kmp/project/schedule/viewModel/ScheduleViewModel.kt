@@ -4,10 +4,15 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.database.Schedule
+import kmp.project.schedule.entity.ScheduleEntity
+import kmp.project.schedule.net.ApiResult
+import kmp.project.schedule.net.scheduleApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -28,7 +33,11 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
-    suspend fun onSave(navController: NavController, currentDate: LocalDate) {
+    suspend fun onSave(
+        navController: NavController,
+        currentDate: LocalDate,
+        showSnackBar: (String) -> Unit
+    ) {
         val schedule = Schedule(
             id = id.value.toLong(),
             uuid = uuid.value,
@@ -54,6 +63,16 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
                 sequence = id.value,
                 finished = finished.value.toString()
             )
+            viewModelScope.launch {
+                val result = scheduleApi.addSchedule(
+                    scheduleToEntity(schedule.copy(uuid = uuid))
+                )
+                if (result is ApiResult.Success) {
+                    showSnackBar("日程 ${schedule.title} 已上传")
+                } else if (result is ApiResult.Error) {
+                    showSnackBar("日程 ${schedule.title} 上传失败：${result.message}")
+                }
+            }
             if (date.value.toEpochDays() == currentDate.toEpochDays()) {
                 schedules.add(0, schedule.copy(uuid = uuid))
             }
@@ -82,7 +101,6 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     }
 
     fun loadSchedules(userName: String, date: MutableState<LocalDate>) {
-        println(userName)
         schedules.clear()
         schedules.addAll(sdk.getScheduleByDate(userName, date.value.toEpochDays().toLong()))
     }
@@ -115,6 +133,20 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             schedule.copy(sequence = index.toLong())
         }
         sdk.updateSchedules(updatedSchedules)
+    }
+
+    private fun scheduleToEntity(schedule: Schedule): ScheduleEntity {
+        return ScheduleEntity(
+            uuid = schedule.uuid,
+            userName = schedule.username,
+            title = schedule.title,
+            content = schedule.content ?: "",
+            date = schedule.date,
+            repeatMode = RepeatMode.valueOf(schedule.repeatMode),
+            location = schedule.location ?: "未设定",
+            sequence = schedule.sequence.toInt(),
+            finished = schedule.finished.toBoolean()
+        )
     }
 }
 

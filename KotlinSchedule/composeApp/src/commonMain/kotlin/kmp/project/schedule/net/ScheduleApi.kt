@@ -2,37 +2,38 @@ package kmp.project.schedule.net
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.sse.SSE
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kmp.project.schedule.entity.ScheduleEntity
-import kotlinx.serialization.json.Json
+import java.net.ConnectException
 
-object ScheduleApi {
-    private const val BASE_URL = "http://127.0.0.1:8080/schedules"
-
-    val client = HttpClient {
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-            })
-        }
-        install(SSE) {
-            showCommentEvents()
-            showRetryEvents()
-        }
-    }
-
-    suspend fun getAllSchedules(accessToken: String): List<ScheduleEntity> {
-        return client.get(BASE_URL) {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer ${accessToken}")
+class ScheduleApi(
+    private val clientWithToken: HttpClient,
+    private val baseUrl: String
+) {
+    suspend fun addSchedule(scheduleEntity: ScheduleEntity): ApiResult<Unit> {
+        return executeRequest {
+            val response = clientWithToken.post("$baseUrl/schedules/create") {
+                contentType(ContentType.Application.Json)
+                setBody(scheduleEntity)
             }
-        }.body()
+            when (response.status.value) {
+                200 -> ApiResult.Success(response.body())
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未经授权的访问或token已过期")
+                else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
+            }
+        }
     }
 
+    private suspend fun <T> executeRequest(
+        block: suspend () -> ApiResult<T>
+    ): ApiResult<T> {
+        return try {
+            block()
+        } catch (e: ConnectException) {
+            ApiResult.Error(NetStatus.NETWORK_ERROR, "网络异常")
+        }
+    }
 }

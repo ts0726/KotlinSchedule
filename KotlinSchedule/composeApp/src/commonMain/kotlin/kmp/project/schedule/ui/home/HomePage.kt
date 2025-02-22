@@ -35,6 +35,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -87,7 +88,8 @@ fun mainPage(
     homePageStateViewModel: HomePageStateViewModel,
     authViewModel: AuthViewModel,
     date: MutableState<LocalDate>,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
 ) {
     val scheduleList = remember { scheduleViewModel.schedules }
 
@@ -131,7 +133,8 @@ fun mainPage(
             scheduleViewModel = scheduleViewModel,
             authViewModel = authViewModel,
             homePageStateViewModel = homePageStateViewModel,
-            coroutineScope = coroutineScope
+            coroutineScope = coroutineScope,
+            snackbarHostState = snackbarHostState
         )
     }
 }

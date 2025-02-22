@@ -1,12 +1,13 @@
 package kmp.project.schedule.entity
 
+import kmp.project.schedule.viewModel.RepeatMode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ScheduleEntity(
     @SerialName("uuid")
-    val uuid: Int,
+    val uuid: String,
     @SerialName("userName")
     val userName: String,
     @SerialName("title")
@@ -20,13 +21,7 @@ data class ScheduleEntity(
     @SerialName("location")
     val location: String,
     @SerialName("sequence")
-    val sequence: Int
+    val sequence: Int,
+    @SerialName("isFinished")
+    val finished: Boolean
 )
-
-enum class RepeatMode {
-    NONE,
-    DAILY,
-    WEEKLY,
-    MONTHLY,
-    YEARLY
-}
