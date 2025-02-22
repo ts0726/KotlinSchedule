@@ -23,7 +23,7 @@ class ScheduleApi(
             }
             when (response.status.value) {
                 200 -> ApiResult.Success(response.body())
-                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未经授权的访问或token已过期")
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未登录或登陆已过期，请尝试重新登陆以上传日程")
                 else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
             }
         }
@@ -34,7 +34,7 @@ class ScheduleApi(
             val response = clientWithToken.delete("$baseUrl/schedules/$uuid")
             when (response.status.value) {
                 200 -> ApiResult.Success(response.body())
-                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未经授权的访问或token已过期")
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未登录或登陆已过期，请尝试重新登陆以删除日程")
                 else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
             }
         }
@@ -48,7 +48,7 @@ class ScheduleApi(
             }
             when (response.status.value) {
                 200 -> ApiResult.Success(response.body())
-                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未经授权的访问或token已过期")
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未登录或登陆已过期，请尝试重新登陆以删除日程")
                 else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
             }
         }
@@ -62,7 +62,7 @@ class ScheduleApi(
             }
             when (response.status.value) {
                 200 -> ApiResult.Success(response.body())
-                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未经授权的访问或token已过期")
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未登录或登陆已过期，请尝试重新登陆以更新日程")
                 404 -> ApiResult.Error(NetStatus.NOT_FOUND, "该日程未上传")
                 else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
             }

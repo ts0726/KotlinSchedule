@@ -114,7 +114,9 @@ fun HomeNavHost(
                         }
                     },
                     onAddClick = { navController.navigate("home_add") },
-                    showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) }
+                    showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) },
+                    nickname = authViewModel.getNickname() ?: "游客",
+                    username = authViewModel.getUserName() ?: ""
                 )
             } else {
                 otherInformation(

@@ -51,22 +51,6 @@ class AuthApi(
         }
     }
 
-//    suspend fun refresh(refreshToken: String): ApiResult<RefreshTokenEntity> {
-//        println("refresh")
-//        return executeRequest {
-//            val response = clientWithToken.post("$baseUrl/refresh") {
-//                println("refresh token: Bearer $refreshToken")
-//                headers { append(HttpHeaders.Authorization, "Bearer ${refreshToken}") }
-//                println("headers: " + headers.get(HttpHeaders.Authorization))
-//            }
-//            when (response.status.value) {
-//                200 -> ApiResult.Success(response.body())
-//                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "登录过期，请重新登陆")
-//                else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
-//            }
-//        }
-//    }
-
     suspend fun updateNickname(nicknameRequest: NicknameRequest): ApiResult<Unit> {
         return executeRequest {
             val response = clientWithToken.post("$baseUrl/auth/updateNickname") {

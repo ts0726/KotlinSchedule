@@ -67,9 +67,10 @@ fun ScheduleDetail(
                 .statusBarsPadding()
         ) {
             ScheduleDetailTopBar(
-                delateSchedule = {
+                delateSchedule = { uuid, username ->
                     viewModel.deleteSchedule(
-                        uuid = it,
+                        uuid = uuid,
+                        userName = username,
                         showSnackBar = showSnackBar
                     )
                 },
@@ -94,7 +95,7 @@ fun ScheduleDetail(
  */
 @Composable
 fun ScheduleDetailTopBar(
-    delateSchedule: (String) -> Unit,
+    delateSchedule: (String, String) -> Unit,
     navHostController: NavHostController,
     viewModel: ScheduleViewModel,
     schedule: Schedule
@@ -190,7 +191,7 @@ fun ScheduleDetailTopBar(
             content = "将同步删除本地和云端的日程，且删除后不可恢复\n确定要删除该日程吗？",
             onConfirm = {
                 showConfirmDialog.value = false
-                delateSchedule(schedule.uuid)
+                delateSchedule(schedule.uuid, schedule.username)
                 navHostController.navigateUp()
             },
             onDismiss = { showConfirmDialog.value = false }

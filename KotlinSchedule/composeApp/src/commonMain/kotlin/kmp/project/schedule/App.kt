@@ -150,7 +150,9 @@ fun CustomScaffold(
                                 homePageStateViewModel = homePageStateViewModel,
                                 date = date,
                                 coroutineScope = coroutineScope,
-                                snackbarHostState = snackbarHostState
+                                snackbarHostState = snackbarHostState,
+                                nickname = authViewModel.getNickname() ?: "游客",
+                                username = authViewModel.getUserName() ?: ""
                             )
                             1 -> TestPage1(onButtonClick = {}, sdk = sdk)
                             2 -> myPage(

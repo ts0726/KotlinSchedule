@@ -40,25 +40,28 @@ object ApiConfig {
                 val tokenManager = AuthTokenManager(ScheduleSDKHolder.instance)
                 loadTokens {
                     BearerTokens(
-                        accessToken = tokenManager.getAccessToken()!!,
+                        accessToken = tokenManager.getAccessToken()?:"",
                         refreshToken = tokenManager.getRefreshToken()
                     )
                 }
-                refreshTokens {
-                    val response: RefreshTokenEntity = httpClientWithoutToken.post("$BASE_URL/refresh") {
-                        markAsRefreshTokenRequest()
-                        headers { append(HttpHeaders.Authorization, "Bearer ${oldTokens?.refreshToken}") }
-                        contentType(ContentType.Application.Json)
-                    }.body()
-                    tokenManager.addToken(
-                        accessToken = response.accessToken,
-                        refreshToken = response.refreshToken
-                    )
-                    BearerTokens(
-                        response.accessToken,
-                        response.refreshToken
-                    )
+                if (tokenManager.getAccessToken() != null) {
+                    refreshTokens {
+                        val response: RefreshTokenEntity = httpClientWithoutToken.post("$BASE_URL/refresh") {
+                            markAsRefreshTokenRequest()
+                            headers { append(HttpHeaders.Authorization, "Bearer ${oldTokens?.refreshToken}") }
+                            contentType(ContentType.Application.Json)
+                        }.body()
+                        tokenManager.addToken(
+                            accessToken = response.accessToken,
+                            refreshToken = response.refreshToken
+                        )
+                        BearerTokens(
+                            response.accessToken,
+                            response.refreshToken
+                        )
+                    }
                 }
+
             }
         }
     }

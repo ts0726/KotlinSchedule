@@ -67,14 +67,16 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
                 sequence = id.value,
                 finished = finished.value.toString()
             )
-            viewModelScope.launch {
-                val result = scheduleApi.addSchedule(
-                    scheduleToEntity(schedule.copy(uuid = uuid))
-                )
-                if (result is ApiResult.Success) {
-                    showSnackBar("日程 ${schedule.title} 已上传")
-                } else if (result is ApiResult.Error) {
-                    showSnackBar("日程 ${schedule.title} 上传失败：${result.message}")
+            if (userName.value != "") {
+                viewModelScope.launch {
+                    val result = scheduleApi.addSchedule(
+                        scheduleToEntity(schedule.copy(uuid = uuid))
+                    )
+                    if (result is ApiResult.Success) {
+                        showSnackBar("日程 ${schedule.title} 已上传")
+                    } else if (result is ApiResult.Error) {
+                        showSnackBar("日程 ${schedule.title} 上传失败：${result.message}")
+                    }
                 }
             }
             if (date.value.toEpochDays() == currentDate.toEpochDays()) {
@@ -111,35 +113,41 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
 
     fun deleteSchedule(
         uuid: String,
+        userName: String,
         showSnackBar: (String) -> Unit
     ) {
-        viewModelScope.launch {
-            val result = scheduleApi.deleteSchedule(uuid)
-            if (result is ApiResult.Success) {
-                showSnackBar("已同步删除云端日程")
-            } else if (result is ApiResult.Error) {
-                showSnackBar("云端日程删除失败：${result.message}")
+        if (userName == "") {
+            viewModelScope.launch {
+                val result = scheduleApi.deleteSchedule(uuid)
+                if (result is ApiResult.Success) {
+                    showSnackBar("已同步删除云端日程")
+                } else if (result is ApiResult.Error) {
+                    showSnackBar("云端日程删除失败：${result.message}")
+                }
             }
         }
         sdk.deleteSchedule(uuid)
         schedules.removeIf { it.uuid == uuid }
     }
 
-    fun deleteSchedules(showSnackBar: (String) -> Unit) {
-        viewModelScope.launch {
-            val result = scheduleApi.deleteSchedules(schedulesToDelete)
-            if (result is ApiResult.Success) {
-                val message: String = if (result.data.failure == 0) {
-                    "日程同步删除成功${result.data.success}条"
-                } else {
-                    "日程同步删除成功${result.data.success}条，失败${result.data.failure}条\n" +
-                            "原因：待删除日程中包含离线日程，此类日程不存在于云端"
+    fun deleteSchedules(userName: String, showSnackBar: (String) -> Unit) {
+        if (userName != "") {
+            viewModelScope.launch {
+                val result = scheduleApi.deleteSchedules(schedulesToDelete)
+                if (result is ApiResult.Success) {
+                    val message: String = if (result.data.failure == 0) {
+                        "日程同步删除成功${result.data.success}条"
+                    } else {
+                        "日程同步删除成功${result.data.success}条，失败${result.data.failure}条\n" +
+                                "原因：待删除日程中包含离线日程，此类日程不存在于云端"
+                    }
+                    showSnackBar(message)
+                } else if (result is ApiResult.Error) {
+                    showSnackBar("云端日程删除失败：${result.message}")
                 }
-                showSnackBar(message)
-            } else if (result is ApiResult.Error) {
-                showSnackBar("云端日程删除失败：${result.message}")
             }
         }
+
         schedulesToDelete.forEach {
             sdk.deleteSchedule(it)
             schedules.removeIf { schedule -> schedule.uuid == it }
@@ -153,6 +161,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         showSnackBar: (String) -> Unit
     ) {
         val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
+        if (schedule.username != "")
         viewModelScope.launch {
             val result = scheduleApi.updateSchedules(scheduleToEntity(schedule))
             if (result is ApiResult.Success) {

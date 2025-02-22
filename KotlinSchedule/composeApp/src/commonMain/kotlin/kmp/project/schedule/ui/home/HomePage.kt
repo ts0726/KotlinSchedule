@@ -90,7 +90,9 @@ fun mainPage(
     authViewModel: AuthViewModel,
     date: MutableState<LocalDate>,
     coroutineScope: CoroutineScope,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    nickname: String,
+    username: String
 ) {
     val scheduleList = remember { scheduleViewModel.schedules }
 
@@ -121,7 +123,9 @@ fun mainPage(
                     }
                 },
                 onAddClick = { navController.navigate("home_add") },
-                showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) }
+                showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) },
+                nickname = nickname,
+                username = username
             )
         }
         //竖屏模式下显示日程信息，横屏模式下作为操作页显示其他信息
@@ -159,7 +163,9 @@ fun scheduledInformation(
     date: MutableState<LocalDate>,
     onScheduleCardClick: (String) -> Unit,
     onAddClick: () -> Unit,
-    showSnackBar: (String) -> Unit
+    showSnackBar: (String) -> Unit,
+    nickname: String,
+    username: String
 ) {
     val haptic = rememberReorderHapticFeedback()
     val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
@@ -194,9 +200,6 @@ fun scheduledInformation(
                 visible = showEditMode && !isCompact,
                 modifier = Modifier
                     .fillMaxWidth()
-//                    .onGloballyPositioned { coordinates ->
-//                        homePageStateViewModel.setTopDeleteDockerHeight(coordinates.size.height)
-//                    }
             ) {
                 topBar(
                     date = date,
@@ -211,10 +214,9 @@ fun scheduledInformation(
                             homePageStateViewModel.setShowConfirmDialog(true)
                     },
                     onMoveClick = {},
-//                    showEditMode = showEditMode,
                     viewModel = scheduleViewModel,
                     isCompact = isCompact,
-//                    showDatePickerDialog = showDatePickerDialog
+                    nickname = nickname
                 )
             }
 
@@ -242,10 +244,9 @@ fun scheduledInformation(
                                         homePageStateViewModel.setShowConfirmDialog(true)
                                 },
                                 onMoveClick = {},
-//                                showEditMode = showEditMode,
                                 viewModel = scheduleViewModel,
                                 isCompact = isCompact,
-//                                showDatePickerDialog = showDatePickerDialog
+                                nickname = nickname
                             )
                         }
                     }
@@ -322,7 +323,7 @@ fun scheduledInformation(
                         "将同步删除本地和云端的日程，且删除后不可恢复\n确定要删除这些日程吗？",
                 onConfirm = {
                     homePageStateViewModel.setShowConfirmDialog(false)
-                    scheduleViewModel.deleteSchedules(showSnackBar)
+                    scheduleViewModel.deleteSchedules(username, showSnackBar)
                     scheduleViewModel.schedulesToDelete.clear()
                 },
                 onDismiss = { homePageStateViewModel.setShowConfirmDialog(false) }
@@ -408,7 +409,8 @@ fun topBar(
     onDeleteClick: () -> Unit,
     onMoveClick: () -> Unit,
     viewModel: ScheduleViewModel,
-    isCompact: Boolean
+    isCompact: Boolean,
+    nickname: String
 ) {
     val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
     val showDatePickerDialog by homePageStateViewModel.showDatePickerDialog.collectAsState()
@@ -461,7 +463,7 @@ fun topBar(
                 visible = !showEditMode,
             ) {
                 Text(
-                    text = "离线模式",
+                    text = nickname,
                     modifier = Modifier.padding(start = 10.dp)
                 )
             }
