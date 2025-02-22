@@ -54,6 +54,21 @@ class ScheduleApi(
         }
     }
 
+    suspend fun updateSchedules(scheduleEntity: ScheduleEntity): ApiResult<Unit> {
+        return executeRequest {
+            val response = clientWithToken.post("$baseUrl/schedules/update") {
+                contentType(ContentType.Application.Json)
+                setBody(scheduleEntity)
+            }
+            when (response.status.value) {
+                200 -> ApiResult.Success(response.body())
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未经授权的访问或token已过期")
+                404 -> ApiResult.Error(NetStatus.NOT_FOUND, "该日程未上传")
+                else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
+            }
+        }
+    }
+
     private suspend fun <T> executeRequest(
         block: suspend () -> ApiResult<T>
     ): ApiResult<T> {

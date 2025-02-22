@@ -11,5 +11,6 @@ enum class NetStatus {
     UNAUTHORIZED,
     SERVER_ERROR,
     UNKNOWN_ERROR,
+    NOT_FOUND,
     CREATED
 }

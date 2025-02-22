@@ -6,11 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.entity.ScheduleEntity
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.net.scheduleApi
+import kmp.project.schedule.sdk.ScheduleSDK
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -51,7 +51,11 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             finished = finished.value.toString()
         )
         if (loadScheduleByUUID(uuid.value) != null) {
-            updateSchedule(schedule, currentDate)
+            updateSchedule(
+                schedule = schedule,
+                currentDate = currentDate,
+                showSnackBar = showSnackBar
+            )
         } else {
             val uuid = sdk.insertSchedule(
                 username = userName.value,
@@ -143,8 +147,20 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         schedulesToDelete.clear()
     }
 
-    private fun updateSchedule(schedule: Schedule, currentDate: LocalDate) {
+    private fun updateSchedule(
+        schedule: Schedule,
+        currentDate: LocalDate,
+        showSnackBar: (String) -> Unit
+    ) {
         val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
+        viewModelScope.launch {
+            val result = scheduleApi.updateSchedules(scheduleToEntity(schedule))
+            if (result is ApiResult.Success) {
+                showSnackBar("云端更新成功")
+            } else if (result is ApiResult.Error) {
+                showSnackBar("云端更新失败：${result.message}")
+            }
+        }
         sdk.updateSchedule(schedule)
         if (date.value.toEpochDays() == currentDate.toEpochDays()) {
             schedules.set(index = index, element = schedule)
