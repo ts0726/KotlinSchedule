@@ -43,6 +43,10 @@ class ScheduleSDK(
         return uuid
     }
 
+    fun insertSchedule(schedule: Schedule) {
+        database.createSchedule(schedule)
+    }
+
 //    fun getAllScheduleList(): List<Schedule> {
 //        return database.getAllSchedules()
 //    }

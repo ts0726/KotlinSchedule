@@ -39,6 +39,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
@@ -51,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kmp.project.schedule.net.sseApi
 import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.sdk.ScheduleSDKHolder
 import kmp.project.schedule.ui.TestPage1
@@ -81,6 +83,10 @@ fun App() {
     val pageID = remember { mutableIntStateOf(0) }
     val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        sseApi.receiveEvent(scheduleViewModel)
+    }
 
     customTheme {
         CustomScaffold(

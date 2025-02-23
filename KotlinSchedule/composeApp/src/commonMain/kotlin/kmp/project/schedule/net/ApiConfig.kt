@@ -6,6 +6,7 @@ import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
@@ -65,6 +66,12 @@ object ApiConfig {
             }
         }
     }
+    val sseClient: HttpClient = httpClientWithToken.config {
+        install(SSE) {
+            showCommentEvents()
+            showRetryEvents()
+        }
+    }
 }
 
 
@@ -76,5 +83,10 @@ val authApi = AuthApi(
 
 val scheduleApi = ScheduleApi(
     clientWithToken = ApiConfig.httpClientWithToken,
+    baseUrl = ApiConfig.BASE_URL
+)
+
+val sseApi = SseApi (
+    sseClient = ApiConfig.sseClient,
     baseUrl = ApiConfig.BASE_URL
 )

@@ -102,6 +102,15 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         finished.value = false
     }
 
+    fun addScheduleFromSseServer(scheduleEntity: ScheduleEntity) {
+        val schedule = entityToSchedule(scheduleEntity)
+        val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        sdk.insertSchedule(schedule)
+        if (schedule.date.toInt() == currentDate.toEpochDays()) {
+            schedules.add(0, schedule)
+        }
+    }
+
     fun loadScheduleByUUID(uuid: String): Schedule? {
         return sdk.getScheduleByUuid(uuid)
     }
@@ -196,6 +205,22 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             location = schedule.location ?: "未设定",
             sequence = schedule.sequence.toInt(),
             finished = schedule.finished.toBoolean()
+        )
+    }
+
+    private fun entityToSchedule(scheduleEntity: ScheduleEntity): Schedule {
+        return Schedule (
+            id = 0,
+//            uuid = scheduleEntity.uuid,
+            uuid = "0",
+            username = scheduleEntity.userName,
+            title = scheduleEntity.title,
+            content = "来自SSE Server的日程：" + scheduleEntity.content,
+            date = scheduleEntity.date,
+            repeatMode = scheduleEntity.repeatMode.toString(),
+            location = scheduleEntity.location,
+            sequence = scheduleEntity.sequence.toLong(),
+            finished = scheduleEntity.finished.toString()
         )
     }
 }
