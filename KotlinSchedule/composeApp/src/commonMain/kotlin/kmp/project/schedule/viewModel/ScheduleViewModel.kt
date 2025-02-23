@@ -116,7 +116,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         userName: String,
         showSnackBar: (String) -> Unit
     ) {
-        if (userName == "") {
+        if (userName != "") {
             viewModelScope.launch {
                 val result = scheduleApi.deleteSchedule(uuid)
                 if (result is ApiResult.Success) {
