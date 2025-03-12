@@ -8,13 +8,14 @@ CREATE TABLE Schedule (
     repeatMode TEXT NOT NULL, -- 重复模式
     location TEXT, -- 地点
     sequence INTEGER NOT NULL, -- 排序
-    finished TEXT NOT NULL -- 完成状态
+    finished TEXT NOT NULL, -- 完成状态
+    timestamp INTEGER NOT NULL --时间戳
 );
 
 -- 插入一条新的日程数据
 insertSchedule:
-INSERT INTO Schedule (uuid, username, title, content, date, repeatMode, location, sequence, finished)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Schedule (uuid, username, title, content, date, repeatMode, location, sequence, finished, timestamp)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- 查询所有的日程数据
 selectAllSchedules:

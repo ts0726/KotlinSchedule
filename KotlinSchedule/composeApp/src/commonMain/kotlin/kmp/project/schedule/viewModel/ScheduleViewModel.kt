@@ -30,6 +30,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val location = mutableStateOf("未设定")
     val sequence = mutableStateOf(0)
     val finished = mutableStateOf(false)
+    val timestamp = mutableStateOf<Long>( 0 )
     var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
@@ -48,11 +49,12 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             repeatMode = repeatMode.value.toString(),
             location = location.value,
             sequence = sequence.value.toLong(),
-            finished = finished.value.toString()
+            finished = finished.value.toString(),
+            timestamp = timestamp.value
         )
         if (loadScheduleByUUID(uuid.value) != null) {
             updateSchedule(
-                schedule = schedule,
+                schedule = schedule.copy(timestamp = Clock.System.now().toEpochMilliseconds()),
                 currentDate = currentDate,
                 showSnackBar = showSnackBar
             )
@@ -204,15 +206,15 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             repeatMode = RepeatMode.valueOf(schedule.repeatMode),
             location = schedule.location ?: "未设定",
             sequence = schedule.sequence.toInt(),
-            finished = schedule.finished.toBoolean()
+            finished = schedule.finished.toBoolean(),
+            timestamp = schedule.timestamp
         )
     }
 
     private fun entityToSchedule(scheduleEntity: ScheduleEntity): Schedule {
         return Schedule (
             id = 0,
-//            uuid = scheduleEntity.uuid,
-            uuid = "0",
+            uuid = scheduleEntity.uuid,
             username = scheduleEntity.userName,
             title = scheduleEntity.title,
             content = "来自SSE Server的日程：" + scheduleEntity.content,
@@ -220,7 +222,8 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             repeatMode = scheduleEntity.repeatMode.toString(),
             location = scheduleEntity.location,
             sequence = scheduleEntity.sequence.toLong(),
-            finished = scheduleEntity.finished.toString()
+            finished = scheduleEntity.finished.toString(),
+            timestamp = scheduleEntity.timestamp
         )
     }
 }

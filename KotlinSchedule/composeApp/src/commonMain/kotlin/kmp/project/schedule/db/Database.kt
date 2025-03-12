@@ -26,7 +26,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                 repeatMode = schedule.repeatMode,
                 location = schedule.location,
                 sequence = schedule.sequence,
-                finished = schedule.finished
+                finished = schedule.finished,
+                timestamp = schedule.timestamp
             )
         }
     }
@@ -77,7 +78,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         repeatMode: String,
         location: String?,
         sequence: Long,
-        finished: String
+        finished: String,
+        timestamp: Long
     ): Schedule {
         return Schedule(
             id = id,
@@ -89,7 +91,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
             repeatMode = repeatMode,
             location = location,
             sequence = sequence,
-            finished = finished
+            finished = finished,
+            timestamp = timestamp
         )
     }
 

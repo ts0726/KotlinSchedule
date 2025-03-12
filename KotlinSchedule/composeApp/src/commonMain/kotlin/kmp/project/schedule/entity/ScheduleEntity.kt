@@ -23,7 +23,9 @@ data class ScheduleEntity(
     @SerialName("sequence")
     val sequence: Int,
     @SerialName("isFinished")
-    val finished: Boolean
+    val finished: Boolean,
+    @SerialName("timeStamp")
+    val timestamp: Long
 )
 
 @Serializable
