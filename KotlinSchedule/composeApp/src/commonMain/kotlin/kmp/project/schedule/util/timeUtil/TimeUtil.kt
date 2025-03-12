@@ -1,6 +1,9 @@
 package kmp.project.schedule.util.timeUtil
 
-import kotlinx.datetime.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 /**
  * 获取日期，返回xx月xx日 星期x
@@ -62,18 +65,13 @@ fun convertMonthOfYearToChinese(monthOfYear: Int): String {
 }
 
 /**
- * 获取“日”时间戳
- */
-//fun getDayTimestamp(): Long {
-//    val currentInstant = Clock.System.now()
-//    val currentDate = currentInstant.toLocalDateTime(TimeZone.currentSystemDefault())
-//    return currentDate.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
-//}
-
-/**
  * 计算距离今日的天数
  */
 fun getDaysFromToday(date: LocalDate): Int {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     return date.toEpochDays() - today.toEpochDays()
+}
+
+fun getTimestamp(): Long {
+    return Clock.System.now().toEpochMilliseconds()
 }

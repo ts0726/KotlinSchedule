@@ -24,7 +24,7 @@ data class ScheduleEntity(
     val sequence: Int,
     @SerialName("isFinished")
     val finished: Boolean,
-    @SerialName("timeStamp")
+    @SerialName("timestamp")
     val timestamp: Long
 )
 

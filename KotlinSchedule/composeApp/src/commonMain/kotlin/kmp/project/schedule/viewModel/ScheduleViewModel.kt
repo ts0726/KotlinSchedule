@@ -11,6 +11,7 @@ import kmp.project.schedule.entity.ScheduleEntity
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.net.scheduleApi
 import kmp.project.schedule.sdk.ScheduleSDK
+import kmp.project.schedule.util.timeUtil.getTimestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,7 +31,6 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val location = mutableStateOf("未设定")
     val sequence = mutableStateOf(0)
     val finished = mutableStateOf(false)
-    val timestamp = mutableStateOf<Long>( 0 )
     var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
@@ -50,11 +50,11 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             location = location.value,
             sequence = sequence.value.toLong(),
             finished = finished.value.toString(),
-            timestamp = timestamp.value
+            timestamp = 0
         )
         if (loadScheduleByUUID(uuid.value) != null) {
             updateSchedule(
-                schedule = schedule.copy(timestamp = Clock.System.now().toEpochMilliseconds()),
+                schedule = schedule.copy(timestamp = getTimestamp()),
                 currentDate = currentDate,
                 showSnackBar = showSnackBar
             )
@@ -72,7 +72,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             if (userName.value != "") {
                 viewModelScope.launch {
                     val result = scheduleApi.addSchedule(
-                        scheduleToEntity(schedule.copy(uuid = uuid))
+                        scheduleToEntity(schedule.copy(uuid = uuid, timestamp = getTimestamp()))
                     )
                     if (result is ApiResult.Success) {
                         showSnackBar("日程 ${schedule.title} 已上传")

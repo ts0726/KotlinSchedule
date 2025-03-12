@@ -4,7 +4,7 @@ import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.db.Database
 import kmp.project.schedule.db.DatabaseDriverFactory
 import kmp.project.schedule.db.SettingsFactory
-import kotlinx.datetime.Clock
+import kmp.project.schedule.util.timeUtil.getTimestamp
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -40,7 +40,7 @@ class ScheduleSDK(
                 location = location,
                 finished = finished,
                 sequence = sequence.toLong(),
-                timestamp = Clock.System.now().toEpochMilliseconds()
+                timestamp = getTimestamp()
             ),
         )
         return uuid
