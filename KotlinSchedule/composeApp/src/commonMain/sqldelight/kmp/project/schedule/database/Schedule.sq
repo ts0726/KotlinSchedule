@@ -9,13 +9,14 @@ CREATE TABLE Schedule (
     location TEXT, -- 地点
     sequence INTEGER NOT NULL, -- 排序
     finished TEXT NOT NULL, -- 完成状态
-    timestamp INTEGER NOT NULL --时间戳
+    timestamp INTEGER NOT NULL, --时间戳
+    device TEXT NOT NULL --设备名称
 );
 
 -- 插入一条新的日程数据
 insertSchedule:
-INSERT INTO Schedule (uuid, username, title, content, date, repeatMode, location, sequence, finished, timestamp)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Schedule (uuid, username, title, content, date, repeatMode, location, sequence, finished, timestamp, device)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- 查询所有的日程数据
 selectAllSchedules:
@@ -23,6 +24,10 @@ SELECT * FROM Schedule;
 
 -- 根据ID查询一条日程数据
 selectScheduleById:
+SELECT * FROM Schedule WHERE id = ?;
+
+-- 根据uuid查询一条日程数据
+selectScheduleBuUuid:
 SELECT * FROM Schedule WHERE id = ?;
 
 -- 根据日期查询日程数据
@@ -33,7 +38,7 @@ WHERE username = ? AND (date = ? OR repeatMode != 'NONE')  ORDER BY sequence;
 -- 更新一条日程数据
 updateSchedule:
 UPDATE Schedule
-SET title = ?, content = ?, date = ?, repeatMode = ?, location = ?, sequence = ?
+SET title = ?, content = ?, date = ?, repeatMode = ?, location = ?, sequence = ?, device = ?
 WHERE uuid = ?;
 
 -- 完成一条日程

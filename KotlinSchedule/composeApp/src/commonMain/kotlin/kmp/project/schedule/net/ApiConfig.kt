@@ -6,6 +6,10 @@ import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.DEFAULT
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
@@ -17,6 +21,7 @@ import kmp.project.schedule.entity.RefreshTokenEntity
 import kmp.project.schedule.sdk.ScheduleSDKHolder
 import kmp.project.schedule.util.tokenUtil.AuthTokenManager
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.seconds
 
 // 全局配置
 object ApiConfig {
@@ -68,8 +73,15 @@ object ApiConfig {
     }
     val sseClient: HttpClient = httpClientWithToken.config {
         install(SSE) {
+            maxReconnectionAttempts = 50
+            reconnectionTime = 1.seconds
+            showRetryEvents()
             showCommentEvents()
             showRetryEvents()
+        }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.ALL // 启用详细日志
         }
     }
 }

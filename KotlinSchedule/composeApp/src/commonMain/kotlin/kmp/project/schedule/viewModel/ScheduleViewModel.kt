@@ -19,6 +19,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kmp.project.schedule.util.DeviceUtil
 
 class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val id = mutableStateOf(-1)
@@ -31,6 +32,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val location = mutableStateOf("未设定")
     val sequence = mutableStateOf(0)
     val finished = mutableStateOf(false)
+    val device = DeviceUtil.getDeviceName()
     var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
@@ -50,7 +52,8 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             location = location.value,
             sequence = sequence.value.toLong(),
             finished = finished.value.toString(),
-            timestamp = 0
+            timestamp = 0,
+            device = device
         )
         if (loadScheduleByUUID(uuid.value) != null) {
             updateSchedule(
@@ -67,7 +70,8 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
                 repeatMode = repeatMode.value.toString(),
                 location = location.value,
                 sequence = id.value,
-                finished = finished.value.toString()
+                finished = finished.value.toString(),
+                device = device
             )
             if (userName.value != "") {
                 viewModelScope.launch {
@@ -207,7 +211,8 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             location = schedule.location ?: "未设定",
             sequence = schedule.sequence.toInt(),
             finished = schedule.finished.toBoolean(),
-            timestamp = schedule.timestamp
+            timestamp = schedule.timestamp,
+            device = schedule.device
         )
     }
 
@@ -223,7 +228,8 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             location = scheduleEntity.location,
             sequence = scheduleEntity.sequence.toLong(),
             finished = scheduleEntity.finished.toString(),
-            timestamp = scheduleEntity.timestamp
+            timestamp = scheduleEntity.timestamp,
+            device = scheduleEntity.device
         )
     }
 }

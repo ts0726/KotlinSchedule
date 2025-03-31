@@ -27,7 +27,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                 location = schedule.location,
                 sequence = schedule.sequence,
                 finished = schedule.finished,
-                timestamp = schedule.timestamp
+                timestamp = schedule.timestamp,
+                device = schedule.device
             )
         }
     }
@@ -47,7 +48,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                 repeatMode = schedule.repeatMode,
                 location = schedule.location,
                 uuid = schedule.uuid,
-                sequence = schedule.sequence
+                sequence = schedule.sequence,
+                device = schedule.device
             )
         }
     }
@@ -62,7 +64,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                     repeatMode = schedule.repeatMode,
                     location = schedule.location,
                     uuid = schedule.uuid,
-                    sequence = schedule.sequence
+                    sequence = schedule.sequence,
+                    device = schedule.device
                 )
             }
         }
@@ -79,7 +82,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         location: String?,
         sequence: Long,
         finished: String,
-        timestamp: Long
+        timestamp: Long,
+        device: String
     ): Schedule {
         return Schedule(
             id = id,
@@ -92,7 +96,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
             location = location,
             sequence = sequence,
             finished = finished,
-            timestamp = timestamp
+            timestamp = timestamp,
+            device = device
         )
     }
 

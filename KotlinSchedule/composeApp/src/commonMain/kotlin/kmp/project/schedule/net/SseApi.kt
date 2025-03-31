@@ -22,8 +22,11 @@ class SseApi(
                 Json.decodeFromString(serializer, jsonString)!!
             }) {
                 incoming.collect { event ->
-                    scheduleViewModel.addScheduleFromSseServer(deserialize<ScheduleEntity>(event.data)!!)
-                    println("received event: ${deserialize<ScheduleEntity>(event.data)}")
+                    println("event date: ${event.data}")
+                    if (event.data?.isNotEmpty()!!) {
+                        scheduleViewModel.addScheduleFromSseServer(deserialize<ScheduleEntity>(event.data)!!)
+                        println("received event: ${deserialize<ScheduleEntity>(event.data)}")
+                    }
                 }
             }
         } catch (e: SSEClientException) {

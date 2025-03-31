@@ -25,7 +25,8 @@ class ScheduleSDK(
         repeatMode: String,
         location: String?,
         sequence: Int,
-        finished: String
+        finished: String,
+        device: String
     ): String {
         val uuid = Uuid.random().toString()
         database.createSchedule(
@@ -40,7 +41,8 @@ class ScheduleSDK(
                 location = location,
                 finished = finished,
                 sequence = sequence.toLong(),
-                timestamp = getTimestamp()
+                timestamp = getTimestamp(),
+                device = device
             ),
         )
         return uuid
