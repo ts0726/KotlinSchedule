@@ -152,6 +152,7 @@ fun mainPage(
  * @param modifier 修饰符
  * @param listState 列表状态
  */
+@Suppress("UnrememberedMutableState")
 @Composable
 fun scheduledInformation(
     scheduleViewModel: ScheduleViewModel,
@@ -268,7 +269,7 @@ fun scheduledInformation(
                         val isSelected = mutableStateOf(
                             scheduleViewModel.schedulesToDelete.contains(schedule.uuid)
                         )
-                        scheduleCard(
+                        ScheduleCard(
                             modifier = Modifier
                                 .zIndex(elevation.value),
                             schedule = schedule,
@@ -289,7 +290,8 @@ fun scheduledInformation(
                             },
                             scope = this,
                             haptic = haptic,
-                            onDragStopped = { scheduleViewModel.reorderSchedules() }
+                            onDragStopped = { scheduleViewModel.reorderSchedules() },
+                            onScheduleFinished = { scheduleViewModel.finishSchedule(it, showSnackBar) }
                         )
                     }
                 }

@@ -17,6 +17,8 @@ class ScheduleApi(
 ) {
     suspend fun addSchedule(scheduleEntity: ScheduleEntity): ApiResult<Unit> {
         return executeRequest {
+            println("addSchedule")
+            println(scheduleEntity)
             val response = clientWithToken.post("$baseUrl/schedules/create") {
                 contentType(ContentType.Application.Json)
                 setBody(scheduleEntity)
@@ -74,7 +76,7 @@ class ScheduleApi(
     ): ApiResult<T> {
         return try {
             block()
-        } catch (e: ConnectException) {
+        } catch (_: ConnectException) {
             ApiResult.Error(NetStatus.NETWORK_ERROR, "网络异常")
         }
     }

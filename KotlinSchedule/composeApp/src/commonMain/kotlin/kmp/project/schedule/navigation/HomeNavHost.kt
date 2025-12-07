@@ -25,8 +25,10 @@ import kmp.project.schedule.ui.home.scheduledInformation
 import kmp.project.schedule.util.viewUtil.showSnackBar
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 
 /**
@@ -144,10 +146,13 @@ fun HomeNavHost(
                     scheduleViewModel.userName.value = authViewModel.getUserName() ?: ""
                     coroutineScope.launch {
                         scheduleViewModel.onSave(
-                            navController,
+//                            navController,
                             date.value,
                             showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) }
                         )
+                        withContext(Dispatchers.Main) {
+                            navController.popBackStack()
+                        }
                         // 延迟调用animateScrollToItem
                         // 动画时间已经scheduleCard的animateItemPlacement匹配好了，别改！！
                         delay(250)

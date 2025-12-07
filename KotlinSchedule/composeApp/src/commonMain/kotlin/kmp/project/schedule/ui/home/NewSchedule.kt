@@ -178,9 +178,9 @@ fun NewScheduleContent(
 
             DatePickerDocked(viewModel)
 
-            repeatPicker(viewModel)
+            RepeatPicker(viewModel)
 
-            locationPicker(viewModel)
+            LocationPicker(viewModel)
 
             OutlinedTextField(
                 value = content,
@@ -306,7 +306,7 @@ fun DatePickerModal(
  * @param viewModel 新建日程ViewModel
  */
 @Composable
-fun repeatPicker(
+fun RepeatPicker(
     viewModel: ScheduleViewModel
 ) {
     var showRepeatPicker by remember { mutableStateOf(false) }
@@ -440,7 +440,7 @@ fun RepeatPickerModal(
 }
 
 @Composable
-fun locationPicker(
+fun LocationPicker(
     viewModel: ScheduleViewModel
 ) {
     var showLocationPicker by remember { mutableStateOf(false) }
@@ -470,7 +470,7 @@ fun locationPicker(
         )
     }
     if (showLocationPicker) {
-        locationPickerModal(
+        LocationPickerModal(
             onDismiss = { showLocationPicker = false },
             viewModel = viewModel
         )
@@ -479,7 +479,7 @@ fun locationPicker(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun locationPickerModal(
+fun LocationPickerModal(
     onDismiss: () -> Unit,
     viewModel: ScheduleViewModel
 ) {

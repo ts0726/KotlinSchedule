@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.reload.ComposeHotRun
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -8,6 +9,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.composeHotReload)
     kotlin("plugin.serialization") version "2.1.0"
 }
 
@@ -123,4 +125,8 @@ sqldelight {
             packageName.set("kmp.project.schedule.database")
         }
     }
+}
+
+tasks.withType<ComposeHotRun>().configureEach {
+    mainClass.set("kmp.project.schedule.MainKt")
 }

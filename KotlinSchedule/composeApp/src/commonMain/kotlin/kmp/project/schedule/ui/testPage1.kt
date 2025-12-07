@@ -27,6 +27,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 
 
+@Suppress("CoroutineCreationDuringComposition")
 @Composable
 fun TestPage1(
     onButtonClick: () -> Unit,

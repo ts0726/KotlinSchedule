@@ -5,21 +5,18 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.entity.ScheduleEntity
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.net.scheduleApi
 import kmp.project.schedule.sdk.ScheduleSDK
+import kmp.project.schedule.util.DeviceUtil
 import kmp.project.schedule.util.timeUtil.getTimestamp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kmp.project.schedule.util.DeviceUtil
 
 class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     val id = mutableStateOf(-1)
@@ -36,8 +33,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     var schedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
 
-    suspend fun onSave(
-        navController: NavController,
+    fun onSave(
         currentDate: LocalDate,
         showSnackBar: (String) -> Unit
     ) {
@@ -91,9 +87,6 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
 
         reset()
-        withContext(Dispatchers.Main) {
-            navController.popBackStack()
-        }
     }
 
     fun reset() {
@@ -170,22 +163,35 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         schedulesToDelete.clear()
     }
 
+    fun finishSchedule(
+        schedule: Schedule,
+        showSnackBar: (String) -> Unit
+    ) {
+        updateSchedule(
+            schedule = schedule.copy(finished = true.toString()),
+            showSnackBar = showSnackBar
+        )
+    }
+
+    @Suppress("SuspiciousIndentation")
     private fun updateSchedule(
         schedule: Schedule,
-        currentDate: LocalDate,
+        currentDate: LocalDate = LocalDate.fromEpochDays(schedule.date.toInt()),
         showSnackBar: (String) -> Unit
     ) {
         val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
-        if (schedule.username != "")
-        viewModelScope.launch {
-            val result = scheduleApi.updateSchedules(scheduleToEntity(schedule))
-            if (result is ApiResult.Success) {
-                showSnackBar("云端更新成功")
-            } else if (result is ApiResult.Error) {
-                showSnackBar("云端更新失败：${result.message}")
+        if (schedule.username != "") {
+            viewModelScope.launch {
+                val result = scheduleApi.updateSchedules(scheduleToEntity(schedule))
+                if (result is ApiResult.Success) {
+                    showSnackBar("云端更新成功")
+                } else if (result is ApiResult.Error) {
+                    showSnackBar("云端更新失败：${result.message}")
+                }
             }
         }
         sdk.updateSchedule(schedule)
+        TODO("更改这里的列表删除和设置逻辑")
         if (date.value.toEpochDays() == currentDate.toEpochDays()) {
             schedules.set(index = index, element = schedule)
         } else {

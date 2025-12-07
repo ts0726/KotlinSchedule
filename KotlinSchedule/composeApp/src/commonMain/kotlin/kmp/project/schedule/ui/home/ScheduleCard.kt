@@ -12,11 +12,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +41,7 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun scheduleCard(
+fun ScheduleCard(
     modifier: Modifier = Modifier,
     schedule: Schedule,
     isSelected: Boolean,
@@ -45,7 +49,8 @@ fun scheduleCard(
     onCardLongClick: (String) -> Unit,
     scope: ReorderableCollectionItemScope,
     haptic: ReorderHapticFeedback,
-    onDragStopped: () -> Unit
+    onDragStopped: () -> Unit,
+    onScheduleFinished: (Schedule) -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
@@ -82,7 +87,15 @@ fun scheduleCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            scheduleCard_Content(schedule.title, schedule.content!!)
+            var checked by remember{ mutableStateOf(schedule.finished.toBoolean()) }
+            Checkbox(
+                checked = checked,
+                onCheckedChange = {
+                    onScheduleFinished(schedule)
+                    checked = it
+                }
+            )
+            ScheduleCard_Content(schedule.title, schedule.content!!)
         }
     }
 }
@@ -91,7 +104,7 @@ fun scheduleCard(
  * 日程卡片内容
  */
 @Composable
-fun scheduleCard_Content(title: String, content: String) {
+fun ScheduleCard_Content(title: String, content: String) {
     Column(
         modifier = Modifier
             .padding(10.dp),

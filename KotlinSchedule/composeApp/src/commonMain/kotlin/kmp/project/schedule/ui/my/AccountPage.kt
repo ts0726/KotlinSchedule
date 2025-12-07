@@ -39,11 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kmp.project.schedule.ui.composableItem.loadingDialog
+import kmp.project.schedule.ui.composableItem.LoadingDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun accountPage(
+fun AccountPage(
     onBackClicked: () -> Unit,
     username: String,
     nickname: String,
@@ -78,7 +78,7 @@ fun accountPage(
             )
         }
     ) {innerPadding ->
-        accountSettings(
+        AccountSettings(
             innerPadding = innerPadding,
             username = username,
             nickname = nickname,
@@ -89,7 +89,7 @@ fun accountPage(
     }
 
     if (showEditNicknameDialog) {
-        editNicknameDialog(
+        EditNicknameDialog(
             nickname = nickname,
             onDismiss = { showEditNicknameDialog = false },
             onUpdateNickname = onUpdateNickname
@@ -97,7 +97,7 @@ fun accountPage(
     }
 
     if (showLoadingDialog.value) {
-        loadingDialog(
+        LoadingDialog(
             title = "正在更新昵称",
             onDismiss = {}
         )
@@ -106,7 +106,7 @@ fun accountPage(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun accountSettings(
+fun AccountSettings(
     innerPadding: PaddingValues,
     username: String,
     nickname: String,
@@ -179,7 +179,7 @@ fun accountSettings(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun editNicknameDialog(
+fun EditNicknameDialog(
     nickname: String,
     onDismiss: () -> Unit,
     onUpdateNickname: (String) -> Unit

@@ -49,7 +49,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                 location = schedule.location,
                 uuid = schedule.uuid,
                 sequence = schedule.sequence,
-                device = schedule.device
+                device = schedule.device,
+                finished = schedule.finished
             )
         }
     }
@@ -65,7 +66,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                     location = schedule.location,
                     uuid = schedule.uuid,
                     sequence = schedule.sequence,
-                    device = schedule.device
+                    device = schedule.device,
+                    finished = schedule.finished
                 )
             }
         }

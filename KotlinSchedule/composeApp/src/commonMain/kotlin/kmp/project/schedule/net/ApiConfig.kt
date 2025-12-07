@@ -21,11 +21,10 @@ import kmp.project.schedule.entity.RefreshTokenEntity
 import kmp.project.schedule.sdk.ScheduleSDKHolder
 import kmp.project.schedule.util.tokenUtil.AuthTokenManager
 import kotlinx.serialization.json.Json
-import kotlin.time.Duration.Companion.seconds
 
 // 全局配置
 object ApiConfig {
-    const val BASE_URL = "http://127.0.0.1:8080"
+    const val BASE_URL = "http://192.168.237.108:8080"
     val httpClientWithoutToken: HttpClient = HttpClient{
         install(ContentNegotiation) {
             json(Json {
@@ -73,8 +72,8 @@ object ApiConfig {
     }
     val sseClient: HttpClient = httpClientWithToken.config {
         install(SSE) {
-            maxReconnectionAttempts = 50
-            reconnectionTime = 1.seconds
+//            maxReconnectionAttempts = 5
+//            reconnectionTime = 5.seconds
             showRetryEvents()
             showCommentEvents()
             showRetryEvents()

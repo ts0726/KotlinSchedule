@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,14 +46,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun myPage(
+fun MyPage(
     navHostController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope
 ) {
     val authState by authViewModel.authState.collectAsState()
-    val showLoadingDialog = mutableStateOf(false)
+    val showLoadingDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(authState) {
         when (val result = authState) {
@@ -92,7 +93,7 @@ fun myPage(
 }
 
 @Composable
-fun myPageContent(
+fun MyPageContent(
     hello: String,
     onSettingClicked: () -> Unit,
     onAccountClicked: () -> Unit
@@ -122,14 +123,14 @@ fun myPageContent(
                 .padding(top = 30.dp)
         ) {
             item {
-                myCard(
+                MyCard(
                     icon = Icons.Default.Settings,
                     title = "设置",
                     myCardClicked = onSettingClicked
                 )
             }
             item {
-                myCard(
+                MyCard(
                     icon = Icons.Filled.AccountCircle,
                     title = "账号管理",
                     myCardClicked = onAccountClicked
@@ -150,7 +151,7 @@ fun myPageContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun myCard(
+fun MyCard(
     icon: ImageVector,
     title: String,
     modifier: Modifier = Modifier,

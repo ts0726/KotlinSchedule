@@ -146,7 +146,7 @@ fun ConfirmDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun loadingDialog(
+fun LoadingDialog(
     title: String,
     onDismiss: () -> Unit
 ) {

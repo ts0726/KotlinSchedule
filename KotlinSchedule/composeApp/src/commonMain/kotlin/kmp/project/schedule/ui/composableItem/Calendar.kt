@@ -41,19 +41,19 @@ fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
     val month = remember { mutableIntStateOf(currentDate.monthNumber) }
 //    var days: List<CalendarDay>
     //初始化被选择的日期为今天
-    val selectedDay = remember { mutableStateOf(currentDate.toEpochDays()) }
+    val selectedDay = remember { mutableIntStateOf(currentDate.toEpochDays()) }
 
     LaunchedEffect(pagerState.currentPage) {
         val yearMonth = currentDate.plus(DatePeriod(months = pagerState.currentPage - initPager))
-        year.value = yearMonth.year
-        month.value = yearMonth.monthNumber
+        year.intValue = yearMonth.year
+        month.intValue = yearMonth.monthNumber
     }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
-            text = convertLocalDateToDate(LocalDate.fromEpochDays(selectedDay.value)),
+            text = convertLocalDateToDate(LocalDate.fromEpochDays(selectedDay.intValue)),
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
@@ -66,11 +66,11 @@ fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${year.value}年 ${convertMonthOfYearToChinese(month.value)}",
+                text = "${year.intValue}年 ${convertMonthOfYearToChinese(month.intValue)}",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
             )
-            pageSwitcher(pagerState, selectedDay, onDayClick)
+            PageSwitcher(pagerState, selectedDay, onDayClick)
         }
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -99,7 +99,7 @@ fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
 }
 
 @Composable
-fun pageSwitcher(
+fun PageSwitcher(
     pagerState: PagerState,
     selectedDay: MutableState<Int>,
     onDayClick: (LocalDate) -> Unit

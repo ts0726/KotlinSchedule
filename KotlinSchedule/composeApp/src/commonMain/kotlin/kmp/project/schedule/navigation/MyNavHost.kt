@@ -17,8 +17,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import kmp.project.schedule.entity.NicknameRequest
 import kmp.project.schedule.ui.my.LoginPage
-import kmp.project.schedule.ui.my.accountPage
-import kmp.project.schedule.ui.my.myPageContent
+import kmp.project.schedule.ui.my.AccountPage
+import kmp.project.schedule.ui.my.MyPageContent
 import kmp.project.schedule.util.tokenUtil.getUsernameFromToken
 import kmp.project.schedule.util.viewUtil.sayHello
 import kmp.project.schedule.util.viewUtil.showSnackBar
@@ -79,7 +79,7 @@ fun MyNavHost(
             val token = authViewModel.getRefreshToken()
             if (token != null)
                 hello = sayHello() + "，" + authViewModel.getNickname()
-            myPageContent(
+            MyPageContent(
                 hello,
                 onSettingClicked = {},
                 onAccountClicked = {
@@ -110,7 +110,7 @@ fun MyNavHost(
             if (token != null) {
                 username = getUsernameFromToken(token).toString()
             }
-            accountPage(
+            AccountPage(
                 onBackClicked = { navController.navigateUp() },
                 username = username,
                 nickname = nickname,

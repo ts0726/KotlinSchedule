@@ -35,7 +35,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kmp.project.schedule.entity.LoginEntity
-import kmp.project.schedule.ui.composableItem.loadingDialog
+import kmp.project.schedule.ui.composableItem.LoadingDialog
 import kmp.project.schedule.ui.userImage
 import kotlinschedule.composeapp.generated.resources.Res
 import kotlinschedule.composeapp.generated.resources.mdieye
@@ -152,7 +152,7 @@ fun LoginPage(
     }
 
     if (showLoadingDialog.value) {
-        loadingDialog(
+        LoadingDialog(
             title = "正在登录",
             onDismiss = {}
         )

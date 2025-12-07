@@ -57,7 +57,7 @@ import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.sdk.ScheduleSDKHolder
 import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.home.mainPage
-import kmp.project.schedule.ui.my.myPage
+import kmp.project.schedule.ui.my.MyPage
 import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.viewModel.AuthViewModel
 import kmp.project.schedule.viewModel.HomePageStateViewModel
@@ -88,7 +88,7 @@ fun App() {
         sseApi.receiveEvent(scheduleViewModel)
     }
 
-    customTheme {
+    CustomTheme {
         CustomScaffold(
             scheduleViewModel = scheduleViewModel,
             authViewModel = authViewModel,
@@ -130,7 +130,7 @@ fun CustomScaffold(
             .fillMaxSize()
     ) {
         if (!isCompact) {
-            sideNavRail(pageID)
+            SideNavRail(pageID)
         }
         Scaffold(
             modifier = Modifier
@@ -138,16 +138,16 @@ fun CustomScaffold(
                 .fillMaxWidth(),
             bottomBar = {
                 if (isCompact) {
-                    bottomNavBar(pageID)
+                    BottomNavBar(pageID)
                 }
             },
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState)
             },
             content = { innerPadding ->
-                contentContainer(
+                ContentContainer(
                     content = {
-                        when (pageID.value) {
+                        when (pageID.intValue) {
                             0 -> mainPage(
                                 isCompact = isCompact,
                                 listState = listState,
@@ -161,7 +161,7 @@ fun CustomScaffold(
                                 username = authViewModel.getUserName() ?: ""
                             )
                             1 -> TestPage1(onButtonClick = {}, sdk = sdk)
-                            2 -> myPage(
+                            2 -> MyPage(
                                 authViewModel = authViewModel,
                                 snackbarHostState = snackbarHostState,
                                 coroutineScope = coroutineScope
@@ -181,7 +181,7 @@ fun CustomScaffold(
  * 边距和对齐方式已设置好，只需通过此组件中调用页面即可
  */
 @Composable
-fun contentContainer(
+fun ContentContainer(
     content: @Composable () -> Unit,
     padding: PaddingValues
 ) {
@@ -202,13 +202,13 @@ fun contentContainer(
  *
  */
 @Composable
-fun sideNavRail(pageID: MutableIntState) {
+fun SideNavRail(pageID: MutableIntState) {
     val cardSizes = remember { mutableStateListOf(50.dp, 30.dp, 30.dp) }
     val items = listOf("主页", "全部", "我的")
 
     //根据pageID初始化图标状态
     for (i in 0 .. 2) {
-        cardSizes[i] = if (i == pageID.value) 50.dp else 30.dp
+        cardSizes[i] = if (i == pageID.intValue) 50.dp else 30.dp
     }
 
     NavigationRail (
@@ -221,13 +221,13 @@ fun sideNavRail(pageID: MutableIntState) {
             userImage("testURL", 40.dp)
         }
 
-        items.forEachIndexed { index, _ ->
+        items.forEachIndexed { index, tag ->
             val cardSize = animateDpAsState(targetValue = cardSizes[index]).value
             Column (
                 modifier = Modifier
                     .clickable(
                         onClick = {
-                            pageID.value = index
+                            pageID.intValue = index
                             for (i in 0..2) {
                                 cardSizes[i] = if (i == index) 50.dp else 30.dp
                             }
@@ -257,9 +257,9 @@ fun sideNavRail(pageID: MutableIntState) {
                         NavigationIcon(index)
                     }
                 }
-                AnimatedVisibility(visible = index == pageID.value) {
+                AnimatedVisibility(visible = index == pageID.intValue) {
                     Text(
-                        text = "selected",
+                        text = tag,
                         modifier = Modifier
                             .padding(bottom = 5.dp),
                         fontWeight = FontWeight.Bold
@@ -276,7 +276,7 @@ fun sideNavRail(pageID: MutableIntState) {
  * 当显示应用的设备为竖屏或屏幕狭窄时，显示底部导航栏
  */
 @Composable
-fun bottomNavBar(pageID: MutableIntState) {
+fun BottomNavBar(pageID: MutableIntState) {
     val items = listOf("主页", "全部", "我的")
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -286,7 +286,7 @@ fun bottomNavBar(pageID: MutableIntState) {
                 icon = { NavigationIcon(index) },
                 selected = index == pageID.intValue,
                 onClick = {
-                    pageID.value = index
+                    pageID.intValue = index
                 },
             )
         }
@@ -308,7 +308,7 @@ fun NavigationIcon(
 }
 
 @Composable
-fun customTheme(
+fun CustomTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {

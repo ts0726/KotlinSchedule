@@ -6,7 +6,8 @@ import androidx.compose.ui.window.application
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
-        title = "KotlinSchedule",
+        title = "日程",
+        alwaysOnTop = true  //remember to delete
     ) {
         App()
     }
