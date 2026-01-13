@@ -104,8 +104,12 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     fun addScheduleFromSseServer(scheduleEntity: ScheduleEntity) {
         val schedule = entityToSchedule(scheduleEntity)
         val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
-        if (loadScheduleByUUID(schedule.uuid)?.timestamp == schedule.timestamp)
+        if (loadScheduleByUUID(schedule.uuid)?.timestamp == schedule.timestamp) {
             return
+        } else if (loadScheduleByUUID(schedule.uuid) != null) {
+            updateScheduleFromSseServer(schedule)
+            return
+        }
         sdk.insertSchedule(schedule)
         if (schedule.date.toInt() == currentDate.toEpochDays()) {
             schedules.add(0, schedule)
@@ -194,6 +198,17 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
         sdk.updateSchedule(schedule)
         TODO("更改这里的列表删除和设置逻辑")
+        if (date.value.toEpochDays() == currentDate.toEpochDays()) {
+            schedules.set(index = index, element = schedule)
+        } else {
+            schedules.removeIf { schedule.uuid == it.uuid }
+        }
+    }
+
+    private fun updateScheduleFromSseServer(schedule: Schedule){
+        val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
+        val currentDate = LocalDate.fromEpochDays(schedule.date.toInt())
+        sdk.updateSchedule(schedule)
         if (date.value.toEpochDays() == currentDate.toEpochDays()) {
             schedules.set(index = index, element = schedule)
         } else {
