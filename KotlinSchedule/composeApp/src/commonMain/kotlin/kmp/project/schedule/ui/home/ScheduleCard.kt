@@ -39,6 +39,7 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
  *
  * 日程信息在卡片中显示，通过点击卡片可查看对应日程
  */
+@Suppress("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScheduleCard(
@@ -87,7 +88,7 @@ fun ScheduleCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            var checked by remember{ mutableStateOf(schedule.finished.toBoolean()) }
+            var checked by  mutableStateOf(schedule.finished.toBoolean())
             Checkbox(
                 checked = checked,
                 onCheckedChange = {

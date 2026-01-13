@@ -174,7 +174,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         showSnackBar: (String) -> Unit
     ) {
         updateSchedule(
-            schedule = schedule.copy(finished = true.toString()),
+            schedule = schedule.copy(finished = schedule.finished.toBoolean().not().toString()),
             showSnackBar = showSnackBar
         )
     }
@@ -197,8 +197,8 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             }
         }
         sdk.updateSchedule(schedule)
-        TODO("更改这里的列表删除和设置逻辑")
         if (date.value.toEpochDays() == currentDate.toEpochDays()) {
+            //更新当前日期的日程列表
             schedules.set(index = index, element = schedule)
         } else {
             schedules.removeIf { schedule.uuid == it.uuid }
@@ -245,7 +245,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             uuid = scheduleEntity.uuid,
             username = scheduleEntity.userName,
             title = scheduleEntity.title,
-            content = "来自SSE Server的日程：" + scheduleEntity.content,
+            content = scheduleEntity.content,
             date = scheduleEntity.date,
             repeatMode = scheduleEntity.repeatMode.toString(),
             location = scheduleEntity.location,
