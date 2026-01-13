@@ -5,6 +5,7 @@ import io.ktor.client.plugins.sse.SSEClientException
 import io.ktor.client.plugins.sse.deserialize
 import io.ktor.client.plugins.sse.sse
 import kmp.project.schedule.entity.ScheduleEntity
+import kmp.project.schedule.entity.SseHello
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
@@ -23,8 +24,12 @@ class SseApi(
             }) {
                 incoming.collect { event ->
                     if (event.data?.isNotEmpty()!!) {
-                        scheduleViewModel.addScheduleFromSseServer(deserialize<ScheduleEntity>(event.data)!!)
-                        println("received event: ${deserialize<ScheduleEntity>(event.data)}")
+                        try {
+                            scheduleViewModel.addScheduleFromSseServer(deserialize<ScheduleEntity>(event.data)!!)
+                            println("received event: ${deserialize<ScheduleEntity>(event.data)}")
+                        } catch (_: Exception) {
+                            ApiConfig.sessionId = deserialize<SseHello>(event.data)!!.sessionId
+                        }
                     }
                 }
             }

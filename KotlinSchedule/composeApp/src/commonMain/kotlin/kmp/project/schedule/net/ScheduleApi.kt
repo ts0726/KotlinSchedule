@@ -17,8 +17,6 @@ class ScheduleApi(
 ) {
     suspend fun addSchedule(scheduleEntity: ScheduleEntity): ApiResult<Unit> {
         return executeRequest {
-            println("addSchedule")
-            println(scheduleEntity)
             val response = clientWithToken.post("$baseUrl/schedules/create") {
                 contentType(ContentType.Application.Json)
                 setBody(scheduleEntity)

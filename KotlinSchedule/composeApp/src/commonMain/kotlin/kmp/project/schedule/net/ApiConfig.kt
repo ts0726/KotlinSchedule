@@ -2,6 +2,7 @@ package kmp.project.schedule.net
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -11,6 +12,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.sse.SSE
+import io.ktor.client.request.header
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
@@ -21,10 +23,12 @@ import kmp.project.schedule.entity.RefreshTokenEntity
 import kmp.project.schedule.sdk.ScheduleSDKHolder
 import kmp.project.schedule.util.tokenUtil.AuthTokenManager
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.seconds
 
 // 全局配置
 object ApiConfig {
-    const val BASE_URL = "http://192.168.237.108:8080"
+    const val BASE_URL = "http://192.168.245.108:8080"
+    var sessionId: String? = null
     val httpClientWithoutToken: HttpClient = HttpClient{
         install(ContentNegotiation) {
             json(Json {
@@ -69,14 +73,18 @@ object ApiConfig {
 
             }
         }
+        install(DefaultRequest) {
+            if (!sessionId.isNullOrBlank()) {
+                header("X-Session-Id", sessionId)
+            }
+        }
     }
     val sseClient: HttpClient = httpClientWithToken.config {
         install(SSE) {
-//            maxReconnectionAttempts = 5
-//            reconnectionTime = 5.seconds
+            maxReconnectionAttempts = 5
+            reconnectionTime = 5.seconds
             showRetryEvents()
             showCommentEvents()
-            showRetryEvents()
         }
         install(Logging) {
             logger = Logger.DEFAULT

@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import kmp.project.schedule.net.ApiConfig
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
@@ -130,5 +131,7 @@ fun TestPage1(
         Text(text = receivedData.value)
 
         Text(text = token.value)
+
+        ApiConfig.sessionId?.let { Text(text = it) }
     }
 }

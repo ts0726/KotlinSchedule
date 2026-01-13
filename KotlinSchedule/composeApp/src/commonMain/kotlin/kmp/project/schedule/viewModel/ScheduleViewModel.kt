@@ -104,6 +104,8 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     fun addScheduleFromSseServer(scheduleEntity: ScheduleEntity) {
         val schedule = entityToSchedule(scheduleEntity)
         val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        if (loadScheduleByUUID(schedule.uuid)?.timestamp == schedule.timestamp)
+            return
         sdk.insertSchedule(schedule)
         if (schedule.date.toInt() == currentDate.toEpochDays()) {
             schedules.add(0, schedule)
