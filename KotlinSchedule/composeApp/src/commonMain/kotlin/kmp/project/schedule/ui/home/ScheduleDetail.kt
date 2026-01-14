@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
@@ -231,6 +232,20 @@ fun ScheduleDetailContent(
             )
             Text(
                 text = if (schedule.username == "") "游客" else schedule.username,
+                fontSize = 20.sp
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Filled.MailOutline,
+                contentDescription = "Device",
+                modifier = Modifier.padding(end = 15.dp)
+            )
+            Text(
+                text = "来自" + schedule.device,
                 fontSize = 20.sp
             )
         }

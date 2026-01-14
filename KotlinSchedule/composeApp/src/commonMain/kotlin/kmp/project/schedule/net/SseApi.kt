@@ -1,5 +1,6 @@
 package kmp.project.schedule.net
 
+import androidx.compose.runtime.MutableState
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.sse.SSEClientException
 import io.ktor.client.plugins.sse.deserialize
@@ -8,6 +9,7 @@ import kmp.project.schedule.entity.ScheduleEntity
 import kmp.project.schedule.entity.SseHello
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.delay
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import okio.EOFException
@@ -16,7 +18,10 @@ class SseApi(
     private val sseClient: HttpClient,
     private val baseUrl: String
 ) {
-    suspend fun receiveEvent(scheduleViewModel: ScheduleViewModel) {
+    suspend fun receiveEvent(
+        scheduleViewModel: ScheduleViewModel,
+        currentDate: MutableState<LocalDate>
+    ) {
         try {
             sseClient.sse(urlString = "$baseUrl/sse/events", deserialize = { typeInfo, jsonString ->
                 val serializer = Json.serializersModule.serializer(typeInfo.kotlinType!!)
@@ -25,7 +30,10 @@ class SseApi(
                 incoming.collect { event ->
                     if (event.data?.isNotEmpty()!!) {
                         try {
-                            scheduleViewModel.addScheduleFromSseServer(deserialize<ScheduleEntity>(event.data)!!)
+                            scheduleViewModel.addScheduleFromSseServer(
+                                deserialize<ScheduleEntity>(event.data)!!,
+                                currentDate.value
+                            )
                             println("received event: ${deserialize<ScheduleEntity>(event.data)}")
                         } catch (_: Exception) {
                             ApiConfig.sessionId = deserialize<SseHello>(event.data)!!.sessionId

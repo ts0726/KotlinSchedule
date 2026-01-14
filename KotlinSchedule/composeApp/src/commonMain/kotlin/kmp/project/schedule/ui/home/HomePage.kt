@@ -81,7 +81,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
  * @param listState 列表状态
  */
 @Composable
-fun mainPage(
+fun MainPage(
     isCompact: Boolean,
     navController: NavHostController = rememberNavController(),
     listState: LazyListState,
@@ -106,7 +106,7 @@ fun mainPage(
     ) {
         //横屏模式下显示日程信息，通过listState同步竖屏时的滚动位置
         if (!isCompact) {
-            scheduledInformation(
+            ScheduledInformation(
                 scheduleViewModel = scheduleViewModel,
                 homePageStateViewModel = homePageStateViewModel,
                 isCompact = isCompact,
@@ -154,7 +154,7 @@ fun mainPage(
  */
 @Suppress("UnrememberedMutableState")
 @Composable
-fun scheduledInformation(
+fun ScheduledInformation(
     scheduleViewModel: ScheduleViewModel,
     homePageStateViewModel: HomePageStateViewModel,
     isCompact: Boolean,
@@ -202,7 +202,7 @@ fun scheduledInformation(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                topBar(
+                TopBar(
                     date = date,
                     homePageStateViewModel = homePageStateViewModel,
                     onAddClick = onAddClick,
@@ -232,7 +232,7 @@ fun scheduledInformation(
                             visible = true,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            topBar(
+                            TopBar(
                                 date = date,
                                 homePageStateViewModel = homePageStateViewModel,
                                 onAddClick = onAddClick,
@@ -303,7 +303,7 @@ fun scheduledInformation(
                 modifier = Modifier.align(Alignment.TopCenter),
                 visible = listState.firstVisibleItemIndex >= 1,
             ) {
-                floatingActionBar(
+                FloatingActionBar(
 //                    showEditMode = showEditMode,
                     homePageStateViewModel = homePageStateViewModel,
                     onAddClick = onAddClick,
@@ -346,7 +346,7 @@ fun scheduledInformation(
  * 横屏模式下在屏幕右侧显示的其他信息
  */
 @Composable
-fun otherInformation(
+fun OtherInformation(
     modifier: Modifier,
     navController: NavHostController,
     date: MutableState<LocalDate>,
@@ -402,7 +402,7 @@ fun otherInformation(
  * 显示用户信息
  */
 @Composable
-fun topBar(
+fun TopBar(
     modifier: Modifier = Modifier,
     date: MutableState<LocalDate>,
     homePageStateViewModel: HomePageStateViewModel,
@@ -558,7 +558,7 @@ fun topBar(
 }
 
 @Composable
-fun floatingActionBar(
+fun FloatingActionBar(
     homePageStateViewModel: HomePageStateViewModel,
     onAddClick: () -> Unit,
     onCloseClick: () -> Unit,

@@ -56,7 +56,7 @@ import kmp.project.schedule.net.sseApi
 import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.sdk.ScheduleSDKHolder
 import kmp.project.schedule.ui.TestPage1
-import kmp.project.schedule.ui.home.mainPage
+import kmp.project.schedule.ui.home.MainPage
 import kmp.project.schedule.ui.my.MyPage
 import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.viewModel.AuthViewModel
@@ -85,7 +85,7 @@ fun App() {
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        sseApi.receiveEvent(scheduleViewModel)
+        sseApi.receiveEvent(scheduleViewModel, date)
     }
 
     CustomTheme {
@@ -148,7 +148,7 @@ fun CustomScaffold(
                 ContentContainer(
                     content = {
                         when (pageID.intValue) {
-                            0 -> mainPage(
+                            0 -> MainPage(
                                 isCompact = isCompact,
                                 listState = listState,
                                 scheduleViewModel = scheduleViewModel,

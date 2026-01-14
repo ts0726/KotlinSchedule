@@ -20,8 +20,8 @@ import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.home.NewSchedule
 import kmp.project.schedule.ui.home.ScheduleDetail
-import kmp.project.schedule.ui.home.otherInformation
-import kmp.project.schedule.ui.home.scheduledInformation
+import kmp.project.schedule.ui.home.OtherInformation
+import kmp.project.schedule.ui.home.ScheduledInformation
 import kmp.project.schedule.util.viewUtil.showSnackBar
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -99,7 +99,7 @@ fun HomeNavHost(
     ) {
         composable("home") {
             if (isCompact) {
-                scheduledInformation(
+                ScheduledInformation(
                     scheduleViewModel = scheduleViewModel,
                     homePageStateViewModel = homePageStateViewModel,
                     isCompact = isCompact,
@@ -121,11 +121,11 @@ fun HomeNavHost(
                     username = authViewModel.getUserName() ?: ""
                 )
             } else {
-                otherInformation(
+                OtherInformation(
                     modifier,
                     navController,
                     date,
-                    scheduleList.size
+                    scheduleList.filter { !it.finished.toBoolean() }.size
                 )
             }
 
