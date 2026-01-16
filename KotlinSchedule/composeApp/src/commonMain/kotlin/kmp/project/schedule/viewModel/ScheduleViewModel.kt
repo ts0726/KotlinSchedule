@@ -172,6 +172,14 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         schedulesToDelete.clear()
     }
 
+    fun deleteSchedulesFromSSEServer(uuids: List<String>) {
+        uuids.forEach {
+//            println("delete schedule: $it")
+            sdk.deleteSchedule(it)
+            schedules.removeIf { schedule -> schedule.uuid == it }
+        }
+    }
+
     fun finishSchedule(
         schedule: Schedule,
         showSnackBar: (String) -> Unit

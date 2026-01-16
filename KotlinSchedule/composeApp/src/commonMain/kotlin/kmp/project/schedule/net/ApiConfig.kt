@@ -27,7 +27,7 @@ import kotlin.time.Duration.Companion.seconds
 
 // 全局配置
 object ApiConfig {
-    const val BASE_URL = "http://192.168.245.108:8080"
+    const val BASE_URL = "http://192.168.106.108:8080"
     var sessionId: String? = null
     val httpClientWithoutToken: HttpClient = HttpClient{
         install(ContentNegotiation) {

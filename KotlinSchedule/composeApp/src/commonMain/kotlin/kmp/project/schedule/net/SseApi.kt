@@ -6,6 +6,7 @@ import io.ktor.client.plugins.sse.SSEClientException
 import io.ktor.client.plugins.sse.deserialize
 import io.ktor.client.plugins.sse.sse
 import kmp.project.schedule.entity.ScheduleEntity
+import kmp.project.schedule.entity.SchedulesToDelete
 import kmp.project.schedule.entity.SseHello
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.delay
@@ -27,6 +28,7 @@ class SseApi(
                 val serializer = Json.serializersModule.serializer(typeInfo.kotlinType!!)
                 Json.decodeFromString(serializer, jsonString)!!
             }) {
+                println("JSON input: $this")
                 incoming.collect { event ->
                     if (event.data?.isNotEmpty()!!) {
                         try {
@@ -34,9 +36,17 @@ class SseApi(
                                 deserialize<ScheduleEntity>(event.data)!!,
                                 currentDate.value
                             )
-                            println("received event: ${deserialize<ScheduleEntity>(event.data)}")
+//                            println("received event: ${deserialize<ScheduleEntity>(event.data)}")
                         } catch (_: Exception) {
-                            ApiConfig.sessionId = deserialize<SseHello>(event.data)!!.sessionId
+                            try {
+//                                println("received non-schedule event: ${event.data}")
+                                ApiConfig.sessionId = deserialize<SseHello>(event.data)!!.sessionId
+                            } catch (_: Exception) {
+//                                println("received delete-schedule event: ${event.data}")
+                                val deleteList = deserialize<SchedulesToDelete>(event.data)?.uuids
+//                                println("deleteList: $deleteList")
+                                scheduleViewModel.deleteSchedulesFromSSEServer(deleteList!!)
+                            }
                         }
                     }
                 }
