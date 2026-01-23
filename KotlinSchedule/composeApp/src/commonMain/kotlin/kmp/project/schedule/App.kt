@@ -63,6 +63,7 @@ import kmp.project.schedule.viewModel.AuthViewModel
 import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -85,6 +86,20 @@ fun App() {
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
+        val currentUser = authViewModel.getUserName()
+        if (!currentUser.isNullOrEmpty()) {
+            // 启动时增量同步数据
+            scheduleViewModel.syncDataIncrementally(
+                userName = currentUser,
+                showSnackBar = {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(it)
+                    }
+                },
+                currentDate = date.value
+            )
+        }
+
         sseApi.receiveEvent(scheduleViewModel, date)
     }
 

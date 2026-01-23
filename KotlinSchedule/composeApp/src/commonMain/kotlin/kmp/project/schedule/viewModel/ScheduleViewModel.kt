@@ -174,7 +174,6 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
 
     fun deleteSchedulesFromSSEServer(uuids: List<String>) {
         uuids.forEach {
-//            println("delete schedule: $it")
             sdk.deleteSchedule(it)
             schedules.removeIf { schedule -> schedule.uuid == it }
         }
@@ -185,7 +184,10 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         showSnackBar: (String) -> Unit
     ) {
         updateSchedule(
-            schedule = schedule.copy(finished = schedule.finished.toBoolean().not().toString()),
+            schedule = schedule.copy(
+                finished = schedule.finished.toBoolean().not().toString(),
+                timestamp = getTimestamp()
+            ),
             showSnackBar = showSnackBar
         )
     }
@@ -234,6 +236,89 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
             schedule.copy(sequence = index.toLong())
         }
         sdk.updateSchedules(updatedSchedules)
+    }
+
+    /**
+     * 增量同步日程
+     * @param userName 当前用户名
+     * @param showSnackBar 显示提示信息
+     * @param currentDate 当前日期
+     * 通过对比本地和云端的时间戳，进行增量同步日程
+     * 1. 获取云端所有日程的uuid和时间戳
+     * 2. 获取本地所有日程的uuid和时间戳
+     * 3. 对比uuid，找出新增、更新和删除的日程
+     * 4. 对于新增和更新的日程，获取其详细信息并更新本地数据库
+     * 5. 对于删除的日程，从本地数据库中删除
+     * 6. 更新视图中的日程列表
+     */
+    fun syncDataIncrementally(
+        userName: String,
+        showSnackBar: (String) -> Unit,
+        currentDate: LocalDate
+    ) {
+        if (userName.isBlank())
+            return
+
+        viewModelScope.launch {
+            try {
+                val syncResult = scheduleApi.syncSchedules()
+                if (syncResult is ApiResult.Success) {
+                    val syncList = syncResult.data
+                    val localSchedules = sdk.getAllSchedulesByUsername(userName)
+                    //获取本地和云端的uuid列表
+                    val localUuids = localSchedules.map { it.uuid }
+                    val syncUuids = syncList.map { it.uuids }
+                    //获取新增日程
+                    val schedulesToAdd = syncList.filter { !localUuids.contains(it.uuids) }
+                    //根据时间戳获得更新日程
+                    val schedulesToUpdate = syncList
+                        .filter { localUuids.contains(it.uuids) }
+                        .filter { syncEntity ->
+                            val localSchedule = localSchedules.find { it.uuid == syncEntity.uuids }
+                            localSchedule != null && syncEntity.timestamp > localSchedule.timestamp
+                        }
+                    //获取删除日程
+                    val schedulesToDelete = localSchedules.filter { !syncUuids.contains(it.uuid) }
+
+                    //执行增量更新
+                    val changedUuids = (schedulesToAdd + schedulesToUpdate).map { it.uuids }
+                    if (changedUuids.isNotEmpty()) {
+                        val scheduleDetailsResult = scheduleApi.getSchedulesByUuids(changedUuids)
+                        if (scheduleDetailsResult is ApiResult.Success) {
+                            val scheduleEntities = scheduleDetailsResult.data
+                            scheduleEntities.forEach { entity ->
+                                val schedule = entityToSchedule(entity)
+                                if (loadScheduleByUUID(schedule.uuid) != null) {    //如果存在则更新
+                                    sdk.updateSchedule(schedule)
+                                    val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
+                                    //更新视图
+                                    if (schedule.date.toInt() == currentDate.toEpochDays()) {
+                                        //更新当前日期的日程列表
+                                        schedules.set(index = index, element = schedule)
+                                    } else {
+                                        schedules.removeIf { schedule.uuid == it.uuid }
+                                    }
+                                } else {    //不存在则插入
+                                    sdk.insertSchedule(schedule)
+                                    if (schedule.date.toInt() == currentDate.toEpochDays()) {
+                                        schedules.add(0, schedule)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    schedulesToDelete.forEach {schedule ->
+                        sdk.deleteSchedule(schedule.uuid)
+                        schedules.remove(schedule)
+                    }
+                    showSnackBar("日程同步完成：新增${schedulesToAdd.size}条，更新${schedulesToUpdate.size}条，删除${schedulesToDelete.size}条")
+                }else if (syncResult is ApiResult.Error) {
+                    showSnackBar("日程同步失败：${syncResult.message}")
+                }
+            } catch (e: Exception) {
+                showSnackBar("日程同步失败：${e.message}")
+            }
+        }
     }
 
     private fun scheduleToEntity(schedule: Schedule): ScheduleEntity {

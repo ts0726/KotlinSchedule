@@ -22,6 +22,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 selectAllSchedules:
 SELECT * FROM Schedule;
 
+-- 根据用户名查询所有日程数据
+selectSchedulesByUsername:
+SELECT * FROM Schedule WHERE username = ? ORDER BY date, sequence;
+
 -- 根据ID查询一条日程数据
 selectScheduleById:
 SELECT * FROM Schedule WHERE id = ?;
@@ -38,7 +42,7 @@ WHERE username = ? AND (date = ? OR repeatMode != 'NONE')  ORDER BY sequence;
 -- 更新一条日程数据
 updateSchedule:
 UPDATE Schedule
-SET title = ?, content = ?, date = ?, repeatMode = ?, location = ?, sequence = ?, device = ?, finished = ?
+SET title = ?, content = ?, date = ?, repeatMode = ?, location = ?, sequence = ?, device = ?, finished = ?, timestamp = ?
 WHERE uuid = ?;
 
 -- 完成一条日程

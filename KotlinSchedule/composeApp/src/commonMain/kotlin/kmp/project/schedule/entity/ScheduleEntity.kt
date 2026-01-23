@@ -37,3 +37,11 @@ data class ScheduleResult(
     @SerialName("failure")
     val failure: Int
 )
+
+@Serializable
+data class SyncScheduleEntity(
+    @SerialName("uuids")
+    val uuids: String,
+    @SerialName("timestamp")
+    val timestamp: Long
+)

@@ -52,9 +52,9 @@ class ScheduleSDK(
         database.createSchedule(schedule)
     }
 
-//    fun getAllScheduleList(): List<Schedule> {
-//        return database.getAllSchedules()
-//    }
+    fun getAllSchedulesByUsername(username: String): List<Schedule> {
+        return database.getAllSchedulesByUsername(username)
+    }
 
     fun getScheduleByDate(username: String, date: Long): List<Schedule> {
 //        return database.getAllSchedules().filter { it.date == date }

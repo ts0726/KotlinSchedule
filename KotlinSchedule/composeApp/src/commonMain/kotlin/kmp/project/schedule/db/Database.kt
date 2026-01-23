@@ -11,6 +11,10 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         return dbQuery.selectAllSchedules(::mapResultToList).executeAsList()
     }
 
+    internal fun getAllSchedulesByUsername(username: String): List<Schedule> {
+        return dbQuery.selectSchedulesByUsername(username).executeAsList()
+    }
+
     internal fun getAllSchedulesbyDate(username: String, date: Long): List<Schedule> {
         return dbQuery.selectSchedulesByDate(username, date).executeAsList()
     }
@@ -50,7 +54,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                 uuid = schedule.uuid,
                 sequence = schedule.sequence,
                 device = schedule.device,
-                finished = schedule.finished
+                finished = schedule.finished,
+                timestamp = schedule.timestamp
             )
         }
     }
@@ -67,7 +72,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
                     uuid = schedule.uuid,
                     sequence = schedule.sequence,
                     device = schedule.device,
-                    finished = schedule.finished
+                    finished = schedule.finished,
+                    timestamp = schedule.timestamp
                 )
             }
         }
