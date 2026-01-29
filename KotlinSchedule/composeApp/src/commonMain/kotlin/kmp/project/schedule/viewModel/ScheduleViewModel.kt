@@ -252,6 +252,10 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         } else {
             schedules.removeIf { schedule.uuid == it.uuid }
         }
+        schedules.sortWith(
+            compareBy<Schedule> { it.sequence }
+                .thenByDescending { it.timestamp }
+        )
     }
 
     fun reorderSchedules(
