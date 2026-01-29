@@ -55,7 +55,7 @@ class ScheduleApi(
         }
     }
 
-    suspend fun updateSchedules(scheduleEntity: ScheduleEntity): ApiResult<Unit> {
+    suspend fun updateSchedule(scheduleEntity: ScheduleEntity): ApiResult<Unit> {
         return executeRequest {
             val response = clientWithToken.post("$baseUrl/schedules/update") {
                 contentType(ContentType.Application.Json)
@@ -65,6 +65,20 @@ class ScheduleApi(
                 200 -> ApiResult.Success(response.body())
                 401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未登录或登陆已过期，请尝试重新登陆以更新日程")
                 404 -> ApiResult.Error(NetStatus.NOT_FOUND, "该日程未上传")
+                else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
+            }
+        }
+    }
+
+    suspend fun updateSchedules(schedules: List<ScheduleEntity>): ApiResult<Unit> {
+        return executeRequest {
+            val response = clientWithToken.post("$baseUrl/schedules/updates") {
+                contentType(ContentType.Application.Json)
+                setBody(schedules)
+            }
+            when (response.status.value) {
+                200 -> ApiResult.Success(response.body())
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未登录或登陆已过期，请尝试重新登陆以更新日程")
                 else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
             }
         }

@@ -290,7 +290,7 @@ fun ScheduledInformation(
                             },
                             scope = this,
                             haptic = haptic,
-                            onDragStopped = { scheduleViewModel.reorderSchedules() },
+                            onDragStopped = { scheduleViewModel.reorderSchedules(showSnackBar) },
                             onScheduleFinished = { scheduleViewModel.finishSchedule(it, showSnackBar) }
                         )
                     }

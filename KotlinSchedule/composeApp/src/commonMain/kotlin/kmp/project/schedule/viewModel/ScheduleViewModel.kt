@@ -126,6 +126,10 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     fun loadSchedules(userName: String, date: MutableState<LocalDate>) {
         schedules.clear()
         schedules.addAll(sdk.getScheduleByDate(userName, date.value.toEpochDays().toLong()))
+        schedules.sortWith(
+            compareBy<Schedule> { it.sequence }
+                .thenByDescending { it.timestamp }
+        )
     }
 
     fun deleteSchedule(
@@ -201,7 +205,7 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
         if (schedule.username != "") {
             viewModelScope.launch {
-                val result = scheduleApi.updateSchedules(scheduleToEntity(schedule))
+                val result = scheduleApi.updateSchedule(scheduleToEntity(schedule))
                 if (result is ApiResult.Success) {
                     showSnackBar("云端更新成功")
                 } else if (result is ApiResult.Error) {
@@ -218,6 +222,25 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
     }
 
+    private fun updateSchedules(
+        schedules: List<Schedule>,
+        showSnackBar: (String) -> Unit
+    ) {
+        if (schedules.isEmpty()) {
+            return
+        }
+        if (schedules[0].username != "") {
+            viewModelScope.launch {
+                val result = scheduleApi.updateSchedules(schedules.map { scheduleToEntity(it) })
+                if (result is ApiResult.Success) {
+                    showSnackBar("云端批量更新成功")
+                } else if (result is ApiResult.Error) {
+                    showSnackBar("云端批量更新失败：${result.message}")
+                }
+            }
+        }
+    }
+
     private fun updateScheduleFromSseServer(
         schedule: Schedule,
         currentDate: LocalDate
@@ -231,10 +254,13 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
         }
     }
 
-    fun reorderSchedules() {
+    fun reorderSchedules(
+        showSnackBar: (String) -> Unit
+    ) {
         val updatedSchedules = schedules.mapIndexed{ index, schedule ->
-            schedule.copy(sequence = index.toLong())
+            schedule.copy(sequence = index.toLong()).copy(timestamp = getTimestamp())
         }
+        updateSchedules(updatedSchedules, showSnackBar)
         sdk.updateSchedules(updatedSchedules)
     }
 
