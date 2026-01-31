@@ -261,11 +261,27 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
     fun reorderSchedules(
         showSnackBar: (String) -> Unit
     ) {
-        val updatedSchedules = schedules.mapIndexed{ index, schedule ->
-            schedule.copy(sequence = index.toLong()).copy(timestamp = getTimestamp())
+        //判断是否需要更新
+        var needUpdate = false
+        for (i in schedules.indices) {
+            if (schedules[i].sequence != i.toLong()) {
+                needUpdate = true
+                break
+            }
         }
-        updateSchedules(updatedSchedules, showSnackBar)
-        sdk.updateSchedules(updatedSchedules)
+        if (needUpdate) {
+            val updatedSchedules = schedules.mapIndexed{ index, schedule ->
+                schedule.copy(sequence = index.toLong()).copy(timestamp = getTimestamp())
+            }
+            updateSchedules(updatedSchedules, showSnackBar)
+            sdk.updateSchedules(updatedSchedules)
+            //更新视图
+            for (i in schedules.indices) {
+                schedules[i] = updatedSchedules[i]
+            }
+        } else {
+            return
+        }
     }
 
     /**
