@@ -25,13 +25,6 @@ import kmp.project.schedule.util.timeUtil.convertMonthOfYearToChinese
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 
-
-//@Composable
-//@Preview
-//fun CalendarPreview() {
-////    CalendarView(YearMonth.now()) {}
-//}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
@@ -246,6 +239,12 @@ fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState
  */
 data class CalendarDay(val day: Int, val isCurrentMonth: Boolean, val isToday: Boolean, val onClick: () -> Unit)
 
+/**
+ * 生成日历日期列表
+ * @param date 当前日期
+ * @param onDayClick 点击日期回调函数
+ * @return 日期列表
+ */
 fun generateCalendarDays(date: LocalDate, onDayClick: (LocalDate) -> Unit): List<CalendarDay> {
     val days = mutableListOf<CalendarDay>()
     val firstDayOfMonth = LocalDate(date.year, date.month, 1)
