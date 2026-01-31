@@ -23,6 +23,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -32,12 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.datetime.LocalDate
-
-//@Composable
-//@Preview
-//fun dialogPreview() {
-////    CalendarPickerDialog({}, {})
-//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +44,7 @@ fun CalendarPickerDialog(
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ) {
         var localDate = date.value
         Card(
