@@ -30,6 +30,20 @@ class ScheduleApi(
         }
     }
 
+    suspend fun addSchedules(scheduleEntities: List<ScheduleEntity>): ApiResult<Unit> {
+        return executeRequest {
+            val response = clientWithToken.post("$baseUrl/schedules/creates") {
+                contentType(ContentType.Application.Json)
+                setBody(scheduleEntities)
+            }
+            when (response.status.value) {
+                200 -> ApiResult.Success(response.body())
+                401 -> ApiResult.Error(NetStatus.UNAUTHORIZED, "未登录或登陆已过期，请尝试重新登陆以上传日程")
+                else -> ApiResult.Error(NetStatus.SERVER_ERROR, "服务器错误")
+            }
+        }
+    }
+
     suspend fun deleteSchedule(uuid: String): ApiResult<Unit> {
         return executeRequest {
             val response = clientWithToken.delete("$baseUrl/schedules/$uuid")

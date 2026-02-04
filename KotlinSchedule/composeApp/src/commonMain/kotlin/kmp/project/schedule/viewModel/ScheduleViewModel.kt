@@ -325,30 +325,27 @@ class ScheduleViewModel(private val sdk: ScheduleSDK): ViewModel() {
                         }
                     //获取删除日程
                     val schedulesToDelete = localSchedules.filter { !syncUuids.contains(it.uuid) }
-
                     //执行增量更新
                     val changedUuids = (schedulesToAdd + schedulesToUpdate).map { it.uuids }
-                    if (changedUuids.isNotEmpty()) {
-                        val scheduleDetailsResult = scheduleApi.getSchedulesByUuids(changedUuids)
-                        if (scheduleDetailsResult is ApiResult.Success) {
-                            val scheduleEntities = scheduleDetailsResult.data
-                            scheduleEntities.forEach { entity ->
-                                val schedule = entityToSchedule(entity)
-                                if (loadScheduleByUUID(schedule.uuid) != null) {    //如果存在则更新
-                                    sdk.updateSchedule(schedule)
-                                    val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
-                                    //更新视图
-                                    if (schedule.date.toInt() == currentDate.toEpochDays()) {
-                                        //更新当前日期的日程列表
-                                        schedules.set(index = index, element = schedule)
-                                    } else {
-                                        schedules.removeIf { schedule.uuid == it.uuid }
-                                    }
-                                } else {    //不存在则插入
-                                    sdk.insertSchedule(schedule)
-                                    if (schedule.date.toInt() == currentDate.toEpochDays()) {
-                                        schedules.add(0, schedule)
-                                    }
+                    val scheduleDetailsResult = scheduleApi.getSchedulesByUuids(changedUuids)
+                    if (changedUuids.isNotEmpty() && scheduleDetailsResult is ApiResult.Success) {
+                        val scheduleEntities = scheduleDetailsResult.data
+                        scheduleEntities.forEach { entity ->
+                            val schedule = entityToSchedule(entity)
+                            if (loadScheduleByUUID(schedule.uuid) != null) {    //如果存在则更新
+                                sdk.updateSchedule(schedule)
+                                val index = schedules.indexOfFirst { it.uuid == schedule.uuid }
+                                //更新视图
+                                if (schedule.date.toInt() == currentDate.toEpochDays()) {
+                                    //更新当前日期的日程列表
+                                    schedules.set(index = index, element = schedule)
+                                } else {
+                                    schedules.removeIf { schedule.uuid == it.uuid }
+                                }
+                            } else {    //不存在则插入
+                                sdk.insertSchedule(schedule)
+                                if (schedule.date.toInt() == currentDate.toEpochDays()) {
+                                    schedules.add(0, schedule)
                                 }
                             }
                         }
