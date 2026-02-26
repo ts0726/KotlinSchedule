@@ -30,7 +30,8 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.android.driver)
-            implementation(libs.koin.androidx.compose)
+//            implementation(libs.koin.androidx.compose)
+            implementation(libs.koin.android)
             implementation(libs.ktor.client.cio)//平台特定ktor engine
         }
         commonMain.dependencies {
@@ -40,11 +41,12 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.jetbrains.kotlinx.datetime)
             implementation("dev.chrisbanes.material3:material3-window-size-class-multiplatform:0.5.0")
-            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.7.0-alpha07")
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.1")
             implementation(libs.okio)
             implementation(libs.reorderable)
             implementation(libs.ktor.client.core)
@@ -53,6 +55,9 @@ kotlin {
             implementation(libs.ktor.client.auth)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.multiplatform.settings)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

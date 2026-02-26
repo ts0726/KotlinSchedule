@@ -1,6 +1,6 @@
 package kmp.project.schedule.util.viewUtil
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 

@@ -11,19 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.viewModel.HomePageStateViewModel
-import kmp.project.schedule.viewModel.ScheduleViewModel
 import kmp.project.schedule.ui.home.NewSchedule
-import kmp.project.schedule.ui.home.ScheduleDetail
 import kmp.project.schedule.ui.home.OtherInformation
+import kmp.project.schedule.ui.home.ScheduleDetail
 import kmp.project.schedule.ui.home.ScheduledInformation
 import kmp.project.schedule.util.viewUtil.showSnackBar
 import kmp.project.schedule.viewModel.AuthViewModel
+import kmp.project.schedule.viewModel.HomePageStateViewModel
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -61,39 +59,35 @@ fun HomeNavHost(
         startDestination = "home",
         modifier = modifier,
         enterTransition = {
-            fadeIn(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
-            ) + slideIntoContainer(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+            slideIntoContainer(
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                initialOffset = { fullSize -> fullSize / 3 }
             )
         },
         exitTransition = {
             fadeOut(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 300, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
             ) + slideOutOfContainer(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
                 targetOffset = { fullSize -> fullSize / 3 }
             )
         },
         popEnterTransition = {
             fadeIn(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
             ) + slideIntoContainer(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
                 towards = AnimatedContentTransitionScope.SlideDirection.End,
-                initialOffset = { fullSize -> fullSize / 3 }
+                initialOffset = { fullSize -> fullSize / 2 }
             )
         },
         popExitTransition = {
             fadeOut(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 300, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
             ) + slideOutOfContainer(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
                 towards = AnimatedContentTransitionScope.SlideDirection.End,
-                targetOffset = { fullSize -> fullSize / 3 }
             )
         }
     ) {
@@ -108,9 +102,10 @@ fun HomeNavHost(
                     list = scheduleList,
                     date = date,
                     onScheduleCardClick = { uuid ->
-                        navController.navigate("scheduleDetail/$uuid") {
+                        navController.navigate("scheduleDetail") {
+                            scheduleViewModel.transportUuid = uuid
                             //清除栈中的日程详情页面，防止叠加
-                            popUpTo("scheduleDetail/{uuid}") {
+                            popUpTo("scheduleDetail") {
                                 inclusive = true
                             }
                         }
@@ -163,17 +158,10 @@ fun HomeNavHost(
             )
         }
         composable(
-            route = "scheduleDetail/{uuid}",
-            arguments = listOf(
-                navArgument("uuid") {
-                    type = NavType.StringType
-                    defaultValue = ""
-                },
-            )
+            route = "scheduleDetail",
         ) { backStackEntry ->
-            val uuid = backStackEntry.arguments?.getString("uuid") ?: ""
             ScheduleDetail(
-                uuid = uuid,
+                uuid = scheduleViewModel.transportUuid,
                 navHostController = navController,
                 viewModel = scheduleViewModel,
                 showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) }

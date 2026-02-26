@@ -20,14 +20,14 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kmp.project.schedule.entity.RefreshTokenEntity
-import kmp.project.schedule.sdk.ScheduleSDKHolder
 import kmp.project.schedule.util.tokenUtil.AuthTokenManager
 import kotlinx.serialization.json.Json
+import org.koin.mp.KoinPlatform
 import kotlin.time.Duration.Companion.seconds
 
 // 全局配置
 object ApiConfig {
-    const val BASE_URL = "http://192.168.106.108:8080"
+    const val BASE_URL = "http://192.168.0.9:8080"
     var sessionId: String? = null
     val httpClientWithoutToken: HttpClient = HttpClient{
         install(ContentNegotiation) {
@@ -46,7 +46,9 @@ object ApiConfig {
         }
         install(Auth) {
             bearer {
-                val tokenManager = AuthTokenManager(ScheduleSDKHolder.instance)
+                val tokenManager = AuthTokenManager(
+                    settingsManager = KoinPlatform.getKoin().get()
+                )
                 loadTokens {
                     BearerTokens(
                         accessToken = tokenManager.getAccessToken()?:"",
@@ -75,6 +77,7 @@ object ApiConfig {
         }
         install(DefaultRequest) {
             if (!sessionId.isNullOrBlank()) {
+                println("sessionId: $sessionId")
                 header("X-Session-Id", sessionId)
             }
         }

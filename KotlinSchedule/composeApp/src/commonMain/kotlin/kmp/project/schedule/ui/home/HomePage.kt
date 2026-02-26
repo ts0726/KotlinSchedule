@@ -115,9 +115,10 @@ fun MainPage(
                 list = scheduleList,
                 date = date,
                 onScheduleCardClick = { uuid ->
-                    navController.navigate("scheduleDetail/$uuid") {
+                    scheduleViewModel.transportUuid = uuid
+                    navController.navigate("scheduleDetail") {
                         //清除栈中的日程详情页面，防止叠加
-                        popUpTo("scheduleDetail/{uuid}") {
+                        popUpTo("scheduleDetail") {
                             inclusive = true
                         }
                     }
@@ -326,7 +327,7 @@ fun ScheduledInformation(
                 onConfirm = {
                     homePageStateViewModel.setShowConfirmDialog(false)
                     scheduleViewModel.deleteSchedules(username, showSnackBar)
-                    scheduleViewModel.schedulesToDelete.clear()
+//                    scheduleViewModel.schedulesToDelete.clear()
                 },
                 onDismiss = { homePageStateViewModel.setShowConfirmDialog(false) }
             )

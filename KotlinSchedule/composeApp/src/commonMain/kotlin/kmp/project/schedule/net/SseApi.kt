@@ -21,7 +21,8 @@ class SseApi(
 ) {
     suspend fun receiveEvent(
         scheduleViewModel: ScheduleViewModel,
-        currentDate: MutableState<LocalDate>
+        currentDate: MutableState<LocalDate>,
+        onSessionIdReceived: (() -> Unit)? = null
     ) {
         try {
             sseClient.sse(urlString = "$baseUrl/sse/events", deserialize = { typeInfo, jsonString ->
@@ -36,15 +37,12 @@ class SseApi(
                                 deserialize<ScheduleEntity>(event.data)!!,
                                 currentDate.value
                             )
-//                            println("received event: ${deserialize<ScheduleEntity>(event.data)}")
                         } catch (_: Exception) {
                             try {
-//                                println("received non-schedule event: ${event.data}")
                                 ApiConfig.sessionId = deserialize<SseHello>(event.data)!!.sessionId
+                                onSessionIdReceived?.invoke()
                             } catch (_: Exception) {
-//                                println("received delete-schedule event: ${event.data}")
                                 val deleteList = deserialize<SchedulesToDelete>(event.data)?.uuids
-//                                println("deleteList: $deleteList")
                                 scheduleViewModel.deleteSchedulesFromSSEServer(deleteList!!)
                             }
                         }

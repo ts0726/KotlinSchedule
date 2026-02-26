@@ -12,8 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import kmp.project.schedule.net.ApiConfig
 import kmp.project.schedule.net.ApiResult
-import kmp.project.schedule.sdk.ScheduleSDK
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
+import kmp.project.schedule.util.SettingsManager
 import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.util.timeUtil.LunarUtil
 import kmp.project.schedule.viewModel.AuthViewModel
@@ -21,26 +21,27 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import org.koin.mp.KoinPlatform
 
 
-@Suppress("CoroutineCreationDuringComposition")
+@Suppress("CoroutineCreationDuringComposition", "ViewModelConstructorInComposable")
 @Composable
 fun TestPage1(
-    onButtonClick: () -> Unit,
-    sdk: ScheduleSDK
+    onButtonClick: () -> Unit
 ) {
+    val settingsManager = KoinPlatform.getKoin().get<SettingsManager>()
     val showDatePickerDialog = remember { mutableStateOf(false) }
     val time = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     val today = time.value.atStartOfDayIn(TimeZone.UTC).toLocalDateTime(TimeZone.UTC)
     val lunar = LunarUtil(today).getChineseLunarDay()
     val receivedData = remember { mutableStateOf("") }
     val token = remember { mutableStateOf("") }
-    val authViewModel = AuthViewModel(sdk)
+    val authViewModel = AuthViewModel(KoinPlatform.getKoin().get())
 
 //    loadingDialog(
 //        title = "正在登录",
@@ -53,10 +54,10 @@ fun TestPage1(
             when(result) {
                 is ApiResult.Success -> {
                     println("success")
-                    sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.data.accessToken)
+                    settingsManager.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.data.accessToken)
                 }
                 is ApiResult.Error -> {
-                    sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.status.toString())
+                    settingsManager.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.status.toString())
                 }
                 null -> {
 
@@ -71,7 +72,7 @@ fun TestPage1(
                     println("注册成功")
                 }
                 is ApiResult.Error -> {
-                    sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.message!!)
+                    settingsManager.addSetting(SettingsName.ACCESS_TOKEN.toString(), result.message!!)
                 }
                 null -> {
 
@@ -114,7 +115,7 @@ fun TestPage1(
 
         Button(
             onClick = {
-                sdk.addSetting(SettingsName.ACCESS_TOKEN.toString(), "test token")
+                settingsManager.addSetting(SettingsName.ACCESS_TOKEN.toString(), "test token")
             }
         ) {
             Text("save token")
@@ -131,6 +132,8 @@ fun TestPage1(
         Text(text = receivedData.value)
 
         Text(text = token.value)
+
+        Text(text = "isUploded = ${settingsManager.getSetting(key = "009d9bf1-0e71-49a6-810e-d0463249f782", Boolean::class.java)}")
 
         ApiConfig.sessionId?.let { Text(text = it) }
     }

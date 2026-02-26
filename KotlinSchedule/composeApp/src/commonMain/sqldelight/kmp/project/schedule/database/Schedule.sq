@@ -10,7 +10,8 @@ CREATE TABLE Schedule (
     sequence INTEGER NOT NULL, -- 排序
     finished TEXT NOT NULL, -- 完成状态
     timestamp INTEGER NOT NULL, --时间戳
-    device TEXT NOT NULL --设备名称
+    device TEXT NOT NULL, --设备名称
+    sync_status TEXT NOT NULL DEFAULT 'PENDING' -- 同步状态
 );
 
 -- 插入一条新的日程数据
@@ -44,6 +45,16 @@ updateSchedule:
 UPDATE Schedule
 SET title = ?, content = ?, date = ?, repeatMode = ?, location = ?, sequence = ?, device = ?, finished = ?, timestamp = ?
 WHERE uuid = ?;
+
+-- 更新日程的同步状态
+updateScheduleSyncStatus:
+UPDATE Schedule
+SET sync_status = ?
+WHERE uuid = ?;
+
+-- 获取日程的同步状态
+selectScheduleSyncStatus:
+SELECT sync_status FROM Schedule WHERE uuid = ?;
 
 -- 完成一条日程
 finishSchedule:

@@ -2,6 +2,7 @@ package kmp.project.schedule.db
 
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.database.ScheduleDatabase
+import kmp.project.schedule.domain.sync.SyncStatus
 
 internal class Database (databaseDriverFactory: DatabaseDriverFactory){
     private val database = ScheduleDatabase(databaseDriverFactory.createDriver())
@@ -79,6 +80,15 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         }
     }
 
+    internal fun updateScheduleSyncStatus(uuid: String, syncStatus: SyncStatus) {
+        dbQuery.transaction {
+            dbQuery.updateScheduleSyncStatus(
+                sync_status = syncStatus.toString(),
+                uuid = uuid
+            )
+        }
+    }
+
     private fun mapResultToList(
         id: Long,
         uuid: String,
@@ -91,7 +101,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         sequence: Long,
         finished: String,
         timestamp: Long,
-        device: String
+        device: String,
+        syncStatus: String,
     ): Schedule {
         return Schedule(
             id = id,
@@ -105,7 +116,8 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
             sequence = sequence,
             finished = finished,
             timestamp = timestamp,
-            device = device
+            device = device,
+            sync_status = syncStatus
         )
     }
 

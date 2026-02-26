@@ -23,30 +23,32 @@ import kmp.project.schedule.util.timeUtil.LunarUtil
 import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.util.timeUtil.convertMonthOfYearToChinese
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 import kotlinx.datetime.*
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.number
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
-    val initPager = (currentDate.year - 1901 - 1) * 12 + currentDate.monthNumber
+    val initPager = (currentDate.year - 1901 - 1) * 12 + currentDate.month.number
     val pagerState = rememberPagerState(initialPage = initPager, pageCount = { (2099 - 1901) * 12 })
     val year = remember { mutableIntStateOf(currentDate.year) }
-    val month = remember { mutableIntStateOf(currentDate.monthNumber) }
-//    var days: List<CalendarDay>
+    val month = remember { mutableIntStateOf(currentDate.month.number) }
     //初始化被选择的日期为今天
-    val selectedDay = remember { mutableIntStateOf(currentDate.toEpochDays()) }
+    val selectedDay = remember { mutableLongStateOf(currentDate.toEpochDays()) }
 
     LaunchedEffect(pagerState.currentPage) {
         val yearMonth = currentDate.plus(DatePeriod(months = pagerState.currentPage - initPager))
         year.intValue = yearMonth.year
-        month.intValue = yearMonth.monthNumber
+        month.intValue = yearMonth.month.number
     }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
-            text = convertLocalDateToDate(LocalDate.fromEpochDays(selectedDay.intValue)),
+            text = convertLocalDateToDate(LocalDate.fromEpochDays(selectedDay.longValue)),
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
@@ -94,7 +96,7 @@ fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
 @Composable
 fun PageSwitcher(
     pagerState: PagerState,
-    selectedDay: MutableState<Int>,
+    selectedDay: MutableState<Long>,
     onDayClick: (LocalDate) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -128,8 +130,8 @@ fun PageSwitcher(
                 onClick = {
                     coroutineScope.launch {
                         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-                        pagerState.animateScrollToPage(page = (today.year - 1901 - 1) * 12 + today.monthNumber)
-                        selectedDay.value = LocalDate(today.year, today.month, today.dayOfMonth).toEpochDays()
+                        pagerState.animateScrollToPage(page = (today.year - 1901 - 1) * 12 + today.month.number)
+                        selectedDay.value = LocalDate(today.year, today.month, today.day).toEpochDays()
                         onDayClick(LocalDate.fromEpochDays(selectedDay.value))
                     }
                 }
@@ -144,7 +146,7 @@ fun PageSwitcher(
 }
 
 @Composable
-fun CalendarView(date: LocalDate, selectedDay: MutableState<Int>, days: List<CalendarDay>) {
+fun CalendarView(date: LocalDate, selectedDay: MutableState<Long>, days: List<CalendarDay>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,9 +180,9 @@ fun CalendarView(date: LocalDate, selectedDay: MutableState<Int>, days: List<Cal
  * @param selectedDay 选中的日期
  */
 @Composable
-fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState<Int>) {
+fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState<Long>) {
     val isSelected = remember(day, selectedDay.value) {
-        day.isCurrentMonth && selectedDay.value == LocalDate(date.year, date.monthNumber, day.day).toEpochDays()
+        day.isCurrentMonth && selectedDay.value == LocalDate(date.year, date.month.number, day.day).toEpochDays()
     }
 
     Card(
@@ -188,7 +190,7 @@ fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState
         onClick = {
             if (day.isCurrentMonth) {
                 day.onClick()
-                selectedDay.value = LocalDate(date.year, date.monthNumber, day.day).toEpochDays()
+                selectedDay.value = LocalDate(date.year, date.month.number, day.day).toEpochDays()
             }
         },
         colors = CardColors(
@@ -216,7 +218,7 @@ fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState
             if (day.isCurrentMonth) {
                 Text(
                     text = LunarUtil(
-                        LocalDate(date.year, date.monthNumber, day.day)
+                        LocalDate(date.year, date.month.number, day.day)
                             .atStartOfDayIn(TimeZone.UTC)
                             .toLocalDateTime(TimeZone.UTC)
                     ).getChineseLunarDay(),
@@ -249,12 +251,12 @@ fun generateCalendarDays(date: LocalDate, onDayClick: (LocalDate) -> Unit): List
     val days = mutableListOf<CalendarDay>()
     val firstDayOfMonth = LocalDate(date.year, date.month, 1)
     val dayOfWeek = (firstDayOfMonth.dayOfWeek.ordinal + 1) % 7
-    val daysInMonth = getMonthOfDay(date.year, date.monthNumber)
+    val daysInMonth = getMonthOfDay(date.year, date.month.number)
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
     //添加上个月的日期
     val previousMonth = date.minus(DatePeriod(months = 1))
-    val daysInPreviousMonth = getMonthOfDay(previousMonth.year, previousMonth.monthNumber)
+    val daysInPreviousMonth = getMonthOfDay(previousMonth.year, previousMonth.month.number)
     for (i in 1 .. dayOfWeek) {
         days.add(
             CalendarDay(
@@ -270,7 +272,7 @@ fun generateCalendarDays(date: LocalDate, onDayClick: (LocalDate) -> Unit): List
     for (i in 1 .. daysInMonth) {
 //        println("now $i")
         //获取当月的第i天，用于返回当天的时间戳
-        val day = LocalDate(date.year, date.monthNumber, i)
+        val day = LocalDate(date.year, date.month.number, i)
         val isToday = day == today
         days.add(
             CalendarDay(

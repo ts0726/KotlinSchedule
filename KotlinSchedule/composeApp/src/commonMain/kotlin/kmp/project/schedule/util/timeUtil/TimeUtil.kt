@@ -1,16 +1,17 @@
 package kmp.project.schedule.util.timeUtil
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.todayIn
 
 /**
  * 获取日期，返回xx月xx日 星期x
  */
 fun getCurrentDate(date: LocalDate): String {
-    val month = date.monthNumber
-    val day = date.dayOfMonth
+    val month = date.month.number
+    val day = date.day
     val dayOfWeek = date.dayOfWeek.name
     return "$month" + "月" + "$day" + "日 " + "星期${convertDayOfWeekToChinese(dayOfWeek)}"
 }
@@ -27,7 +28,7 @@ fun getCurrentDate(date: LocalDate): String {
 //}
 //
 fun convertLocalDateToDate(date: LocalDate): String {
-    return "${date.year}年${date.monthNumber}月${date.dayOfMonth}日 周${convertDayOfWeekToChinese(date.dayOfWeek.name)}"
+    return "${date.year}年${date.month.number}月${date.day}日 周${convertDayOfWeekToChinese(date.dayOfWeek.name)}"
 }
 
 /**
@@ -67,7 +68,7 @@ fun convertMonthOfYearToChinese(monthOfYear: Int): String {
 /**
  * 计算距离今日的天数
  */
-fun getDaysFromToday(date: LocalDate): Int {
+fun getDaysFromToday(date: LocalDate): Long {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     return date.toEpochDays() - today.toEpochDays()
 }

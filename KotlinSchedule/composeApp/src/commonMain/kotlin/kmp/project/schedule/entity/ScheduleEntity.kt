@@ -1,6 +1,5 @@
 package kmp.project.schedule.entity
 
-import kmp.project.schedule.viewModel.RepeatMode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

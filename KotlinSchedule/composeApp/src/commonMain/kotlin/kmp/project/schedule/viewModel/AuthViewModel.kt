@@ -7,7 +7,7 @@ import kmp.project.schedule.entity.LoginEntity
 import kmp.project.schedule.entity.NicknameRequest
 import kmp.project.schedule.net.ApiResult
 import kmp.project.schedule.net.authApi
-import kmp.project.schedule.sdk.ScheduleSDK
+import kmp.project.schedule.util.SettingsManager
 import kmp.project.schedule.util.SettingsName
 import kmp.project.schedule.util.tokenUtil.AuthTokenManager
 import kmp.project.schedule.util.tokenUtil.getUsernameFromToken
@@ -16,8 +16,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
-    private val tokenManager = AuthTokenManager(sdk)
+class AuthViewModel(
+    private val settingsManager: SettingsManager
+): ViewModel() {
+    private val tokenManager = AuthTokenManager(settingsManager)
 
     private val _authState = MutableStateFlow<ApiResult<AuthEntity>?>(null)
     val authState: StateFlow<ApiResult<AuthEntity>?> = _authState.asStateFlow()
@@ -30,7 +32,7 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
 
     private val _nicknameState by lazy {
         MutableStateFlow(
-            sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
+            settingsManager.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
         )
     }
     val nicknameState: StateFlow<String> get() = _nicknameState.asStateFlow()
@@ -43,7 +45,7 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
             val result = authApi.login(loginEntity)
             _authState.value = result
             if (result is ApiResult.Success) {
-                val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
+                val nickname = settingsManager.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
                 _nicknameState.value = nickname
             }
             requestFinished()
@@ -76,7 +78,7 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
             val result = authApi.updateNickname(nicknameRequest)
             requestFinished()
             if (result is ApiResult.Success) {
-                sdk.addSetting(SettingsName.NICKNAME.toString(), nicknameRequest.nickname)
+                settingsManager.addSetting(SettingsName.NICKNAME.toString(), nicknameRequest.nickname)
                 _nicknameState.value = nicknameRequest.nickname
                 showSnackBar("昵称修改成功")
             } else if (result is ApiResult.Error) {
@@ -91,7 +93,7 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     }
 
     fun resetNickname() {
-        val nickname = sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
+        val nickname = settingsManager.getSetting(SettingsName.NICKNAME.toString(), String::class.java) ?: "未登录"
         _nicknameState.value = nickname
     }
 
@@ -112,21 +114,21 @@ class AuthViewModel(private val sdk: ScheduleSDK): ViewModel() {
     }
 
     fun getNickname(): String? {
-        return sdk.getSetting(SettingsName.NICKNAME.toString(), String::class.java)
+        return settingsManager.getSetting(SettingsName.NICKNAME.toString(), String::class.java)
     }
 
     /**
      * update settings nickname
      */
     fun updateNickname(nickname: String) {
-        sdk.addSetting(SettingsName.NICKNAME.toString(), nickname)
+        settingsManager.addSetting(SettingsName.NICKNAME.toString(), nickname)
     }
 
     fun clearNickname() {
-        sdk.removeSetting(SettingsName.NICKNAME.toString())
+        settingsManager.removeSetting(SettingsName.NICKNAME.toString())
     }
 
     fun getUserName(): String? {
-        return getUsernameFromToken(sdk.getSetting(SettingsName.REFRESH_TOKEN.toString(), String::class.java)?:"")
+        return getUsernameFromToken(settingsManager.getSetting(SettingsName.REFRESH_TOKEN.toString(), String::class.java)?:"")
     }
 }

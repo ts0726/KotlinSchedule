@@ -51,10 +51,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kmp.project.schedule.net.sseApi
-import kmp.project.schedule.sdk.ScheduleSDK
-import kmp.project.schedule.sdk.ScheduleSDKHolder
+import kmp.project.schedule.domain.repository.LocalRepositoryImpl
 import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.home.MainPage
 import kmp.project.schedule.ui.my.MyPage
@@ -64,60 +62,64 @@ import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import org.koin.compose.koinInject
+import org.koin.mp.KoinPlatform
+
+@Composable
+expect fun PlatformKoinApplication(content: @Composable () -> Unit)
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun App() {
-    val windowSize = calculateWindowSizeClass()
-    val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
-    val sdk = getScheduleSDK()
-    ScheduleSDKHolder.instance = sdk
-    val scheduleViewModel: ScheduleViewModel = viewModel { ScheduleViewModel(sdk) }
-    val authViewModel: AuthViewModel = viewModel { AuthViewModel(sdk) }
-    val homePageStateViewModel: HomePageStateViewModel = viewModel()
-    val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-    val pageID = remember { mutableIntStateOf(0) }
-    val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    PlatformKoinApplication {
+        val windowSize = calculateWindowSizeClass()
+        val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
+        val scheduleViewModel: ScheduleViewModel = koinInject()
+        val authViewModel: AuthViewModel = koinInject()
+        val homePageStateViewModel: HomePageStateViewModel = koinInject()
+        val listState = rememberLazyListState()
+        val coroutineScope = rememberCoroutineScope()
+        val pageID = remember { mutableIntStateOf(0) }
+        val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
+        val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(Unit) {
-        val currentUser = authViewModel.getUserName()
-        if (!currentUser.isNullOrEmpty()) {
-            // 启动时增量同步数据
-            scheduleViewModel.syncDataIncrementally(
-                userName = currentUser,
-                showSnackBar = {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(it)
-                    }
-                },
-                currentDate = date.value
-            )
+        LaunchedEffect(Unit) {
+            sseApi.receiveEvent(scheduleViewModel, date) {
+                val currentUser = authViewModel.getUserName()
+                if (!currentUser.isNullOrEmpty()) {
+                    // 启动时增量同步数据
+                    scheduleViewModel.syncDataIncrementally(
+                        userName = currentUser,
+                        showSnackBar = {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(it)
+                            }
+                        },
+                        currentDate = date.value
+                    )
+                }
+            }
         }
 
-        sseApi.receiveEvent(scheduleViewModel, date)
+        CustomTheme {
+            CustomScaffold(
+                scheduleViewModel = scheduleViewModel,
+                authViewModel = authViewModel,
+                homePageStateViewModel = homePageStateViewModel,
+                isCompact = isCompact,
+                listState = listState,
+                snackbarHostState = snackbarHostState,
+                coroutineScope = coroutineScope,
+                pageID = pageID,
+                date = date,
+                repository = KoinPlatform.getKoin().get()
+            )
+        }
     }
-
-    CustomTheme {
-        CustomScaffold(
-            scheduleViewModel = scheduleViewModel,
-            authViewModel = authViewModel,
-            homePageStateViewModel = homePageStateViewModel,
-            isCompact = isCompact,
-            listState = listState,
-            snackbarHostState = snackbarHostState,
-            coroutineScope = coroutineScope,
-            pageID = pageID,
-            date = date,
-            sdk = sdk
-        )
-    }
-
 }
 
 /**
@@ -138,7 +140,7 @@ fun CustomScaffold(
     coroutineScope: CoroutineScope,
     pageID: MutableIntState,
     date: MutableState<LocalDate>,
-    sdk: ScheduleSDK
+    repository: LocalRepositoryImpl
 ) {
     Row (
         Modifier
@@ -175,7 +177,7 @@ fun CustomScaffold(
                                 nickname = authViewModel.getNickname() ?: "游客",
                                 username = authViewModel.getUserName() ?: ""
                             )
-                            1 -> TestPage1(onButtonClick = {}, sdk = sdk)
+                            1 -> TestPage1(onButtonClick = {})
                             2 -> MyPage(
                                 authViewModel = authViewModel,
                                 snackbarHostState = snackbarHostState,
@@ -342,6 +344,3 @@ fun CustomTheme(
         content = content
     )
 }
-
-@Composable
-expect fun getScheduleSDK(): ScheduleSDK

@@ -1,14 +1,23 @@
 package kmp.project.schedule
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import kmp.project.schedule.db.DatabaseDriverFactory
-import kmp.project.schedule.db.SettingsFactory
-import kmp.project.schedule.sdk.ScheduleSDK
+import kmp.project.schedule.di.appModule
+import kmp.project.schedule.di.repositoryModule
+import kmp.project.schedule.di.settingsModule
+import kmp.project.schedule.di.viewModelModule
+import org.koin.compose.KoinApplication
 
 @Composable
-actual fun getScheduleSDK(): ScheduleSDK {
-    val databaseDriverFactory = DatabaseDriverFactory()
-    val settingsFactory = SettingsFactory()
-    return remember { ScheduleSDK.getInstance(databaseDriverFactory, settingsFactory) }
+actual fun PlatformKoinApplication(content: @Composable () -> Unit) {
+    KoinApplication(
+        application = {
+            //通用模块
+            modules(appModule, viewModelModule)
+            //平台特定模块
+            modules(repositoryModule, settingsModule)
+        }
+    ) {
+        println("Desktop KoinApplication initialized")
+        content()
+    }
 }

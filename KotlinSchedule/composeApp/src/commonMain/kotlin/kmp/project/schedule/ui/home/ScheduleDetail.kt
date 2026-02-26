@@ -37,11 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kmp.project.schedule.database.Schedule
+import kmp.project.schedule.entity.RepeatMode
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.getRepeat
 import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.util.timeUtil.getDaysFromToday
-import kmp.project.schedule.viewModel.RepeatMode
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.datetime.LocalDate
 
@@ -68,7 +68,7 @@ fun ScheduleDetail(
                 .statusBarsPadding()
         ) {
             ScheduleDetailTopBar(
-                delateSchedule = { uuid, username ->
+                deleteSchedule = { uuid, username ->
                     viewModel.deleteSchedule(
                         uuid = uuid,
                         userName = username,
@@ -82,8 +82,6 @@ fun ScheduleDetail(
             ScheduleDetailContent(schedule!!)
         }
     } else {
-//        // 显示加载指示器或占位符
-//        Text("Loading...")
         navHostController.popBackStack()
     }
 }
@@ -96,7 +94,7 @@ fun ScheduleDetail(
  */
 @Composable
 fun ScheduleDetailTopBar(
-    delateSchedule: (String, String) -> Unit,
+    deleteSchedule: (String, String) -> Unit,
     navHostController: NavHostController,
     viewModel: ScheduleViewModel,
     schedule: Schedule
@@ -192,7 +190,7 @@ fun ScheduleDetailTopBar(
             content = "将同步删除本地和云端的日程，且删除后不可恢复\n确定要删除该日程吗？",
             onConfirm = {
                 showConfirmDialog.value = false
-                delateSchedule(schedule.uuid, schedule.username)
+                deleteSchedule(schedule.uuid, schedule.username)
                 navHostController.navigateUp()
             },
             onDismiss = { showConfirmDialog.value = false }
@@ -323,11 +321,26 @@ fun ScheduleDetailContent(
                 textAlign = TextAlign.Justify
             )
         }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Refresh,
+                contentDescription = "SyncStatus",
+                modifier = Modifier.padding(end = 15.dp).align(Alignment.Top),
+            )
+            Text(
+                text = schedule.sync_status,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Justify
+            )
+        }
     }
 }
 
 fun getDaysStringFromToday(date: LocalDate): String {
-    val days = getDaysFromToday(date)
+    val days = getDaysFromToday(date).toInt()
     return if (days == 0) {
         "今天"
     } else if (days == 1) {

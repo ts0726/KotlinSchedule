@@ -25,6 +25,7 @@ import kmp.project.schedule.util.viewUtil.showSnackBar
 import kmp.project.schedule.viewModel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 
+@Suppress("UnrememberedMutableState")
 @Composable
 fun MyNavHost(
     navController: NavHostController,
@@ -37,39 +38,35 @@ fun MyNavHost(
         navController = navController,
         startDestination = "my",
         enterTransition = {
-            fadeIn(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
-            ) + slideIntoContainer(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+            slideIntoContainer(
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                initialOffset = { fullSize -> fullSize / 3 }
             )
         },
         exitTransition = {
             fadeOut(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 300, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
             ) + slideOutOfContainer(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
                 targetOffset = { fullSize -> fullSize / 3 }
             )
         },
         popEnterTransition = {
             fadeIn(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
             ) + slideIntoContainer(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
                 towards = AnimatedContentTransitionScope.SlideDirection.End,
-                initialOffset = { fullSize -> fullSize / 3 }
+                initialOffset = { fullSize -> fullSize / 2 }
             )
         },
         popExitTransition = {
             fadeOut(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 300, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
             ) + slideOutOfContainer(
-                animationSpec = tween(durationMillis = 250, easing = CubicBezierEasing(0.84f,0f,0f,0.98f)),
+                animationSpec = tween(durationMillis = 400, easing = CubicBezierEasing(1f,0f,0f,0.98f)),
                 towards = AnimatedContentTransitionScope.SlideDirection.End,
-                targetOffset = { fullSize -> fullSize / 3 }
             )
         }
     ) {
