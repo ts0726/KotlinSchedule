@@ -33,8 +33,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
@@ -52,10 +50,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kmp.project.schedule.net.sseApi
-import kmp.project.schedule.domain.repository.LocalRepositoryImpl
-import kmp.project.schedule.ui.TestPage1
 import kmp.project.schedule.ui.home.MainPage
 import kmp.project.schedule.ui.my.MyPage
+import kmp.project.schedule.ui.plan.PlanPage
 import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.viewModel.AuthViewModel
 import kmp.project.schedule.viewModel.HomePageStateViewModel
@@ -67,7 +64,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
-import org.koin.mp.KoinPlatform
 
 @Composable
 expect fun PlatformKoinApplication(content: @Composable () -> Unit)
@@ -105,7 +101,7 @@ fun App() {
             }
         }
 
-        CustomTheme {
+        PlatformTheme {
             CustomScaffold(
                 scheduleViewModel = scheduleViewModel,
                 authViewModel = authViewModel,
@@ -115,8 +111,7 @@ fun App() {
                 snackbarHostState = snackbarHostState,
                 coroutineScope = coroutineScope,
                 pageID = pageID,
-                date = date,
-                repository = KoinPlatform.getKoin().get()
+                date = date
             )
         }
     }
@@ -139,8 +134,7 @@ fun CustomScaffold(
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
     pageID: MutableIntState,
-    date: MutableState<LocalDate>,
-    repository: LocalRepositoryImpl
+    date: MutableState<LocalDate>
 ) {
     Row (
         Modifier
@@ -177,7 +171,7 @@ fun CustomScaffold(
                                 nickname = authViewModel.getNickname() ?: "游客",
                                 username = authViewModel.getUserName() ?: ""
                             )
-                            1 -> TestPage1(onButtonClick = {})
+                            1 -> PlanPage()
                             2 -> MyPage(
                                 authViewModel = authViewModel,
                                 snackbarHostState = snackbarHostState,
@@ -325,22 +319,4 @@ fun NavigationIcon(
 }
 
 @Composable
-fun CustomTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        darkTheme -> darkColorScheme(
-//            background = Color(0xFF212028),
-//            surfaceContainer = Color(0xFF141318)
-        )
-        else -> lightColorScheme(
-//            background = Color(0xFFF3EDF7),
-//            surfaceContainer = Color(0xFFFDF8FF)
-        )
-    }
-    MaterialTheme(
-        colorScheme = colorScheme,
-        content = content
-    )
-}
+expect fun PlatformTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit)
