@@ -17,6 +17,7 @@ import kmp.project.schedule.util.timeUtil.getTimestamp
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
 
@@ -137,14 +138,30 @@ class ScheduleViewModel(
 
     fun loadSchedules(userName: String, date: MutableState<LocalDate>) {
         schedules.clear()
-        schedules.addAll(
-            repository.getScheduleByDate(
-                userName,
-                date.value.toEpochDays()).filter { it.sync_status != SyncStatus.DELETED_PENDING.toString() }
-        )
-        schedules.sortWith(
-            compareBy<Schedule> { it.sequence }.thenByDescending { it.timestamp }
-        )
+        schedules.addAll(loadTodaySchedules(userName, date))
+    }
+
+    private fun loadTodaySchedules(userName: String, date: MutableState<LocalDate>): List<Schedule> {
+        val userSchedule = repository.getAllSchedulesByUsername(userName)
+        val todaySchedules = userSchedule.filter { it.date == date.value.toEpochDays() }
+        val repeatSchedule = userSchedule.filter { it.date != date.value.toEpochDays() }
+            .filter { it.repeatMode != RepeatMode.NONE.toString() }
+            .filter { schedule ->
+                val scheduleDate = LocalDate.fromEpochDays(schedule.date.toInt())
+                val today = date.value
+                when (RepeatMode.valueOf(schedule.repeatMode)) {
+                    RepeatMode.DAILY -> true
+                    RepeatMode.WEEKLY -> scheduleDate.dayOfWeek == today.dayOfWeek
+                    RepeatMode.MONTHLY -> scheduleDate.day == today.day
+                    RepeatMode.YEARLY -> scheduleDate.month.number == today.month.number &&
+                            scheduleDate.day == today.day
+                    else -> false
+                }
+            }
+        return (todaySchedules + repeatSchedule).filter { it.sync_status != SyncStatus.DELETED_PENDING.toString() }
+            .sortedWith(
+                compareBy<Schedule> { it.sequence }.thenByDescending { it.timestamp }
+            )
     }
 
     fun deleteSchedule(
