@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -33,9 +31,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
@@ -45,10 +42,14 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
+import kmp.project.schedule.navigation.key.MyPage
+import kmp.project.schedule.navigation.key.ScheduleList
 import kmp.project.schedule.net.sseApi
 import kmp.project.schedule.ui.home.MainPage
 import kmp.project.schedule.ui.my.MyPage
@@ -59,11 +60,11 @@ import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
+import kotlin.time.Clock
 
 @Composable
 expect fun PlatformKoinApplication(content: @Composable () -> Unit)
@@ -72,16 +73,17 @@ expect fun PlatformKoinApplication(content: @Composable () -> Unit)
 @Composable
 fun App() {
     PlatformKoinApplication {
-        val windowSize = calculateWindowSizeClass()
-        val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
+        val windowSizeInfo = currentWindowAdaptiveInfo()
+        val isCompact = !windowSizeInfo.windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)
         val scheduleViewModel: ScheduleViewModel = koinInject()
         val authViewModel: AuthViewModel = koinInject()
         val homePageStateViewModel: HomePageStateViewModel = koinInject()
-        val listState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
         val pageID = remember { mutableIntStateOf(0) }
         val date = remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
         val snackbarHostState = remember { SnackbarHostState() }
+        val homeBackStack = remember { mutableStateListOf<Any>(ScheduleList) }
+        val myBackStack = remember { mutableStateListOf<Any>(MyPage) }
 
         LaunchedEffect(Unit) {
             sseApi.receiveEvent(scheduleViewModel, date) {
@@ -107,11 +109,12 @@ fun App() {
                 authViewModel = authViewModel,
                 homePageStateViewModel = homePageStateViewModel,
                 isCompact = isCompact,
-                listState = listState,
                 snackbarHostState = snackbarHostState,
                 coroutineScope = coroutineScope,
                 pageID = pageID,
-                date = date
+                date = date,
+                homeBackStack = homeBackStack,
+                myBackStack = myBackStack
             )
         }
     }
@@ -130,11 +133,12 @@ fun CustomScaffold(
     authViewModel: AuthViewModel,
     homePageStateViewModel: HomePageStateViewModel,
     isCompact: Boolean,
-    listState: LazyListState,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
     pageID: MutableIntState,
-    date: MutableState<LocalDate>
+    date: MutableState<LocalDate>,
+    homeBackStack: SnapshotStateList<Any>,
+    myBackStack: SnapshotStateList<Any>
 ) {
     Row (
         Modifier
@@ -161,21 +165,20 @@ fun CustomScaffold(
                         when (pageID.intValue) {
                             0 -> MainPage(
                                 isCompact = isCompact,
-                                listState = listState,
                                 scheduleViewModel = scheduleViewModel,
                                 authViewModel = authViewModel,
                                 homePageStateViewModel = homePageStateViewModel,
                                 date = date,
                                 coroutineScope = coroutineScope,
                                 snackbarHostState = snackbarHostState,
-                                nickname = authViewModel.getNickname() ?: "游客",
-                                username = authViewModel.getUserName() ?: ""
+                                backStack = homeBackStack
                             )
                             1 -> PlanPage()
                             2 -> MyPage(
                                 authViewModel = authViewModel,
                                 snackbarHostState = snackbarHostState,
-                                coroutineScope = coroutineScope
+                                coroutineScope = coroutineScope,
+                                backStack = myBackStack
                             )
                         }
                     },

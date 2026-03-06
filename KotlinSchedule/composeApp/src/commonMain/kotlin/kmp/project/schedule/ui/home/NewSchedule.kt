@@ -33,8 +33,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -68,7 +66,8 @@ import kotlinx.datetime.LocalDate
 fun NewSchedule(
     onBack: () -> Unit,
     onSave: () -> Unit,
-    viewModel: ScheduleViewModel
+    viewModel: ScheduleViewModel,
+    isCompact: Boolean
 ) {
     val bringIntoViewRequester = remember {
         BringIntoViewRequester()
@@ -84,9 +83,9 @@ fun NewSchedule(
         NewScheduleTopBar(
             onBack = onBack,
             onSave = onSave,
-            topBarTitle = if (viewModel.id.value == -1) "创建日程" else "编辑日程"
+            topBarTitle = if (viewModel.id.intValue == -1) "创建日程" else "编辑日程"
         )
-        NewScheduleContent(viewModel, bringIntoViewRequester)
+        NewScheduleContent(viewModel, bringIntoViewRequester, isCompact)
     }
 }
 
@@ -143,7 +142,8 @@ fun NewScheduleTopBar(
 @Composable
 fun NewScheduleContent(
     viewModel: ScheduleViewModel,
-    bringIntoViewRequester: BringIntoViewRequester
+    bringIntoViewRequester: BringIntoViewRequester,
+    isCompact: Boolean
 ) {
     var title by viewModel.title
     var content by viewModel.content
@@ -176,7 +176,7 @@ fun NewScheduleContent(
                 }
             )
 
-            DatePickerDocked(viewModel)
+            DatePickerDocked(viewModel, isCompact)
 
             RepeatPicker(viewModel)
 
@@ -202,7 +202,10 @@ fun NewScheduleContent(
  * @param viewModel 新建日程ViewModel
  */
 @Composable
-fun DatePickerDocked(viewModel: ScheduleViewModel) {
+fun DatePickerDocked(
+    viewModel: ScheduleViewModel,
+    isCompact: Boolean
+) {
     var showDatePickerModal by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -236,6 +239,7 @@ fun DatePickerDocked(viewModel: ScheduleViewModel) {
                     showDatePickerModal = false
                 },
                 date = viewModel.date,
+                isCompact = isCompact
             )
         }
     }
@@ -251,9 +255,8 @@ fun DatePickerDocked(viewModel: ScheduleViewModel) {
 fun DatePickerModal(
     onDismiss: () -> Unit,
     date: MutableState<LocalDate>,
+    isCompact: Boolean
 ) {
-    val windowSize = calculateWindowSizeClass()
-    val isCompact = windowSize.widthSizeClass == WindowWidthSizeClass.Compact
     var selectedDate = date.value
     BasicAlertDialog(
         onDismissRequest = onDismiss,

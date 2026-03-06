@@ -35,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.entity.RepeatMode
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
@@ -48,15 +47,18 @@ import kotlinx.datetime.LocalDate
 /**
  * 日程详情页
  * @param uuid 日程UUID
- * @param navHostController 导航控制器
  * @param viewModel 日程ViewModel
+ * @param showSnackBar 显示SnackBar的函数，参数为要显示的消息
+ * @param onBack 返回函数
+ * @param onEdit 编辑函数
  */
 @Composable
 fun ScheduleDetail(
     uuid: String,
-    navHostController: NavHostController,
     viewModel: ScheduleViewModel,
-    showSnackBar: (String) -> Unit
+    showSnackBar: (String) -> Unit,
+    onBack: () -> Unit,
+    onEdit: () -> Unit
 ) {
     var schedule by remember { mutableStateOf<Schedule?>(null) }
     schedule = viewModel.loadScheduleByUUID(uuid)
@@ -75,29 +77,34 @@ fun ScheduleDetail(
                         showSnackBar = showSnackBar
                     )
                 },
-                navHostController,
+//                navHostController,
                 viewModel,
-                schedule!!
+                schedule!!,
+                onBack,
+                onEdit
             )
             ScheduleDetailContent(schedule!!)
         }
     } else {
-        navHostController.popBackStack()
+        onBack()
     }
 }
 
 /**
  * 日程详情页顶部栏,用于返回和呼出菜单
- * @param navHostController 导航控制器
+ * @param deleteSchedule 删除日程的函数，参数为日程UUID和用户名
  * @param viewModel 日程ViewModel
  * @param schedule 日程数据
+ * @param onBack 返回函数
+ * @param onEdit 编辑函数
  */
 @Composable
 fun ScheduleDetailTopBar(
     deleteSchedule: (String, String) -> Unit,
-    navHostController: NavHostController,
     viewModel: ScheduleViewModel,
-    schedule: Schedule
+    schedule: Schedule,
+    onBack: () -> Unit,
+    onEdit: () -> Unit
 ) {
     val expanded = remember { mutableStateOf(false) }
     val showConfirmDialog = remember { mutableStateOf(false) }
@@ -110,7 +117,7 @@ fun ScheduleDetailTopBar(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
-            onClick = { navHostController.navigateUp() },
+            onClick = onBack,
         ){
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -139,15 +146,16 @@ fun ScheduleDetailTopBar(
                 DropdownMenuItem(
                     onClick = {
                         expanded.value = false
-                        viewModel.id.value = schedule.id.toInt()
+                        viewModel.id.intValue = schedule.id.toInt()
                         viewModel.uuid.value = schedule.uuid
                         viewModel.date.value = LocalDate.fromEpochDays(schedule.date.toInt())
                         viewModel.title.value = schedule.title
                         viewModel.content.value = schedule.content!!
                         viewModel.location.value = schedule.location!!
                         viewModel.repeatMode.value = RepeatMode.valueOf(schedule.repeatMode)
-                        viewModel.sequence.value = schedule.sequence.toInt()
-                        navHostController.navigate("home_add")
+                        viewModel.sequence.intValue = schedule.sequence.toInt()
+                        onEdit()
+//                        navHostController.navigate("home_add")
                     },
                     text = {
                         Row(
@@ -191,7 +199,8 @@ fun ScheduleDetailTopBar(
             onConfirm = {
                 showConfirmDialog.value = false
                 deleteSchedule(schedule.uuid, schedule.username)
-                navHostController.navigateUp()
+//                navHostController.navigateUp()'
+                onBack()
             },
             onDismiss = { showConfirmDialog.value = false }
         )

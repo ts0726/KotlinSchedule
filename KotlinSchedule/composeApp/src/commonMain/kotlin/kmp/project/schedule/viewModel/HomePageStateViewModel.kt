@@ -16,13 +16,14 @@ class HomePageStateViewModel : ViewModel() {
     private val _showDatePickerDialog = MutableStateFlow(false)
     val showDatePickerDialog: StateFlow<Boolean> = _showDatePickerDialog
 
+    // 保存滚动状态
+    var savedFirstVisibleIndex: Int = 0
+
+    var savedScrollOffset: Int = 0
+
     fun setShowEditMode(value: Boolean) {
         _showEditMode.value = value
     }
-
-//    fun setTopDeleteDockerHeight(value: Int) {
-//        _topDeleteDockerHeight.value = value
-//    }
 
     fun setShowConfirmDialog(value: Boolean) {
         _showConfirmDialog.value = value

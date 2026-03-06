@@ -44,6 +44,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +60,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.navigation.HomeNavHost
+import kmp.project.schedule.navigation.navDisplay.HomeNavDisplay
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
@@ -65,7 +68,6 @@ import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.util.timeUtil.getCurrentDate
 import kmp.project.schedule.util.viewUtil.ReorderHapticFeedbackType
 import kmp.project.schedule.util.viewUtil.rememberReorderHapticFeedback
-import kmp.project.schedule.util.viewUtil.showSnackBar
 import kmp.project.schedule.viewModel.AuthViewModel
 import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
@@ -78,63 +80,35 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
  * 主页
  * @param isCompact 是否是竖屏模式
  * @param navController 导航控制器
- * @param listState 列表状态
+ * @param scheduleViewModel 日程数据的 ViewModel
+ * @param homePageStateViewModel 主页状态的 ViewModel
+ * @param authViewModel 认证相关的 ViewModel
+ * @param date 当前显示的日期
+ * @param coroutineScope 协程作用域
+ * @param snackbarHostState Snackbar 状态
+ * @param backStack 导航回退栈
  */
 @Composable
 fun MainPage(
     isCompact: Boolean,
     navController: NavHostController = rememberNavController(),
-    listState: LazyListState,
     scheduleViewModel: ScheduleViewModel,
     homePageStateViewModel: HomePageStateViewModel,
     authViewModel: AuthViewModel,
     date: MutableState<LocalDate>,
     coroutineScope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
-    nickname: String,
-    username: String
+    backStack: SnapshotStateList<Any>
 ) {
     val scheduleList = remember { scheduleViewModel.schedules }
 
     LaunchedEffect(date.value) {
         scheduleViewModel.loadSchedules(authViewModel.getUserName()?:"", date)
     }
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        //横屏模式下显示日程信息，通过listState同步竖屏时的滚动位置
-        if (!isCompact) {
-            ScheduledInformation(
-                scheduleViewModel = scheduleViewModel,
-                homePageStateViewModel = homePageStateViewModel,
-                isCompact = isCompact,
-                modifier = Modifier.weight(1f),
-                listState = listState,
-                list = scheduleList,
-                date = date,
-                onScheduleCardClick = { uuid ->
-                    scheduleViewModel.transportUuid = uuid
-                    navController.navigate("scheduleDetail") {
-                        //清除栈中的日程详情页面，防止叠加
-                        popUpTo("scheduleDetail") {
-                            inclusive = true
-                        }
-                    }
-                },
-                onAddClick = { navController.navigate("home_add") },
-                showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) },
-                nickname = nickname,
-                username = username
-            )
-        }
-        //竖屏模式下显示日程信息，横屏模式下作为操作页显示其他信息
-        HomeNavHost(
-            navController = navController,
-            modifier = Modifier.weight(1f),
+        HomeNavDisplay(
+            backStack = backStack,
+            modifier = Modifier,
             isCompact = isCompact,
-            listState = listState,
             scheduleList = scheduleList,
             date = date,
             scheduleViewModel = scheduleViewModel,
@@ -143,7 +117,7 @@ fun MainPage(
             coroutineScope = coroutineScope,
             snackbarHostState = snackbarHostState
         )
-    }
+//    }
 }
 
 /**
@@ -151,19 +125,24 @@ fun MainPage(
  * 列表状体通过[LazyListState]同步，用于横竖屏切换时保持滚动位置
  * @param isCompact 是否是竖屏模式
  * @param modifier 修饰符
- * @param listState 列表状态
+ * @param list 日程列表
+ * @param date 当前显示的日期
+ * @param onScheduleCardClick 点击日程卡片的回调
+ * @param onAddClick 点击添加按钮的回调
+ * @param showSnackBar 显示 Snackbar 的回调
+ * @param nickname 用户昵称
+ * @param username 用户名
  */
-@Suppress("UnrememberedMutableState")
+@Suppress("UnrememberedMutableState", "FrequentlyChangingValue")
 @Composable
-fun ScheduledInformation(
+fun ScheduleInformation(
     scheduleViewModel: ScheduleViewModel,
     homePageStateViewModel: HomePageStateViewModel,
     isCompact: Boolean,
     modifier: Modifier = Modifier,
-    listState: LazyListState,
     list: List<Schedule>,
     date: MutableState<LocalDate>,
-    onScheduleCardClick: (String) -> Unit,
+    onScheduleCardClick: (Schedule) -> Unit,
     onAddClick: () -> Unit,
     showSnackBar: (String) -> Unit,
     nickname: String,
@@ -173,6 +152,24 @@ fun ScheduledInformation(
     val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
     val showConfirmDialog by homePageStateViewModel.showConfirmDialog.collectAsState()
     val showDatePickerDialog by homePageStateViewModel.showDatePickerDialog.collectAsState()
+
+    val listState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState(
+            homePageStateViewModel.savedFirstVisibleIndex,
+            homePageStateViewModel.savedScrollOffset
+        )
+    }
+
+    // 监听滚动状态变化，保存到 ViewModel
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            Pair(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset)
+        }.collect { (index, offset) ->
+                homePageStateViewModel.savedFirstVisibleIndex = index
+                homePageStateViewModel.savedScrollOffset = offset
+            }
+    }
+
     val reorderableLazyColumnState = rememberReorderableLazyListState(listState) { from, to ->
         scheduleViewModel.schedules = scheduleViewModel.schedules.apply {
             if (isCompact) {
@@ -254,7 +251,7 @@ fun ScheduledInformation(
                     }
                 }
 
-                itemsIndexed(items = list, key = { _, schedule -> schedule.uuid }) {index, schedule ->
+                itemsIndexed(items = list, key = { _, schedule -> schedule.uuid }) { _, schedule ->
                     ReorderableItem(
                         reorderableLazyColumnState,
                         key = schedule.uuid,
@@ -275,13 +272,13 @@ fun ScheduledInformation(
                                 .zIndex(elevation.value),
                             schedule = schedule,
                             isSelected = isSelected.value,
-                            onCardClick = { uuid ->
+                            onCardClick = { schedule ->
                                 if (showEditMode && !isSelected.value) {
-                                    scheduleViewModel.schedulesToDelete.add(uuid)
+                                    scheduleViewModel.schedulesToDelete.add(schedule.uuid)
                                 } else if (showEditMode && isSelected.value) {
-                                    scheduleViewModel.schedulesToDelete.remove(uuid)
+                                    scheduleViewModel.schedulesToDelete.remove(schedule.uuid)
                                 } else {
-                                    onScheduleCardClick(uuid)
+                                    onScheduleCardClick(schedule)
                                 }
                             },
                             onCardLongClick = {
@@ -349,14 +346,14 @@ fun ScheduledInformation(
 @Composable
 fun OtherInformation(
     modifier: Modifier,
-    navController: NavHostController,
     date: MutableState<LocalDate>,
-    scheduleCount: Int
+    scheduleCount: Int,
+    onAddClick: () -> Unit
 ) {
     LazyColumn(
         modifier = modifier
             .statusBarsPadding()
-            .fillMaxHeight()
+//            .fillMaxHeight()
     ) {
         item {
             Row(
@@ -376,7 +373,7 @@ fun OtherInformation(
                 Spacer(modifier = Modifier.weight(1f))
 
                 Button(
-                    onClick = { navController.navigate("home_add") },
+                    onClick = onAddClick,
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = "Add")
                 }

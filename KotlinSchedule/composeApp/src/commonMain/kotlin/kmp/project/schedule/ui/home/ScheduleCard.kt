@@ -46,7 +46,7 @@ fun ScheduleCard(
     modifier: Modifier = Modifier,
     schedule: Schedule,
     isSelected: Boolean,
-    onCardClick: (String) -> Unit,
+    onCardClick: (Schedule) -> Unit,
     onCardLongClick: (String) -> Unit,
     scope: ReorderableCollectionItemScope,
     haptic: ReorderHapticFeedback,
@@ -64,7 +64,7 @@ fun ScheduleCard(
                     interactionSource = interactionSource,
                     indication = ripple(bounded = true),
                     onLongClick = { onCardLongClick(schedule.uuid) },
-                    onClick = { onCardClick(schedule.uuid) },
+                    onClick = { onCardClick(schedule) },
                 )
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .border(

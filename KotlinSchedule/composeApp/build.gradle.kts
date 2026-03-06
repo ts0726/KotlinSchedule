@@ -45,7 +45,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.jetbrains.kotlinx.datetime)
-            implementation("dev.chrisbanes.material3:material3-window-size-class-multiplatform:0.5.0")
+            implementation("org.jetbrains.compose.material3:material3-window-size-class:1.7.3")
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.1")
             implementation(libs.okio)
             implementation(libs.reorderable)
@@ -58,6 +58,9 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.jetbrains.material3.adaptiveNavigation3)
+            implementation(libs.jetbrains.lifecycle.viewmodelNavigation3)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
