@@ -65,9 +65,10 @@ fun CalendarPickerDialog(
                     onDismiss()
                 }
             )
-            CalendarPager(localDate) { date ->
-                localDate = date
-            }
+            CalendarPager(
+                currentDate = localDate,
+                onDayClick = { date -> localDate = date }
+            )
         }
     }
 }

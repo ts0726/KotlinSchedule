@@ -7,6 +7,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -15,8 +16,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kmp.project.schedule.util.timeUtil.LunarUtil
@@ -30,13 +34,20 @@ import kotlinx.datetime.number
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
+fun CalendarPager(
+    currentDate: LocalDate,
+    onDayClick: (LocalDate) -> Unit,
+    viewMode: Int = 0
+) {
     val initPager = (currentDate.year - 1901 - 1) * 12 + currentDate.month.number
     val pagerState = rememberPagerState(initialPage = initPager, pageCount = { (2099 - 1901) * 12 })
     val year = remember { mutableIntStateOf(currentDate.year) }
     val month = remember { mutableIntStateOf(currentDate.month.number) }
     //初始化被选择的日期为今天
     val selectedDay = remember { mutableLongStateOf(currentDate.toEpochDays()) }
+
+    var parentWidth by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current // 获取当前屏幕密度
 
     LaunchedEffect(pagerState.currentPage) {
         val yearMonth = currentDate.plus(DatePeriod(months = pagerState.currentPage - initPager))
@@ -45,7 +56,12 @@ fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 5.dp, end = 5.dp, bottom = 5.dp)
+            .onGloballyPositioned{ coordinates ->
+                parentWidth = with(density) { coordinates.size.width.toDp() }
+            },
     ) {
         Text(
             text = convertLocalDateToDate(LocalDate.fromEpochDays(selectedDay.longValue)),
@@ -68,7 +84,7 @@ fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
             PageSwitcher(pagerState, selectedDay, onDayClick)
         }
         Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.SpaceAround,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 5.dp, bottom = 5.dp),
@@ -88,7 +104,7 @@ fun CalendarPager(currentDate: LocalDate, onDayClick: (LocalDate) -> Unit) {
             val days = remember(page) {
                 generateCalendarDays(currentDate.plus(DatePeriod(months = page - initPager)), onDayClick)
             }
-            CalendarView(currentDate.plus(DatePeriod(months = page - initPager)), selectedDay, days)
+            CalendarView(currentDate.plus(DatePeriod(months = page - initPager)), selectedDay, days, viewMode, parentWidth)
         }
     }
 }
@@ -146,25 +162,34 @@ fun PageSwitcher(
 }
 
 @Composable
-fun CalendarView(date: LocalDate, selectedDay: MutableState<Long>, days: List<CalendarDay>) {
+fun CalendarView(
+    date: LocalDate,
+    selectedDay: MutableState<Long>,
+    days: List<CalendarDay>,
+    viewMode: Int,
+    parentWidth: Dp
+) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(370.dp),
+            .height(if (viewMode == 0) 370.dp else 700.dp),
         verticalArrangement = Arrangement.SpaceAround
     ) {
         var index = 0
         for (i in 1..days.size / 7) {
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
+                modifier = if (viewMode == 0) Modifier.fillMaxWidth().height(60.dp)
+                        else Modifier.fillMaxWidth().weight(1f)
             ) {
                 while (index < i * 7) {
                     val day = days[index]
                     key(day.day) {
-                        CalendarDayCard(day, date, selectedDay)
+                        if (viewMode == 0)
+                            CalendarDayCard(day, date, selectedDay)
+                        else
+                            MonthlyCalendarDayCard(day, date, selectedDay, parentWidth)
                     }
                     index++
                 }
@@ -227,6 +252,93 @@ fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState
                     lineHeight = 9.sp,
                     fontSize = 9.sp,
                 )
+            }
+        }
+    }
+}
+
+/**
+ * 月视图日历卡片
+ */
+@Composable
+fun MonthlyCalendarDayCard(
+    day: CalendarDay,
+    date: LocalDate,
+    selectedDay: MutableState<Long>,
+    calendarWidth: Dp
+) {
+    val isSelected = remember(day, selectedDay.value) {
+        day.isCurrentMonth && selectedDay.value == LocalDate(date.year, date.month.number, day.day).toEpochDays()
+    }
+
+    Card(
+        shape = RoundedCornerShape(0.dp),
+        onClick = {
+            if (day.isCurrentMonth) {
+                day.onClick()
+                selectedDay.value = LocalDate(date.year, date.month.number, day.day).toEpochDays()
+            }
+        },
+        colors = CardColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = Color.LightGray,
+            disabledContainerColor = MaterialTheme.colorScheme.background,
+            disabledContentColor = MaterialTheme.colorScheme.background
+        ),
+        modifier = Modifier.fillMaxHeight().width(calendarWidth / 7),
+        border = BorderStroke(
+            width = if (isSelected) 2.dp else 0.dp,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else Color(255, 255, 255, 50)
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 5.dp, bottom = 5.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Card(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    colors = CardColors(
+                        containerColor = calendarTodayColor(day, isSelected),
+                        contentColor = Color.LightGray,
+                        disabledContainerColor = calendarTextColor(day, isSelected),
+                        disabledContentColor = calendarTextColor(day, isSelected)
+                    ),
+                    border = calendarSelectedBorder(day, isSelected),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = day.day.toString(),
+                            color = calendarTextColor(day, isSelected),
+                            fontWeight = FontWeight.ExtraBold,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 13.sp,
+                            fontSize = 13.sp,
+                        )
+                    }
+                }
+                if (day.isCurrentMonth) {
+                    Text(
+                        text = LunarUtil(
+                            LocalDate(date.year, date.month.number, day.day)
+                                .atStartOfDayIn(TimeZone.UTC)
+                                .toLocalDateTime(TimeZone.UTC)
+                        ).getChineseLunarDay(),
+                        color = if (day.isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 9.sp,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

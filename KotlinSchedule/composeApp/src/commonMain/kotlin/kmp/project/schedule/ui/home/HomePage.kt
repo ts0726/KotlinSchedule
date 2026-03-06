@@ -389,7 +389,7 @@ fun OtherInformation(
         }
 
         item {
-            CalendarPager(date.value) { date.value = it }
+            CalendarPager(currentDate = date.value, onDayClick = { date.value = it }, viewMode = 1)
         }
     }
 }

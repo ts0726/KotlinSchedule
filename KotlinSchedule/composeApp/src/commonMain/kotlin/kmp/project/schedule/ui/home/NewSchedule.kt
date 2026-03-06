@@ -271,7 +271,7 @@ fun DatePickerModal(
                 modifier = Modifier.fillMaxWidth()
                     .padding(10.dp)
             ) {
-                CalendarPager(date.value) { selectedDate = it }
+                CalendarPager(currentDate = date.value, onDayClick = { selectedDate = it })
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
