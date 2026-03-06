@@ -65,6 +65,9 @@ fun HomeNavDisplay(
                                     date = date,
                                     scheduleCount = scheduleList.filter { !it.finished.toBoolean() }.size,
                                     onAddClick = {
+                                        if (backStack.last() is CreateSchedule) {
+                                            return@OtherInformation
+                                        }
                                         backStack.add(CreateSchedule)
                                     }
                                 )
@@ -79,13 +82,20 @@ fun HomeNavDisplay(
                             list = scheduleViewModel.schedules,
                             date = date,
                             onScheduleCardClick = {schedule ->
+                                if (backStack.last() is ScheduleDetail)
+                                    backStack.removeLastOrNull()
                                 backStack.add(
                                     ScheduleDetail(
                                         schedule
                                     )
                                 )
                             },
-                            onAddClick = { backStack.add(CreateSchedule) },
+                            onAddClick = {
+                                if (backStack.last() is CreateSchedule) {
+                                    return@ScheduleInformation
+                                }
+                                backStack.add(CreateSchedule)
+                            },
                             showSnackBar = { showSnackBar(snackbarHostState, coroutineScope, it) },
                             nickname = authViewModel.getNickname() ?: "游客",
                             username = authViewModel.getUserName() ?: ""
@@ -105,6 +115,9 @@ fun HomeNavDisplay(
                                 backStack.removeLastOrNull()
                             },
                             onEdit = {
+                                if (backStack.last() is CreateSchedule) {
+                                    return@ScheduleDetail
+                                }
                                 backStack.add(CreateSchedule)
                             }
                         )

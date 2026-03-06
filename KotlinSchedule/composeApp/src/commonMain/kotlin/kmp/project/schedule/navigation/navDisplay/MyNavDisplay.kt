@@ -70,9 +70,9 @@ fun MyNavDisplay(
                         hello,
                         onSettingClicked = {},
                         onAccountClicked = {
-                            if (token != null)
+                            if (token != null && backStack.last() != AccountPage)
                                 backStack.add(AccountPage)
-                            else
+                            else if (token == null && backStack.last() != LoginPage)
                                 backStack.add(LoginPage)
                         }
                     )
