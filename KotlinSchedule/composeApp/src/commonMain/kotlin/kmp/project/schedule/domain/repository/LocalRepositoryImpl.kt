@@ -65,6 +65,14 @@ class LocalRepositoryImpl(
         return database.getAllSchedules().firstOrNull { it.uuid == uuid }
     }
 
+    override fun getSchedulesByDateRange(
+        username: String,
+        startDate: Long,
+        endDate: Long
+    ): List<Schedule> {
+        return database.getSchedulesByDateRange(username, startDate, endDate)
+    }
+
     override fun deleteSchedule(uuid: String) {
         database.deleteSchedule(uuid)
     }

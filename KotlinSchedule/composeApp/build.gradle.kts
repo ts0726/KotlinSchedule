@@ -138,3 +138,12 @@ sqldelight {
 tasks.withType<ComposeHotRun>().configureEach {
     mainClass.set("kmp.project.schedule.MainKt")
 }
+
+tasks.withType(JavaExec::class.java) {
+    val args:List<String> = arrayListOf(
+        "-Dsun.stdout.encoding=UTF-8",
+        "-Dsun.stderr.encoding=UTF-8",
+        "-Dfile.encoding=UTF-8"
+    )
+    this.jvmArgs(args)
+}

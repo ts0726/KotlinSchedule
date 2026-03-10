@@ -66,6 +66,7 @@ import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.util.timeUtil.getCurrentDate
+import kmp.project.schedule.util.timeUtil.getMonthDateRange
 import kmp.project.schedule.util.viewUtil.ReorderHapticFeedbackType
 import kmp.project.schedule.util.viewUtil.rememberReorderHapticFeedback
 import kmp.project.schedule.viewModel.AuthViewModel
@@ -73,6 +74,7 @@ import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.number
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -102,8 +104,14 @@ fun MainPage(
 ) {
     val scheduleList = remember { scheduleViewModel.schedules }
 
-    LaunchedEffect(date.value) {
-        scheduleViewModel.loadSchedules(authViewModel.getUserName()?:"", date)
+    LaunchedEffect("${date.value.year}-${date.value.month.number}-${date.value.day}", scheduleViewModel.monthSchedules.size) {
+        println("MainPage: Date changed to ${date.value}, loading schedules...")
+        scheduleViewModel.loadMonthSchedulesToCache(
+            authViewModel.getUserName()?:"",
+            getMonthDateRange(date.value).first,
+            getMonthDateRange(date.value).second
+        )
+        scheduleViewModel.loadTodaySchedulesToCache(date)
     }
         HomeNavDisplay(
             backStack = backStack,
@@ -324,7 +332,6 @@ fun ScheduleInformation(
                 onConfirm = {
                     homePageStateViewModel.setShowConfirmDialog(false)
                     scheduleViewModel.deleteSchedules(username, showSnackBar)
-//                    scheduleViewModel.schedulesToDelete.clear()
                 },
                 onDismiss = { homePageStateViewModel.setShowConfirmDialog(false) }
             )
@@ -334,7 +341,8 @@ fun ScheduleInformation(
             CalendarPickerDialog(
                 onDismiss = { homePageStateViewModel.setShowDatePickerDialog(false) },
                 onDateSelected = { date.value = it },
-                date = date
+                date = date,
+                scheduleViewModel = scheduleViewModel
             )
         }
     }
@@ -348,12 +356,12 @@ fun OtherInformation(
     modifier: Modifier,
     date: MutableState<LocalDate>,
     scheduleCount: Int,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    scheduleViewModel: ScheduleViewModel
 ) {
     LazyColumn(
         modifier = modifier
             .statusBarsPadding()
-//            .fillMaxHeight()
     ) {
         item {
             Row(
@@ -389,7 +397,13 @@ fun OtherInformation(
         }
 
         item {
-            CalendarPager(currentDate = date.value, onDayClick = { date.value = it }, viewMode = 1)
+            CalendarPager(
+                currentDate = date.value,
+                onDayClick = { date.value = it },
+                onMonthChanged = { date.value = it },
+                viewMode = 1,
+                scheduleViewModel = scheduleViewModel
+            )
         }
     }
 }

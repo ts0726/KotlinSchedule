@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.datetime.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +40,8 @@ import kotlinx.datetime.LocalDate
 fun CalendarPickerDialog(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
-    date: MutableState<LocalDate>
+    date: MutableState<LocalDate>,
+    scheduleViewModel: ScheduleViewModel
 ) {
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
@@ -67,7 +69,9 @@ fun CalendarPickerDialog(
             )
             CalendarPager(
                 currentDate = localDate,
-                onDayClick = { date -> localDate = date }
+                onDayClick = { date -> localDate = date },
+                onMonthChanged = { date -> localDate = date },
+                scheduleViewModel = scheduleViewModel
             )
         }
     }

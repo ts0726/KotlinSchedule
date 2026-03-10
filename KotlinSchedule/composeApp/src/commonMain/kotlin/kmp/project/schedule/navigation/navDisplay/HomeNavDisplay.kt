@@ -69,7 +69,8 @@ fun HomeNavDisplay(
                                             return@OtherInformation
                                         }
                                         backStack.add(CreateSchedule)
-                                    }
+                                    },
+                                    scheduleViewModel = scheduleViewModel
                                 )
                             }
                         )

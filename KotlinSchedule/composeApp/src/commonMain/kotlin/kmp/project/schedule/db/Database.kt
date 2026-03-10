@@ -20,6 +20,10 @@ internal class Database (databaseDriverFactory: DatabaseDriverFactory){
         return dbQuery.selectSchedulesByDate(username, date).executeAsList()
     }
 
+    internal fun getSchedulesByDateRange(username: String, startDate: Long, endDate: Long): List<Schedule> {
+        return dbQuery.selectSchedulesByDateRange(username, startDate, endDate).executeAsList()
+    }
+
     internal fun createSchedule(schedule: Schedule) {
         dbQuery.transaction {
             dbQuery.insertSchedule(

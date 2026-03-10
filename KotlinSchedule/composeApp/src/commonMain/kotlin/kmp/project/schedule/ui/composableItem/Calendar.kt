@@ -2,7 +2,16 @@ package kmp.project.schedule.ui.composableItem
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -11,8 +20,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,39 +43,55 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.util.timeUtil.LunarUtil
 import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.util.timeUtil.convertMonthOfYearToChinese
+import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
-import kotlinx.datetime.*
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.minus
 import kotlinx.datetime.number
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
+@Suppress("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarPager(
     currentDate: LocalDate,
     onDayClick: (LocalDate) -> Unit,
-    viewMode: Int = 0
+    onMonthChanged: (LocalDate) -> Unit,
+    viewMode: Int = 0,
+    scheduleViewModel: ScheduleViewModel
 ) {
     val initPager = (currentDate.year - 1901 - 1) * 12 + currentDate.month.number
     val pagerState = rememberPagerState(initialPage = initPager, pageCount = { (2099 - 1901) * 12 })
-    val year = remember { mutableIntStateOf(currentDate.year) }
-    val month = remember { mutableIntStateOf(currentDate.month.number) }
+
+    val currentYearMonth = remember(pagerState.currentPage) {
+        currentDate.plus(DatePeriod(months = pagerState.currentPage - initPager))
+    }
+
     //初始化被选择的日期为今天
-    val selectedDay = remember { mutableLongStateOf(currentDate.toEpochDays()) }
+    val selectedDay = remember(currentDate) {
+        mutableLongStateOf(currentDate.toEpochDays())
+    }
 
     var parentWidth by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current // 获取当前屏幕密度
 
     LaunchedEffect(pagerState.currentPage) {
-        val yearMonth = currentDate.plus(DatePeriod(months = pagerState.currentPage - initPager))
-        year.intValue = yearMonth.year
-        month.intValue = yearMonth.month.number
+        val newDate = currentDate.plus(DatePeriod(months = pagerState.currentPage - initPager))
+        onMonthChanged(newDate)
     }
 
     Column(
@@ -77,7 +116,7 @@ fun CalendarPager(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${year.intValue}年 ${convertMonthOfYearToChinese(month.intValue)}",
+                text = "${currentYearMonth.year}年 ${convertMonthOfYearToChinese(currentYearMonth.month.number)}",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
             )
@@ -100,11 +139,22 @@ fun CalendarPager(
         }
         HorizontalPager(
             state = pagerState,
+            key = { page -> "month_$page" }
         ) { page ->
-            val days = remember(page) {
-                generateCalendarDays(currentDate.plus(DatePeriod(months = page - initPager)), onDayClick)
+            val targetDate = remember(page) {
+                currentDate.plus(DatePeriod(months = page - initPager))
             }
-            CalendarView(currentDate.plus(DatePeriod(months = page - initPager)), selectedDay, days, viewMode, parentWidth)
+            val days = remember(page) {
+                generateCalendarDays(targetDate, onDayClick)
+            }
+            CalendarView(
+                date = targetDate,
+                selectedDay = selectedDay,
+                days = days,
+                viewMode = viewMode,
+                parentWidth = parentWidth,
+                scheduleViewModel = scheduleViewModel
+            )
         }
     }
 }
@@ -161,15 +211,23 @@ fun PageSwitcher(
     }
 }
 
+/**
+ * 日历视图
+ * @param date 当前日期
+ * @param selectedDay 选中的日期
+ * @param days 日期列表
+ * @param viewMode 视图模式，0为周视图，1为月
+ * @param parentWidth 父组件宽度，用于月视图中计算每个日期卡片的宽度
+ */
 @Composable
 fun CalendarView(
     date: LocalDate,
     selectedDay: MutableState<Long>,
     days: List<CalendarDay>,
     viewMode: Int,
-    parentWidth: Dp
+    parentWidth: Dp,
+    scheduleViewModel: ScheduleViewModel
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -185,11 +243,17 @@ fun CalendarView(
             ) {
                 while (index < i * 7) {
                     val day = days[index]
-                    key(day.day) {
+                    key("${date.year}-${date.month.number}") {
                         if (viewMode == 0)
                             CalendarDayCard(day, date, selectedDay)
                         else
-                            MonthlyCalendarDayCard(day, date, selectedDay, parentWidth)
+                            MonthlyCalendarDayCard(
+                                day = day,
+                                date = date,
+                                selectedDay = selectedDay,
+                                calendarWidth = parentWidth,
+                                scheduleViewModel = scheduleViewModel
+                            )
                     }
                     index++
                 }
@@ -259,16 +323,35 @@ fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState
 
 /**
  * 月视图日历卡片
+ * @param day 日期数据类
+ * @param date 当前日期
+ * @param selectedDay 选中的日期
+ * @param calendarWidth 父组件宽度，用于计算卡片宽度
+ * @param scheduleViewModel 日程视图模型，用于加载当天的日程
  */
 @Composable
 fun MonthlyCalendarDayCard(
     day: CalendarDay,
     date: LocalDate,
     selectedDay: MutableState<Long>,
-    calendarWidth: Dp
+    calendarWidth: Dp,
+    scheduleViewModel: ScheduleViewModel,
 ) {
     val isSelected = remember(day, selectedDay.value) {
         day.isCurrentMonth && selectedDay.value == LocalDate(date.year, date.month.number, day.day).toEpochDays()
+    }
+
+    val targetDate = remember(date, day.day) {
+        if (day.isCurrentMonth) {
+            LocalDate(date.year, date.month.number, day.day)
+        } else {
+            null
+        }
+    }
+    val todaySchedules = remember(targetDate) { mutableStateOf(emptyList<Schedule>()) }
+
+    if (targetDate != null) {
+        todaySchedules.value = scheduleViewModel.loadTodaySchedulesFromCache(targetDate)
     }
 
     Card(
@@ -340,6 +423,19 @@ fun MonthlyCalendarDayCard(
                     )
                 }
             }
+            if (day.isCurrentMonth) {
+                for (schedule in todaySchedules.value.take(3)) {
+                    Text(
+                        text = schedule.title,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 9.sp,
+                        fontSize = 9.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
     }
 }
@@ -382,7 +478,6 @@ fun generateCalendarDays(date: LocalDate, onDayClick: (LocalDate) -> Unit): List
 
     //添加当前月份的日期
     for (i in 1 .. daysInMonth) {
-//        println("now $i")
         //获取当月的第i天，用于返回当天的时间戳
         val day = LocalDate(date.year, date.month.number, i)
         val isToday = day == today
@@ -398,11 +493,8 @@ fun generateCalendarDays(date: LocalDate, onDayClick: (LocalDate) -> Unit): List
 
     //添加下个月的日期
     if (days.size % 7 != 0) {
-//        println("days size: ${days.size}")
         val remainingDays = (days.size / 7 + 1) * 7 - days.size
-//        println(remainingDays)
         for (i in 1 .. remainingDays) {
-//            println("after $i")
             days.add(
                 CalendarDay(
                     day = i,

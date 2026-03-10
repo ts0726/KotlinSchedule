@@ -25,6 +25,8 @@ interface LocalRepository {
 
     fun getScheduleByUuid(uuid: String): Schedule?
 
+    fun getSchedulesByDateRange(username: String, startDate: Long, endDate: Long): List<Schedule>
+
     fun deleteSchedule(uuid: String)
 
     fun updateSchedule(schedule: Schedule)

@@ -239,7 +239,8 @@ fun DatePickerDocked(
                     showDatePickerModal = false
                 },
                 date = viewModel.date,
-                isCompact = isCompact
+                isCompact = isCompact,
+                scheduleViewModel = viewModel
             )
         }
     }
@@ -255,7 +256,8 @@ fun DatePickerDocked(
 fun DatePickerModal(
     onDismiss: () -> Unit,
     date: MutableState<LocalDate>,
-    isCompact: Boolean
+    isCompact: Boolean,
+    scheduleViewModel: ScheduleViewModel
 ) {
     var selectedDate = date.value
     BasicAlertDialog(
@@ -271,7 +273,12 @@ fun DatePickerModal(
                 modifier = Modifier.fillMaxWidth()
                     .padding(10.dp)
             ) {
-                CalendarPager(currentDate = date.value, onDayClick = { selectedDate = it })
+                CalendarPager(
+                    currentDate = date.value,
+                    onDayClick = { selectedDate = it },
+                    onMonthChanged = { selectedDate = it },
+                    scheduleViewModel = scheduleViewModel
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,

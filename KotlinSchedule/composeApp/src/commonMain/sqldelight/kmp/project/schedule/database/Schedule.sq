@@ -69,3 +69,9 @@ DELETE FROM Schedule WHERE uuid = ?;
 -- 获取对应日期的日程数量
 countSchedulesByDate:
 SELECT COUNT(*) FROM Schedule WHERE date = ?;
+
+-- 根据日期范围查询日程数据
+selectSchedulesByDateRange:
+SELECT * FROM Schedule
+WHERE username = ? AND (date BETWEEN ? AND ?)
+ORDER BY date, sequence;

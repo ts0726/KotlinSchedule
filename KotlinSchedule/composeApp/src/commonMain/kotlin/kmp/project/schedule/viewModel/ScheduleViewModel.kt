@@ -7,11 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kmp.project.schedule.database.Schedule
-import kmp.project.schedule.entity.ScheduleEntity
 import kmp.project.schedule.domain.repository.LocalRepositoryImpl
 import kmp.project.schedule.domain.sync.SyncManager
 import kmp.project.schedule.domain.sync.SyncStatus
 import kmp.project.schedule.entity.RepeatMode
+import kmp.project.schedule.entity.ScheduleEntity
 import kmp.project.schedule.util.DeviceUtil
 import kmp.project.schedule.util.timeUtil.getTimestamp
 import kotlinx.coroutines.launch
@@ -38,9 +38,9 @@ class ScheduleViewModel(
     val device = DeviceUtil.getDeviceName()
     val syncStatus = mutableStateOf(SyncStatus.PENDING)
     var schedules = mutableStateListOf<Schedule>()
+    var monthSchedules = mutableStateListOf<Schedule>()
     val schedulesToDelete = mutableStateListOf<String>()
-
-    var transportUuid = ""
+    val schedulesByDate = mutableStateOf(emptyMap<LocalDate, List<Schedule>>())
 
     fun onSave(
         currentDate: LocalDate,
@@ -97,6 +97,7 @@ class ScheduleViewModel(
             if (date.value.toEpochDays() == currentDate.toEpochDays()) {
                 schedules.add(0, schedule.copy(uuid = uuid))
             }
+            monthSchedules.add(schedule.copy(uuid = uuid))
         }
 
         reset()
@@ -129,6 +130,12 @@ class ScheduleViewModel(
                     schedules.add(0, schedule)
                 }
             }
+            val monthIndex = monthSchedules.indexOfFirst { it.uuid == schedule.uuid }
+            if (monthIndex >= 0) {
+                monthSchedules[monthIndex] = schedule
+            } else {
+                monthSchedules.add(schedule)
+            }
         }
     }
 
@@ -136,19 +143,29 @@ class ScheduleViewModel(
         return repository.getScheduleByUuid(uuid)
     }
 
-    fun loadSchedules(userName: String, date: MutableState<LocalDate>) {
+    fun loadTodaySchedulesToCache(date: MutableState<LocalDate>) {
         schedules.clear()
-        schedules.addAll(loadTodaySchedules(userName, date))
+        schedules.addAll(loadTodaySchedules(date.value))
     }
 
-    private fun loadTodaySchedules(userName: String, date: MutableState<LocalDate>): List<Schedule> {
-        val userSchedule = repository.getAllSchedulesByUsername(userName)
-        val todaySchedules = userSchedule.filter { it.date == date.value.toEpochDays() }
-        val repeatSchedule = userSchedule.filter { it.date != date.value.toEpochDays() }
+    fun loadTodaySchedulesFromCache(date: LocalDate): List<Schedule> {
+        return loadTodaySchedules(date)
+    }
+
+    fun loadMonthSchedulesToCache(userName: String, monthStart: LocalDate, monthEnd: LocalDate) {
+        monthSchedules.clear()
+        monthSchedules.addAll(loadMonthSchedules(userName, monthStart, monthEnd))
+        schedulesByDate.value = monthSchedules.groupBy { LocalDate.fromEpochDays(it.date.toInt()) }
+    }
+
+    private fun loadTodaySchedules(date: LocalDate): List<Schedule> {
+        val userSchedule = monthSchedules
+        val todaySchedules = userSchedule.filter { it.date == date.toEpochDays() }
+        val repeatSchedule = userSchedule.filter { it.date != date.toEpochDays() }
             .filter { it.repeatMode != RepeatMode.NONE.toString() }
             .filter { schedule ->
                 val scheduleDate = LocalDate.fromEpochDays(schedule.date.toInt())
-                val today = date.value
+                val today = date
                 when (RepeatMode.valueOf(schedule.repeatMode)) {
                     RepeatMode.DAILY -> true
                     RepeatMode.WEEKLY -> scheduleDate.dayOfWeek == today.dayOfWeek
@@ -164,11 +181,30 @@ class ScheduleViewModel(
             )
     }
 
+    private fun loadMonthSchedules(userName: String, monthStart: LocalDate, monthEnd: LocalDate): List<Schedule> {
+        val userSchedule = repository.getSchedulesByDateRange(
+            username = userName,
+            startDate = monthStart.toEpochDays(),
+            endDate = monthEnd.toEpochDays()
+        )
+        val repeatSchedule = repository.getAllSchedulesByUsername(userName)
+            .filter { it.date < monthStart.toEpochDays() || it.date > monthEnd.toEpochDays() }
+            .filter { it.repeatMode != RepeatMode.NONE.toString() }
+
+        return (userSchedule + repeatSchedule).filter { it.sync_status != SyncStatus.DELETED_PENDING.toString() }
+            .sortedWith(
+                compareBy<Schedule> { it.sequence }.thenByDescending { it.timestamp }
+            )
+    }
+
     fun deleteSchedule(
         uuid: String,
         userName: String,
         showSnackBar: (String) -> Unit
     ) {
+        repository.updateScheduleSyncStatus(uuid, SyncStatus.DELETED_PENDING)
+        schedules.removeIf { it.uuid == uuid }
+        monthSchedules.removeIf { it.uuid == uuid }
         if (userName != "") {
             viewModelScope.launch {
                 val result = syncManager.syncDeleteSchedule(uuid)
@@ -176,15 +212,14 @@ class ScheduleViewModel(
                     repository.deleteSchedule(uuid)
                     showSnackBar("已同步删除云端日程")
                 } else {
-                    repository.updateScheduleSyncStatus(uuid, SyncStatus.DELETED_PENDING)
                     showSnackBar("云端日程删除失败：${result.exceptionOrNull()?.message}")
                 }
             }
         }
-        schedules.removeIf { it.uuid == uuid }
     }
 
     fun deleteSchedules(userName: String, showSnackBar: (String) -> Unit) {
+        deleteLocalSchedules()
         if (userName != "") {
             viewModelScope.launch {
                 val result = syncManager.syncDeleteSchedules(schedulesToDelete)
@@ -198,17 +233,14 @@ class ScheduleViewModel(
                                 "原因：待删除日程中包含离线日程，此类日程不存在于云端"
                     }
                     showSnackBar(message)
-                    deleteLocalSchedules()
-                } else {
-                    schedulesToDelete.forEach { scheduleUuid ->
-                        repository.updateScheduleSyncStatus(scheduleUuid, SyncStatus.DELETED_PENDING)
-                        schedules.removeIf { it.uuid == scheduleUuid}
+                    schedulesToDelete.forEach { uuid ->
+                        repository.deleteSchedule(uuid)
+                        schedulesToDelete.clear()
                     }
+                } else {
                     showSnackBar("云端日程删除失败：${result.exceptionOrNull()?.message}")
                 }
             }
-        } else {
-            deleteLocalSchedules()
         }
     }
 
@@ -216,6 +248,7 @@ class ScheduleViewModel(
         syncManager.handleSseDelete(uuids)
         uuids.forEach {
             schedules.removeIf { schedule -> schedule.uuid == it }
+            monthSchedules.removeIf { schedule -> schedule.uuid == it }
         }
     }
 
@@ -252,11 +285,18 @@ class ScheduleViewModel(
             }
         }
         repository.updateSchedule(schedule)
+        //更新当前日期的日程列表
         if (schedule.date == currentDate.toEpochDays()) {
-            //更新当前日期的日程列表
             schedules.set(index = index, element = schedule)
         } else {
             schedules.removeIf { schedule.uuid == it.uuid }
+        }
+        //更新月视图日程列表
+        val monthIndex = monthSchedules.indexOfFirst { it.uuid == schedule.uuid }
+        if (monthIndex >= 0) {
+            monthSchedules[monthIndex] = schedule
+        } else {
+            monthSchedules.removeIf { schedule.uuid == it.uuid }
         }
     }
 
@@ -277,16 +317,13 @@ class ScheduleViewModel(
                     showSnackBar("云端批量更新成功")
                 } else {
                     schedules.forEach { schedule ->
-                        repository.updateScheduleSyncStatus(schedule.uuid, SyncStatus.SYNCED)
+                        repository.updateScheduleSyncStatus(schedule.uuid, SyncStatus.FAILED)
                     }
                     showSnackBar("云端批量更新失败：${result.exceptionOrNull()?.message}")
                 }
             }
         }
     }
-
-    // SSE更新逻辑已移至SyncManager.handleSseSchedule
-
 
     fun reorderSchedules(
         showSnackBar: (String) -> Unit
@@ -335,7 +372,7 @@ class ScheduleViewModel(
                 if (result.isSuccess) {
                     val successCount = result.getOrThrow()
                     // 重新加载当前日期的日程，确保视图同步
-                    loadSchedules(userName, mutableStateOf(currentDate))
+                    loadTodaySchedulesToCache(mutableStateOf(currentDate))
                     showSnackBar("${successCount}条日程已同步")
                 } else {
                     showSnackBar("日程同步失败：${result.exceptionOrNull()?.message}")
@@ -381,10 +418,11 @@ class ScheduleViewModel(
     }
 
     private fun deleteLocalSchedules() {
-        schedulesToDelete.forEach {
-            repository.deleteSchedule(it)
-            schedules.removeIf { schedule -> schedule.uuid == it }
+        schedulesToDelete.forEach { uuid ->
+            repository.updateScheduleSyncStatus(uuid, SyncStatus.DELETED_PENDING)
+            println("本地删除日程：$uuid")
+            schedules.removeIf { schedule -> schedule.uuid == uuid }
+            monthSchedules.removeIf { schedule -> schedule.uuid == uuid }
         }
-        schedulesToDelete.clear()
     }
 }

@@ -1,9 +1,12 @@
 package kmp.project.schedule.util.timeUtil
 
+import kotlinx.datetime.DateTimeUnit
 import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.number
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 
 /**
@@ -16,17 +19,6 @@ fun getCurrentDate(date: LocalDate): String {
     return "$month" + "月" + "$day" + "日 " + "星期${convertDayOfWeekToChinese(dayOfWeek)}"
 }
 
-///**
-// * 将时间戳转换为日期字符串
-// * @param millis 时间戳
-// */
-//fun convertMillisToDate(millis: Long): String {
-//    val instant = Instant.fromEpochMilliseconds(millis)
-//    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-//    return "${localDateTime.year}年${localDateTime.monthNumber}月${localDateTime.dayOfMonth}日" +
-//            " 周${convertDayOfWeekToChinese(localDateTime.dayOfWeek.name)}"
-//}
-//
 fun convertLocalDateToDate(date: LocalDate): String {
     return "${date.year}年${date.month.number}月${date.day}日 周${convertDayOfWeekToChinese(date.dayOfWeek.name)}"
 }
@@ -75,4 +67,10 @@ fun getDaysFromToday(date: LocalDate): Long {
 
 fun getTimestamp(): Long {
     return Clock.System.now().toEpochMilliseconds()
+}
+
+fun getMonthDateRange(date: LocalDate): Pair<LocalDate, LocalDate> {
+    val startDay = date.minus(date.day - 1, DateTimeUnit.DAY)
+    val endDay = startDay.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY)
+    return Pair(startDay, endDay)
 }
