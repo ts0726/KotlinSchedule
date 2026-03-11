@@ -29,7 +29,6 @@ class SseApi(
                 val serializer = Json.serializersModule.serializer(typeInfo.kotlinType!!)
                 Json.decodeFromString(serializer, jsonString)!!
             }) {
-                println("JSON input: $this")
                 incoming.collect { event ->
                     if (event.data?.isNotEmpty()!!) {
                         try {

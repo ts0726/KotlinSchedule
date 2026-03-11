@@ -231,7 +231,7 @@ fun CalendarView(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if (viewMode == 0) 370.dp else 700.dp),
+            .height(if (viewMode == 0) 370.dp else 800.dp),
         verticalArrangement = Arrangement.SpaceAround
     ) {
         var index = 0
@@ -243,16 +243,34 @@ fun CalendarView(
             ) {
                 while (index < i * 7) {
                     val day = days[index]
+                    val targetDate = remember(date, day.day) {
+                        if (day.isCurrentMonth) {
+                            LocalDate(date.year, date.month.number, day.day)
+                        } else {
+                            null
+                        }
+                    }
+                    val todaySchedules = remember(targetDate) { mutableStateOf(emptyList<Schedule>()) }
+
+                    if (targetDate != null) {
+                        todaySchedules.value = scheduleViewModel.loadTodaySchedulesFromCache(targetDate)
+                    }
                     key("${date.year}-${date.month.number}") {
                         if (viewMode == 0)
-                            CalendarDayCard(day, date, selectedDay)
+                            CalendarDayCard(
+                                day = day,
+                                date = date,
+                                selectedDay = selectedDay,
+                                todaySchedulesCount = todaySchedules.value.size
+                            )
                         else
                             MonthlyCalendarDayCard(
                                 day = day,
                                 date = date,
                                 selectedDay = selectedDay,
                                 calendarWidth = parentWidth,
-                                scheduleViewModel = scheduleViewModel
+                                scheduleViewModel = scheduleViewModel,
+                                todaySchedules = todaySchedules.value
                             )
                     }
                     index++
@@ -269,7 +287,12 @@ fun CalendarView(
  * @param selectedDay 选中的日期
  */
 @Composable
-fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState<Long>) {
+fun CalendarDayCard(
+    day: CalendarDay,
+    date: LocalDate,
+    selectedDay: MutableState<Long>,
+    todaySchedulesCount: Int
+) {
     val isSelected = remember(day, selectedDay.value) {
         day.isCurrentMonth && selectedDay.value == LocalDate(date.year, date.month.number, day.day).toEpochDays()
     }
@@ -317,6 +340,16 @@ fun CalendarDayCard(day: CalendarDay, date: LocalDate, selectedDay: MutableState
                     fontSize = 9.sp,
                 )
             }
+            if (todaySchedulesCount > 0) {
+                Text(
+                    text = todaySchedulesCount.toString(),
+                    color = calendarTextColor(day, isSelected),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 10.sp,
+                )
+            }
         }
     }
 }
@@ -336,22 +369,10 @@ fun MonthlyCalendarDayCard(
     selectedDay: MutableState<Long>,
     calendarWidth: Dp,
     scheduleViewModel: ScheduleViewModel,
+    todaySchedules: List<Schedule>
 ) {
     val isSelected = remember(day, selectedDay.value) {
         day.isCurrentMonth && selectedDay.value == LocalDate(date.year, date.month.number, day.day).toEpochDays()
-    }
-
-    val targetDate = remember(date, day.day) {
-        if (day.isCurrentMonth) {
-            LocalDate(date.year, date.month.number, day.day)
-        } else {
-            null
-        }
-    }
-    val todaySchedules = remember(targetDate) { mutableStateOf(emptyList<Schedule>()) }
-
-    if (targetDate != null) {
-        todaySchedules.value = scheduleViewModel.loadTodaySchedulesFromCache(targetDate)
     }
 
     Card(
@@ -383,7 +404,7 @@ fun MonthlyCalendarDayCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Card(
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(30.dp),
                     shape = CircleShape,
                     colors = CardColors(
                         containerColor = calendarTodayColor(day, isSelected),
@@ -404,7 +425,7 @@ fun MonthlyCalendarDayCard(
                             fontWeight = FontWeight.ExtraBold,
                             textAlign = TextAlign.Center,
                             lineHeight = 13.sp,
-                            fontSize = 13.sp,
+                            fontSize = 10.sp,
                         )
                     }
                 }
@@ -424,16 +445,30 @@ fun MonthlyCalendarDayCard(
                 }
             }
             if (day.isCurrentMonth) {
-                for (schedule in todaySchedules.value.take(3)) {
-                    Text(
-                        text = schedule.title,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 9.sp,
-                        fontSize = 9.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                for (schedule in todaySchedules) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 5.dp, vertical = 2.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        colors = CardColors(
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            disabledContentColor = MaterialTheme.colorScheme.primary
+                        ),
+                        border = BorderStroke(0.dp, Color.Transparent)
+                    ) {
+                        Text(
+                            text = schedule.title,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                        )
+                    }
                 }
             }
         }

@@ -105,7 +105,6 @@ fun MainPage(
     val scheduleList = remember { scheduleViewModel.schedules }
 
     LaunchedEffect("${date.value.year}-${date.value.month.number}-${date.value.day}", scheduleViewModel.monthSchedules.size) {
-        println("MainPage: Date changed to ${date.value}, loading schedules...")
         scheduleViewModel.loadMonthSchedulesToCache(
             authViewModel.getUserName()?:"",
             getMonthDateRange(date.value).first,

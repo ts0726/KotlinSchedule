@@ -101,7 +101,6 @@ class SyncManagerImpl(
                                     localRepository.updateScheduleSyncStatus(schedule.uuid, SyncStatus.SYNCED)
                                     syncSuccessSchedulesCount.intValue++
                                 }
-                                println("successUUID: ${schedule.uuid}，status：${schedule.sync_status}") // 打印同步成功的日程UUID
                             }
                         }
                     }
@@ -212,7 +211,6 @@ class SyncManagerImpl(
                     onSuccess(scheduleEntities)
                 }
                 is ApiResult.Error -> {
-                    println("result: $result")
                     throw Exception(errorMessage + result.message)
                 }
             }

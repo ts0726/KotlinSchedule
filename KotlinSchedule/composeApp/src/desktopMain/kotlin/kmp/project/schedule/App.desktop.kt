@@ -20,7 +20,6 @@ actual fun PlatformKoinApplication(content: @Composable () -> Unit) {
             modules(repositoryModule, settingsModule)
         }
     ) {
-        println("Desktop KoinApplication initialized")
         content()
     }
 }

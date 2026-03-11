@@ -422,7 +422,6 @@ class ScheduleViewModel(
     private fun deleteLocalSchedules() {
         schedulesToDelete.forEach { uuid ->
             repository.updateScheduleSyncStatus(uuid, SyncStatus.DELETED_PENDING)
-            println("本地删除日程：$uuid")
             schedules.removeIf { schedule -> schedule.uuid == uuid }
             monthSchedules.removeIf { schedule -> schedule.uuid == uuid }
         }
