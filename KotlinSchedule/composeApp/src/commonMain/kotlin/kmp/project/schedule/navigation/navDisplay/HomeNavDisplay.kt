@@ -128,6 +128,7 @@ fun HomeNavDisplay(
                         key = key,
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
+                        scheduleViewModel.date.value = date.value
                         NewSchedule(
                             onBack = {
                                 scheduleViewModel.reset()

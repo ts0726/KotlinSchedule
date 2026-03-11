@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BasicAlertDialog
@@ -453,115 +452,30 @@ fun RepeatPickerModal(
 fun LocationPicker(
     viewModel: ScheduleViewModel
 ) {
-    var showLocationPicker by remember { mutableStateOf(false) }
-    Box(
+    val options = listOf("家", "公司", "学校")
+    var tempLocation by viewModel.location
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 10.dp, bottom = 10.dp)
+            .padding(top = 10.dp)
     ) {
         OutlinedTextField(
-            value = viewModel.location.value,
-            onValueChange = {},
-            readOnly = true,
+            value = tempLocation,
+            onValueChange = { tempLocation = it },
             label = { Text("地点") },
             modifier = Modifier.fillMaxWidth(),
-            trailingIcon = {
-                IconButton(
-                    onClick = {
-                        showLocationPicker = !showLocationPicker
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Select Location"
-                    )
-                }
-            }
         )
-    }
-    if (showLocationPicker) {
-        LocationPickerModal(
-            onDismiss = { showLocationPicker = false },
-            viewModel = viewModel
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LocationPickerModal(
-    onDismiss: () -> Unit,
-    viewModel: ScheduleViewModel
-) {
-    val options = listOf("家", "公司", "学校")
-    var tempLocation by remember { mutableStateOf(viewModel.location.value) }
-    BasicAlertDialog(
-        onDismissRequest = onDismiss
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp),
-            ) {
-                Text(
-                    text = "地点",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(10.dp)
-                )
-                OutlinedTextField(
-                    value = tempLocation,
-                    onValueChange = {
-                        tempLocation = it
+            for (option in options) {
+                AssistChip(
+                    label = { Text(option, fontWeight = FontWeight.Bold) },
+                    onClick = {
+                        tempLocation = option
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.padding(end = 5.dp)
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    for (option in options) {
-                        AssistChip(
-                            label = { Text(option, fontWeight = FontWeight.Bold) },
-                            onClick = {
-                                tempLocation = option
-                            },
-                            modifier = Modifier.padding(5.dp)
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(
-                        onClick = onDismiss
-                    ) {
-                        Text(
-                            text = "取消",
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(5.dp)
-                        )
-                    }
-                    TextButton(
-                        onClick = {
-                            viewModel.location.value = tempLocation
-                            onDismiss()
-                        }
-                    ) {
-                        Text(
-                            text = "确定",
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(5.dp)
-                        )
-                    }
-                }
             }
         }
     }
