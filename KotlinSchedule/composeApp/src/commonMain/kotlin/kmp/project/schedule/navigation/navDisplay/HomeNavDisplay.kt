@@ -120,7 +120,8 @@ fun HomeNavDisplay(
                                     return@ScheduleDetail
                                 }
                                 backStack.add(CreateSchedule)
-                            }
+                            },
+                            isCompact = isCompact
                         )
                     }
 

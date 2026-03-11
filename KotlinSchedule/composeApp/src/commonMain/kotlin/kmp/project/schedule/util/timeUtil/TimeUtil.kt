@@ -7,7 +7,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.number
 import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 /**
  * 获取日期，返回xx月xx日 星期x
@@ -21,6 +23,10 @@ fun getCurrentDate(date: LocalDate): String {
 
 fun convertLocalDateToDate(date: LocalDate): String {
     return "${date.year}年${date.month.number}月${date.day}日 周${convertDayOfWeekToChinese(date.dayOfWeek.name)}"
+}
+
+fun convertLocalDateToDateSimple(date: LocalDate): String {
+    return "${date.year}年${date.month.number}月${date.day}日"
 }
 
 /**
@@ -73,4 +79,8 @@ fun getMonthDateRange(date: LocalDate): Pair<LocalDate, LocalDate> {
     val startDay = date.minus(date.day - 1, DateTimeUnit.DAY)
     val endDay = startDay.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY)
     return Pair(startDay, endDay)
+}
+
+fun convertTimestampToLocalDate(timestamp: Long): LocalDate {
+    return fromEpochMilliseconds(timestamp).toLocalDateTime(TimeZone.currentSystemDefault()).date
 }

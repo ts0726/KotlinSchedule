@@ -1,18 +1,32 @@
 package kmp.project.schedule.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.filled.EventRepeat
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
@@ -31,15 +45,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kmp.project.schedule.database.Schedule
+import kmp.project.schedule.domain.sync.SyncStatus
 import kmp.project.schedule.entity.RepeatMode
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
 import kmp.project.schedule.util.getRepeat
 import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
+import kmp.project.schedule.util.timeUtil.convertLocalDateToDateSimple
+import kmp.project.schedule.util.timeUtil.convertTimestampToLocalDate
 import kmp.project.schedule.util.timeUtil.getDaysFromToday
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.datetime.LocalDate
@@ -58,7 +77,8 @@ fun ScheduleDetail(
     viewModel: ScheduleViewModel,
     showSnackBar: (String) -> Unit,
     onBack: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    isCompact: Boolean
 ) {
     var schedule by remember { mutableStateOf<Schedule?>(null) }
     schedule = viewModel.loadScheduleByUUID(uuid)
@@ -77,13 +97,12 @@ fun ScheduleDetail(
                         showSnackBar = showSnackBar
                     )
                 },
-//                navHostController,
                 viewModel,
                 schedule!!,
                 onBack,
                 onEdit
             )
-            ScheduleDetailContent(schedule!!)
+            ScheduleDetailContent(schedule!!, isCompact)
         }
     } else {
         onBack()
@@ -213,137 +232,255 @@ fun ScheduleDetailTopBar(
  */
 @Composable
 fun ScheduleDetailContent(
-    schedule: Schedule
+    schedule: Schedule,
+    isCompact: Boolean
 ) {
-    Column(
+    LazyColumn (
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(start = 20.dp, end = 20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Text(
-            text = schedule.title,
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 20.dp, top = 10.dp),
-            lineHeight = 45.sp
-        )
+        item {
+            Column(
+                modifier = Modifier
+                    .padding(top = 40.dp, bottom = 10.dp)
+                    .fillMaxWidth(),
+            ) {
+                Text(
+                    text = schedule.title,
+                    fontSize = 45.sp,
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = 50.sp
+                )
+                SyncStatus(
+                    syncStatus = schedule.sync_status,
+                    modifier = Modifier.padding(top = 15.dp)
+                )
+            }
+
+            if (!isCompact) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    GeneralBox(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(end = 10.dp, top = 10.dp, bottom = 10.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainer),
+                        icon = Icons.Filled.DateRange,
+                        contentDescription = "Date",
+                        title = "日期",
+                        mainText = convertLocalDateToDate(LocalDate.fromEpochDays(schedule.date.toInt())),
+                        subText = getDaysStringFromToday(LocalDate.fromEpochDays(schedule.date.toInt()))
+                    )
+                    GeneralBox(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(top = 10.dp, bottom = 10.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainer),
+                        icon = Icons.Filled.LocationOn,
+                        contentDescription = "Location",
+                        title = "地点",
+                        mainText = schedule.location ?: "未知地点",
+                    )
+                }
+            } else {
+                GeneralBox(
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .padding(top = 10.dp, bottom = 10.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainer),
+                    icon = Icons.Filled.DateRange,
+                    contentDescription = "Date",
+                    title = "日期",
+                    mainText = convertLocalDateToDate(LocalDate.fromEpochDays(schedule.date.toInt())),
+                    subText = getDaysStringFromToday(LocalDate.fromEpochDays(schedule.date.toInt()))
+                )
+                GeneralBox(
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .padding(top = 10.dp, bottom = 10.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainer),
+                    icon = Icons.Filled.LocationOn,
+                    contentDescription = "Location",
+                    title = "地点",
+                    mainText = schedule.location ?: "未知地点",
+                )
+            }
+
+            InformationBox(
+                schedule,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+
+            GeneralBox(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .padding(top = 10.dp, bottom = 10.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainer),
+                icon = Icons.AutoMirrored.Filled.Notes,
+                contentDescription = "Notes",
+                title = "备注",
+                mainText = schedule.content ?: "无备注"
+            )
+        }
+    }
+}
+
+@Composable
+private fun InformationBox(
+    schedule: Schedule,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Filled.AccountBox,
+                imageVector = Icons.Filled.Info,
+                contentDescription = "Information",
+                modifier = Modifier.padding(end = 10.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "更多信息",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Row(
+            modifier = Modifier
+                .height(IntrinsicSize.Max)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            GeneralBox(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(end = 10.dp, top = 10.dp, bottom = 10.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainer),
+                icon = Icons.Filled.AccountCircle,
                 contentDescription = "Account",
-                modifier = Modifier.padding(end = 15.dp)
+                title = "用户",
+                mainText = if (schedule.username == "") "游客" else schedule.username
             )
-            Text(
-                text = if (schedule.username == "") "游客" else schedule.username,
-                fontSize = 20.sp
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Filled.MailOutline,
+            GeneralBox(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(top = 10.dp, bottom = 10.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainer),
+                icon = Icons.Filled.MailOutline,
                 contentDescription = "Device",
-                modifier = Modifier.padding(end = 15.dp)
-            )
-            Text(
-                text = "来自" + schedule.device,
-                fontSize = 20.sp
+                title = "设备",
+                mainText = "来自" + schedule.device
             )
         }
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .height(IntrinsicSize.Max)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = Icons.Filled.DateRange,
-                contentDescription = "Date",
-                modifier = Modifier.padding(end = 15.dp)
-            )
-            Text(
-                text = convertLocalDateToDate(LocalDate.fromEpochDays(schedule.date.toInt())),
-                fontSize = 20.sp
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Default.Warning,
-                contentDescription = "warning",
-                modifier = Modifier.padding(end = 15.dp)
-            )
-            Text(
-                text = getDaysStringFromToday(LocalDate.fromEpochDays(schedule.date.toInt())),
-                fontSize = 20.sp,
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Refresh,
+            GeneralBox(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(end = 10.dp, top = 10.dp, bottom = 10.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainer),
+                icon = Icons.Filled.EventRepeat,
                 contentDescription = "Repeat",
-                modifier = Modifier.padding(end = 15.dp)
-            )
-            Text(
-                text = getRepeat(
+                title = "重复模式",
+                mainText = getRepeat(
                     LocalDate.fromEpochDays(schedule.date.toInt()),
                     RepeatMode.valueOf(schedule.repeatMode)
+                )
+            )
+            GeneralBox(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(top = 10.dp, bottom = 10.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainer),
+                icon = Icons.Filled.EditCalendar,
+                contentDescription = "Last",
+                title = "上次修改",
+                mainText = convertLocalDateToDateSimple(
+                    convertTimestampToLocalDate(schedule.timestamp)
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun GeneralBox (
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    contentDescription: String,
+    title: String,
+    mainText: String,
+    subText: String = "",
+) {
+    Box(
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(10.dp, top = 20.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = contentDescription,
+                    modifier = Modifier.padding(end = 10.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = title,
+                    fontSize = 20.sp
+                )
+            }
+            Text(
+                text = mainText,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(
+                    start = 10.dp,
+                    bottom = if (subText.isNotEmpty()) 10.dp else 20.dp,
+                    top = 10.dp
                 ),
-                fontSize = 20.sp
+                lineHeight = 25.sp
             )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Filled.LocationOn,
-                contentDescription = "location",
-                modifier = Modifier.padding(end = 15.dp)
-            )
-            Text(
-                text = schedule.location ?: "未知地点",
-                fontSize = 20.sp,
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = "content",
-                modifier = Modifier.padding(end = 15.dp).align(Alignment.Top),
-            )
-            Text(
-                text = schedule.content!!,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Justify
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Refresh,
-                contentDescription = "SyncStatus",
-                modifier = Modifier.padding(end = 15.dp).align(Alignment.Top),
-            )
-            Text(
-                text = schedule.sync_status,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Justify
-            )
+            if (subText.isNotEmpty()) {
+                Text(
+                    text = subText,
+                    fontSize = 17.sp,
+                    modifier = Modifier.padding(start = 10.dp, bottom = 20.dp)
+                )
+            }
         }
     }
 }
@@ -360,5 +497,72 @@ fun getDaysStringFromToday(date: LocalDate): String {
         "$days 天后"
     } else {
         "${-days} 天前"
+    }
+}
+
+@Composable
+private fun SyncStatus(
+    syncStatus: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(getSyncStatusColor(syncStatus))
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = getSyncStatusIcon(syncStatus),
+            contentDescription = "Sync Status",
+            tint = getSyncStatusTextColor(syncStatus),
+            modifier = Modifier.size(16.dp)
+        )
+        Text(
+            text = getSyncStatusString(syncStatus),
+            color = getSyncStatusTextColor(syncStatus),
+            fontSize = 12.sp,
+            modifier = Modifier.padding(start = 4.dp),
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+fun getSyncStatusString(syncStatus: String): String {
+    return when(syncStatus) {
+        SyncStatus.SYNCED.toString() -> "已同步"
+        SyncStatus.PENDING.toString() -> "待同步"
+        SyncStatus.FAILED.toString() -> "同步失败"
+        else -> "未知状态"
+    }
+}
+
+@Composable
+private fun getSyncStatusColor(syncStatus: String): Color {
+    return when(syncStatus) {
+        SyncStatus.SYNCED.toString() -> MaterialTheme.colorScheme.primary // 绿色
+        SyncStatus.PENDING.toString() -> Color(0xFFFFC107) // 黄色
+        SyncStatus.FAILED.toString() -> MaterialTheme.colorScheme.error // 红色
+        else -> Color.Gray
+    }
+}
+
+@Composable
+private fun getSyncStatusIcon(syncStatus: String): ImageVector {
+    return when(syncStatus) {
+        SyncStatus.SYNCED.toString() -> Icons.Filled.Done
+        SyncStatus.PENDING.toString() -> Icons.Filled.Refresh
+        SyncStatus.FAILED.toString() -> Icons.Filled.Warning
+        else -> Icons.Filled.Info
+    }
+}
+
+@Composable
+private fun getSyncStatusTextColor(syncStatus: String): Color {
+    return when(syncStatus) {
+        SyncStatus.SYNCED.toString() -> MaterialTheme.colorScheme.onPrimary
+        SyncStatus.PENDING.toString() -> Color(0xFF795548)
+        SyncStatus.FAILED.toString() -> MaterialTheme.colorScheme.onError
+        else -> Color.Gray
     }
 }
