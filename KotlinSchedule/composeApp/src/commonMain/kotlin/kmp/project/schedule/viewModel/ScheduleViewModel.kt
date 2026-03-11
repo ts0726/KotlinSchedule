@@ -317,7 +317,9 @@ class ScheduleViewModel(
                     showSnackBar("云端批量更新成功")
                 } else {
                     schedules.forEach { schedule ->
-                        repository.updateScheduleSyncStatus(schedule.uuid, SyncStatus.FAILED)
+                        if (schedule.sync_status != SyncStatus.PENDING.toString()) {
+                            repository.updateScheduleSyncStatus(schedule.uuid, SyncStatus.FAILED)
+                        }
                     }
                     showSnackBar("云端批量更新失败：${result.exceptionOrNull()?.message}")
                 }
