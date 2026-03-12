@@ -17,8 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,7 +52,6 @@ import kmp.project.schedule.navigation.key.ScheduleList
 import kmp.project.schedule.net.sseApi
 import kmp.project.schedule.ui.home.MainPage
 import kmp.project.schedule.ui.my.MyPage
-import kmp.project.schedule.ui.plan.PlanPage
 import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.viewModel.AuthViewModel
 import kmp.project.schedule.viewModel.HomePageStateViewModel
@@ -173,8 +171,7 @@ fun CustomScaffold(
                                 snackbarHostState = snackbarHostState,
                                 backStack = homeBackStack
                             )
-                            1 -> PlanPage()
-                            2 -> MyPage(
+                            1 -> MyPage(
                                 authViewModel = authViewModel,
                                 snackbarHostState = snackbarHostState,
                                 coroutineScope = coroutineScope,
@@ -218,7 +215,7 @@ fun ContentContainer(
 @Composable
 fun SideNavRail(pageID: MutableIntState) {
     val cardSizes = remember { mutableStateListOf(50.dp, 30.dp, 30.dp) }
-    val items = listOf("主页", "全部", "我的")
+    val items = listOf("主页", "我的")
 
     //根据pageID初始化图标状态
     for (i in 0 .. 2) {
@@ -291,7 +288,7 @@ fun SideNavRail(pageID: MutableIntState) {
  */
 @Composable
 fun BottomNavBar(pageID: MutableIntState) {
-    val items = listOf("主页", "全部", "我的")
+    val items = listOf("主页", "我的")
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) {
@@ -315,8 +312,7 @@ fun NavigationIcon(
     index: Int,
 ) {
     when (index) {
-        0 -> Icon(Icons.Filled.Edit, contentDescription = "Home", modifier = Modifier.padding(3.dp))
-        1 -> Icon(Icons.Filled.Add, contentDescription = "Favorite", modifier = Modifier.padding(3.dp))
+        0 -> Icon(Icons.Filled.Home, contentDescription = "Home", modifier = Modifier.padding(3.dp))
         else -> Icon(Icons.Filled.Person, contentDescription = "Person", modifier = Modifier.padding(3.dp))
     }
 }

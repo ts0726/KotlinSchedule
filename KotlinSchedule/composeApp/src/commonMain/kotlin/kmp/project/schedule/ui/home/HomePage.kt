@@ -309,7 +309,6 @@ fun ScheduleInformation(
                 visible = listState.firstVisibleItemIndex >= 1,
             ) {
                 FloatingActionBar(
-//                    showEditMode = showEditMode,
                     homePageStateViewModel = homePageStateViewModel,
                     onAddClick = onAddClick,
                     onCloseClick = { homePageStateViewModel.setShowEditMode(false) },
@@ -495,25 +494,27 @@ fun TopBar(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(
-                    onClick = { homePageStateViewModel.setShowDatePickerDialog(!showDatePickerDialog) },
+            if (isCompact) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "Select Repeat"
-                    )
-                }
+                    IconButton(
+                        onClick = { homePageStateViewModel.setShowDatePickerDialog(!showDatePickerDialog) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Select Repeat"
+                        )
+                    }
 
-                IconButton(
-                    onClick = onAddClick
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
+                    IconButton(
+                        onClick = onAddClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add"
+                        )
+                    }
                 }
             }
 
