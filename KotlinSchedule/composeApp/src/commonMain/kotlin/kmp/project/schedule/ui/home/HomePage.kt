@@ -369,12 +369,32 @@ fun OtherInformation(
                     .fillMaxWidth()
                     .padding(start = 10.dp, end = 10.dp, top = 20.dp),
             ) {
-                Text(
-                    text = "今日剩余${scheduleCount}项日程",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                AnimatedContent(
+                    targetState = (scheduleCount == 0 && scheduleViewModel.schedules.isNotEmpty()),
+                ) {
+                    if (it) {
+                        Text(
+                            text = "今日日程已全部完成！",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    } else if (scheduleCount > 0 && scheduleViewModel.schedules.isNotEmpty()) {
+                        Text(
+                            text = "今日剩余${scheduleCount}项日程",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    } else if (scheduleViewModel.schedules.isEmpty()) {
+                        Text(
+                            text = "今日无日程，宜看窗外云卷云舒",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.weight(1f))
 

@@ -212,7 +212,7 @@ fun DatePickerDocked(
             .padding(top = 10.dp, bottom = 10.dp)
     ) {
         OutlinedTextField(
-            value = convertLocalDateToDate(viewModel.date.value),
+            value = convertLocalDateToDate(viewModel.date.value) + "（${getDaysStringFromToday(viewModel.date.value)}）",
             onValueChange = { },
             label = { Text("选择日期") },
             readOnly = true,
