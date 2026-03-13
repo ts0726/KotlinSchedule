@@ -130,10 +130,12 @@ class SyncManagerImpl(
         } else if (localRepository.getScheduleByUuid(schedule.uuid) != null) {
             // 更新现有日程
             localRepository.updateSchedule(schedule)
+            localRepository.updateScheduleSyncStatus(schedule.uuid, SyncStatus.SYNCED)
             return true
         }
         // 插入新日程
         localRepository.insertSchedule(schedule)
+        localRepository.updateScheduleSyncStatus(schedule.uuid, SyncStatus.SYNCED)
         return true
     }
 
