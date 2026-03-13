@@ -340,16 +340,14 @@ fun CalendarDayCard(
                     fontSize = 9.sp,
                 )
             }
-            if (todaySchedulesCount > 0) {
-                Text(
-                    text = todaySchedulesCount.toString(),
-                    color = calendarTextColor(day, isSelected),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 10.sp,
-                )
-            }
+            Text(
+                text = if (todaySchedulesCount == 0) "" else todaySchedulesCount.toString(),
+                color = calendarTextColor(day, isSelected),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                lineHeight = 10.sp,
+            )
         }
     }
 }
