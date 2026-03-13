@@ -2,6 +2,7 @@ package kmp.project.schedule
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -44,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
@@ -157,6 +159,7 @@ fun CustomScaffold(
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState)
             },
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
             content = { innerPadding ->
                 ContentContainer(
                     content = {
@@ -198,6 +201,8 @@ fun ContentContainer(
 ) {
     Column(
         Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
             .padding(bottom = padding.calculateBottomPadding()),
         horizontalAlignment = Alignment.CenterHorizontally

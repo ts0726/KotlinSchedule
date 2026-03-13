@@ -13,6 +13,7 @@ import kmp.project.schedule.domain.sync.SyncStatus
 import kmp.project.schedule.entity.RepeatMode
 import kmp.project.schedule.entity.ScheduleEntity
 import kmp.project.schedule.util.DeviceUtil
+import kmp.project.schedule.util.timeUtil.getMonthDateRange
 import kmp.project.schedule.util.timeUtil.getTimestamp
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -373,7 +374,12 @@ class ScheduleViewModel(
                 val result = syncManager.syncDataIncrementally(userName, currentDate)
                 if (result.isSuccess) {
                     val successCount = result.getOrThrow()
-                    // 重新加载当前日期的日程，确保视图同步
+                    // 重新加载日程，确保视图同步
+                    loadMonthSchedulesToCache(
+                        userName = userName,
+                        monthStart = getMonthDateRange(currentDate).first,
+                        monthEnd = getMonthDateRange(currentDate).second
+                    )
                     loadTodaySchedulesToCache(mutableStateOf(currentDate))
                     showSnackBar("${successCount}条日程已同步")
                 } else {

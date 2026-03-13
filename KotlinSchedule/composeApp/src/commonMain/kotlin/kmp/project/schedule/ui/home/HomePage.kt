@@ -104,27 +104,37 @@ fun MainPage(
 ) {
     val scheduleList = remember { scheduleViewModel.schedules }
 
-    LaunchedEffect("${date.value.year}-${date.value.month.number}-${date.value.day}", scheduleViewModel.monthSchedules.size) {
+    LaunchedEffect(
+        "${date.value.year}-${date.value.month.number}",
+//        scheduleViewModel.monthSchedules.size,
+    ) {
+        println("月份更新")
         scheduleViewModel.loadMonthSchedulesToCache(
             authViewModel.getUserName()?:"",
             getMonthDateRange(date.value).first,
             getMonthDateRange(date.value).second
         )
+    }
+
+    LaunchedEffect(
+        "${date.value.year}-${date.value.month.number}-${date.value.day}"
+    ) {
+        println("****日期更新")
         scheduleViewModel.loadTodaySchedulesToCache(date)
     }
-        HomeNavDisplay(
-            backStack = backStack,
-            modifier = Modifier,
-            isCompact = isCompact,
-            scheduleList = scheduleList,
-            date = date,
-            scheduleViewModel = scheduleViewModel,
-            authViewModel = authViewModel,
-            homePageStateViewModel = homePageStateViewModel,
-            coroutineScope = coroutineScope,
-            snackbarHostState = snackbarHostState
-        )
-//    }
+
+    HomeNavDisplay(
+        backStack = backStack,
+        modifier = Modifier,
+        isCompact = isCompact,
+        scheduleList = scheduleList,
+        date = date,
+        scheduleViewModel = scheduleViewModel,
+        authViewModel = authViewModel,
+        homePageStateViewModel = homePageStateViewModel,
+        coroutineScope = coroutineScope,
+        snackbarHostState = snackbarHostState
+    )
 }
 
 /**
