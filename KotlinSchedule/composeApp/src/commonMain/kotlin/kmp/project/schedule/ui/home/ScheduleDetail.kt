@@ -308,7 +308,7 @@ fun ScheduleDetailContent(
                 GeneralBox(
                     modifier = Modifier
                         .wrapContentHeight()
-                        .padding(top = 10.dp, bottom = 10.dp)
+                        .padding(bottom = 10.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(MaterialTheme.colorScheme.surfaceContainer),
                     icon = Icons.Filled.LocationOn,
@@ -326,7 +326,7 @@ fun ScheduleDetailContent(
             GeneralBox(
                 modifier = Modifier
                     .wrapContentHeight()
-                    .padding(top = 10.dp, bottom = 10.dp)
+                    .padding(bottom = 10.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainer),
                 icon = Icons.AutoMirrored.Filled.Notes,
@@ -404,7 +404,7 @@ private fun InformationBox(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(end = 10.dp, top = 10.dp, bottom = 10.dp)
+                    .padding(end = 10.dp, bottom = 10.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainer),
                 icon = Icons.Filled.EventRepeat,
@@ -419,7 +419,7 @@ private fun InformationBox(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(top = 10.dp, bottom = 10.dp)
+                    .padding(bottom = 10.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainer),
                 icon = Icons.Filled.EditCalendar,

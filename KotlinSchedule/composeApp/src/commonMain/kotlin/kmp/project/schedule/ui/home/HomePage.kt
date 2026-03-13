@@ -258,7 +258,7 @@ fun ScheduleInformation(
                     }
                 }
 
-                itemsIndexed(items = list, key = { _, schedule -> schedule.uuid }) { _, schedule ->
+                itemsIndexed(items = list, key = { _, schedule -> schedule.uuid }) { index, schedule ->
                     ReorderableItem(
                         reorderableLazyColumnState,
                         key = schedule.uuid,
@@ -276,6 +276,12 @@ fun ScheduleInformation(
                         )
                         ScheduleCard(
                             modifier = Modifier
+                                .padding(
+                                    top = if (index == 0) 10.dp else 5.dp,
+                                    bottom = if (index == scheduleViewModel.schedules.size - 1) 10.dp else 5.dp,
+                                    start = 15.dp,
+                                    end = 15.dp
+                                )
                                 .zIndex(elevation.value),
                             schedule = schedule,
                             isSelected = isSelected.value,
