@@ -48,7 +48,6 @@ fun CalendarPickerDialog(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ) {
-        var localDate = date.value
         Card(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -63,14 +62,14 @@ fun CalendarPickerDialog(
             ModalBottomSheetTitle(
                 title = "日期选择",
                 onConfirm = {
-                    onDateSelected(localDate)
+                    onDateSelected(date.value)
                     onDismiss()
                 }
             )
             CalendarPager(
-                currentDate = localDate,
-                onDayClick = { date -> localDate = date },
-                onMonthChanged = { date -> localDate = date },
+                currentDate = date.value,
+                onDayClick = { date.value = it },
+                onMonthChanged = { date.value = it },
                 scheduleViewModel = scheduleViewModel
             )
         }

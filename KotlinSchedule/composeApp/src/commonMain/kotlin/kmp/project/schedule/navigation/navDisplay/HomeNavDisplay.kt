@@ -154,7 +154,8 @@ fun HomeNavDisplay(
                                 }
                             },
                             viewModel = scheduleViewModel,
-                            isCompact = isCompact
+                            isCompact = isCompact,
+                            date = date
                         )
                     }
 

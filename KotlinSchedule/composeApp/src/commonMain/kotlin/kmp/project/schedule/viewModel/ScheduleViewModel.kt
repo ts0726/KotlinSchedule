@@ -286,12 +286,20 @@ class ScheduleViewModel(
             }
         }
         repository.updateSchedule(schedule)
+
         //更新当前日期的日程列表
-        if (schedule.date == currentDate.toEpochDays()) {
-            schedules.set(index = index, element = schedule)
-        } else {
-            schedules.removeIf { schedule.uuid == it.uuid }
+        when (schedule.date) {
+            currentDate.toEpochDays() if schedules.find { it.uuid == schedule.uuid } != null -> {
+                schedules.set(index = index, element = schedule)
+            }
+            currentDate.toEpochDays() if schedules.find { it.uuid == schedule.uuid } == null -> {
+                schedules.add(0, schedule)
+            }
+            else -> {
+                schedules.removeIf { schedule.uuid == it.uuid }
+            }
         }
+
         //更新月视图日程列表
         val monthIndex = monthSchedules.indexOfFirst { it.uuid == schedule.uuid }
         if (monthIndex >= 0) {

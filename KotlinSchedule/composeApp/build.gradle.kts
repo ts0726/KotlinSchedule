@@ -85,7 +85,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1.3"
     }
     packaging {
         resources {
@@ -112,8 +112,8 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "kmp.project.schedule"
-            packageVersion = "1.0.0"
+            packageName = "日程"
+            packageVersion = "1.1.3"
             modules("java.instrument", "java.prefs", "java.sql", "jdk.unsupported","jdk.crypto.ec","jdk.localedata")
 //            modules("schedule.sql")
         }

@@ -52,6 +52,9 @@ import kmp.project.schedule.util.getRepeat
 import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 
 /**
@@ -66,7 +69,8 @@ fun NewSchedule(
     onBack: () -> Unit,
     onSave: () -> Unit,
     viewModel: ScheduleViewModel,
-    isCompact: Boolean
+    isCompact: Boolean,
+    date: MutableState<LocalDate>
 ) {
     val bringIntoViewRequester = remember {
         BringIntoViewRequester()
@@ -84,7 +88,7 @@ fun NewSchedule(
             onSave = onSave,
             topBarTitle = if (viewModel.id.intValue == -1) "创建日程" else "编辑日程"
         )
-        NewScheduleContent(viewModel, bringIntoViewRequester, isCompact)
+        NewScheduleContent(viewModel, bringIntoViewRequester, isCompact, date)
     }
 }
 
@@ -142,7 +146,8 @@ fun NewScheduleTopBar(
 fun NewScheduleContent(
     viewModel: ScheduleViewModel,
     bringIntoViewRequester: BringIntoViewRequester,
-    isCompact: Boolean
+    isCompact: Boolean,
+    date: MutableState<LocalDate>
 ) {
     var title by viewModel.title
     var content by viewModel.content
@@ -175,7 +180,7 @@ fun NewScheduleContent(
                 }
             )
 
-            DatePickerDocked(viewModel, isCompact)
+            DatePickerDocked(viewModel, isCompact, date)
 
             RepeatPicker(viewModel)
 
@@ -203,7 +208,8 @@ fun NewScheduleContent(
 @Composable
 fun DatePickerDocked(
     viewModel: ScheduleViewModel,
-    isCompact: Boolean
+    isCompact: Boolean,
+    date: MutableState<LocalDate>
 ) {
     var showDatePickerModal by remember { mutableStateOf(false) }
     Box(
@@ -233,11 +239,26 @@ fun DatePickerDocked(
             textStyle = TextStyle(MaterialTheme.colorScheme.onBackground)
         )
         if (showDatePickerModal) {
+            var noSelect = true
             DatePickerModal(
                 onDismiss = {
                     showDatePickerModal = false
+                    if (noSelect)
+                        date.value = Clock.System.todayIn(TimeZone.currentSystemDefault())
                 },
-                date = viewModel.date,
+                onConfirmClicked = {
+                    noSelect = false
+                    showDatePickerModal = false
+                },
+                onDayClicked = {
+                    viewModel.date.value = it
+                    date.value = it
+                },
+                onMonthChanged = {
+                    viewModel.date.value = it
+                    date.value = it
+                },
+                date = date,
                 isCompact = isCompact,
                 scheduleViewModel = viewModel
             )
@@ -254,11 +275,14 @@ fun DatePickerDocked(
 @Composable
 fun DatePickerModal(
     onDismiss: () -> Unit,
+    onConfirmClicked: () -> Unit,
+    onDayClicked: (LocalDate) -> Unit,
+    onMonthChanged: (LocalDate) -> Unit,
     date: MutableState<LocalDate>,
     isCompact: Boolean,
     scheduleViewModel: ScheduleViewModel
 ) {
-    var selectedDate = date.value
+    scheduleViewModel.date.value
     BasicAlertDialog(
         onDismissRequest = onDismiss,
     ) {
@@ -274,8 +298,8 @@ fun DatePickerModal(
             ) {
                 CalendarPager(
                     currentDate = date.value,
-                    onDayClick = { selectedDate = it },
-                    onMonthChanged = { selectedDate = it },
+                    onDayClick = onDayClicked,
+                    onMonthChanged = onMonthChanged,
                     scheduleViewModel = scheduleViewModel
                 )
                 Row(
@@ -293,10 +317,7 @@ fun DatePickerModal(
                         )
                     }
                     TextButton(
-                        onClick = {
-                            date.value = selectedDate
-                            onDismiss()
-                        }
+                        onClick = onConfirmClicked
                     ) {
                         Text(
                             text = "确定",

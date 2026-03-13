@@ -74,9 +74,12 @@ import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
+import kotlinx.datetime.todayIn
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import kotlin.time.Clock
 
 /**
  * 主页
@@ -352,9 +355,17 @@ fun ScheduleInformation(
         }
 
         if (showDatePickerDialog) {
+            var isSelected = true
             CalendarPickerDialog(
-                onDismiss = { homePageStateViewModel.setShowDatePickerDialog(false) },
-                onDateSelected = { date.value = it },
+                onDismiss = {
+                    homePageStateViewModel.setShowDatePickerDialog(false)
+                    if (isSelected)
+                        date.value = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                },
+                onDateSelected = {
+                    isSelected = false
+                    date.value = it
+                },
                 date = date,
                 scheduleViewModel = scheduleViewModel
             )
