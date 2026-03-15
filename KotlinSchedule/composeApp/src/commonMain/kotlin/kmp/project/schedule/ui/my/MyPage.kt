@@ -151,7 +151,7 @@ fun MyPageContent(
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "版本：0.0.1 alpha",
+            text = "版本：1.1.5",
             fontSize = 10.sp,
             color = Color.LightGray,
             textAlign = TextAlign.Center

@@ -64,6 +64,7 @@ import kmp.project.schedule.navigation.navDisplay.HomeNavDisplay
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
+import kmp.project.schedule.ui.composableItem.SseConnectionStatusIndicator
 import kmp.project.schedule.ui.userImage
 import kmp.project.schedule.util.timeUtil.getCurrentDate
 import kmp.project.schedule.util.timeUtil.getMonthDateRange
@@ -595,21 +596,34 @@ fun TopBar(
 
         //顶栏标题
         AnimatedContent(targetState = showEditMode && isCompact) {
-            if (it) {
-                Text(
-                    text = "已选择${viewModel.schedulesToDelete.size}项日程",
-                    fontWeight = FontWeight.W800,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
-                )
-            } else if (isCompact) {
-                Text(
-                    text = getCurrentDate(date.value),
-                    fontWeight = FontWeight.W800,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                if (it) {
+                    Text(
+                        text = "已选择${viewModel.schedulesToDelete.size}项日程",
+                        fontWeight = FontWeight.W800,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
+                    )
+                } else if (isCompact) {
+                    Text(
+                        text = getCurrentDate(date.value),
+                        fontWeight = FontWeight.W800,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
+                    )
+                }
+                SseConnectionStatusIndicator(
+                    connectionStatus = homePageStateViewModel.connectionStatus.value,
+                    modifier = Modifier.padding(end = 20.dp),
+                    onClick = {
+                        homePageStateViewModel.retryState.value = !homePageStateViewModel.retryState.value
+                    }
                 )
             }
         }

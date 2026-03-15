@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -51,7 +52,9 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import kmp.project.schedule.navigation.key.MyPage
 import kmp.project.schedule.navigation.key.ScheduleList
+import kmp.project.schedule.net.SseConnectionStatus
 import kmp.project.schedule.net.sseApi
+import kmp.project.schedule.ui.composableItem.SseConnectionStatusIndicator
 import kmp.project.schedule.ui.home.MainPage
 import kmp.project.schedule.ui.my.MyPage
 import kmp.project.schedule.ui.userImage
@@ -85,8 +88,8 @@ fun App() {
         val homeBackStack = remember { mutableStateListOf<Any>(ScheduleList) }
         val myBackStack = remember { mutableStateListOf<Any>(MyPage) }
 
-        LaunchedEffect(Unit) {
-            sseApi.receiveEvent(scheduleViewModel, date) {
+        LaunchedEffect(homePageStateViewModel.retryState.value) {
+            sseApi.receiveEvent(homePageStateViewModel, scheduleViewModel, date) {
                 val currentUser = authViewModel.getUserName()
                 if (!currentUser.isNullOrEmpty()) {
                     // 启动时增量同步数据
@@ -145,7 +148,13 @@ fun CustomScaffold(
             .fillMaxSize()
     ) {
         if (!isCompact) {
-            SideNavRail(pageID)
+            SideNavRail(
+                pageID = pageID,
+                status = homePageStateViewModel.connectionStatus.value,
+                onIndicatorClick = {
+                    homePageStateViewModel.retryState.value = !homePageStateViewModel.retryState.value
+                }
+            )
         }
         Scaffold(
             modifier = Modifier
@@ -218,7 +227,11 @@ fun ContentContainer(
  *
  */
 @Composable
-fun SideNavRail(pageID: MutableIntState) {
+fun SideNavRail(
+    pageID: MutableIntState,
+    status: SseConnectionStatus,
+    onIndicatorClick: () -> Unit
+) {
     val cardSizes = remember { mutableStateListOf(50.dp, 30.dp, 30.dp) }
     val items = listOf("主页", "我的")
 
@@ -283,6 +296,11 @@ fun SideNavRail(pageID: MutableIntState) {
                 }
             }
         }
+        Spacer(modifier = Modifier.weight(1f))
+        SseConnectionStatusIndicator(
+            connectionStatus = status,
+            onClick = onIndicatorClick
+        )
     }
 }
 

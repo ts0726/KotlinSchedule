@@ -1,6 +1,8 @@
 package kmp.project.schedule.viewModel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import kmp.project.schedule.net.SseConnectionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -20,6 +22,10 @@ class HomePageStateViewModel : ViewModel() {
     var savedFirstVisibleIndex: Int = 0
 
     var savedScrollOffset: Int = 0
+
+    val connectionStatus = mutableStateOf(SseConnectionStatus.CLOSED)
+
+    val retryState = mutableStateOf(false)
 
     fun setShowEditMode(value: Boolean) {
         _showEditMode.value = value
