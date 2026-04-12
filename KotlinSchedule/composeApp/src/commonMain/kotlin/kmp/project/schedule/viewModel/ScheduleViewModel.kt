@@ -267,6 +267,26 @@ class ScheduleViewModel(
         )
     }
 
+    fun moveSchedulesToDate(
+        schedule: List<String>,
+        newDate: LocalDate,
+        showSnackBar: (String) -> Unit
+    ) {
+        val schedulesToMove = schedule.mapNotNull { repository.getScheduleByUuid(it) }
+        val updatedSchedules = schedulesToMove.map { it.copy(date = newDate.toEpochDays(), timestamp = getTimestamp()) }
+        updateSchedules(updatedSchedules, showSnackBar)
+        repository.updateSchedules(updatedSchedules)
+        //更新视图
+        schedulesToMove.forEach { movedSchedule ->
+            schedules.add(movedSchedule)
+            val monthIndex = monthSchedules.indexOfFirst { it.uuid == movedSchedule.uuid }
+            if (monthIndex >= 0) {
+                monthSchedules[monthIndex] = monthSchedules[monthIndex].copy(date = newDate.toEpochDays(), timestamp = getTimestamp())
+            }
+        }
+        schedules.sortWith(compareBy<Schedule> { it.sequence }.thenBy { it.timestamp })
+    }
+
     @Suppress("SuspiciousIndentation")
     private fun updateSchedule(
         schedule: Schedule,

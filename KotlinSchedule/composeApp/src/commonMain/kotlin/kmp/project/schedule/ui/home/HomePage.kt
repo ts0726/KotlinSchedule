@@ -61,6 +61,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kmp.project.schedule.database.Schedule
 import kmp.project.schedule.navigation.navDisplay.HomeNavDisplay
+import kmp.project.schedule.net.SseConnectionStatus
 import kmp.project.schedule.ui.composableItem.CalendarPager
 import kmp.project.schedule.ui.composableItem.CalendarPickerDialog
 import kmp.project.schedule.ui.composableItem.ConfirmDialog
@@ -167,6 +168,7 @@ fun ScheduleInformation(
     val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
     val showConfirmDialog by homePageStateViewModel.showConfirmDialog.collectAsState()
     val showDatePickerDialog by homePageStateViewModel.showDatePickerDialog.collectAsState()
+    val showMoveDatePickerDialog by homePageStateViewModel.showMoveDatePickerDialog.collectAsState()
 
     val listState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState(
@@ -217,7 +219,9 @@ fun ScheduleInformation(
             ) {
                 TopBar(
                     date = date,
-                    homePageStateViewModel = homePageStateViewModel,
+                    onDataClick = {
+                        homePageStateViewModel.setShowDatePickerDialog(!showDatePickerDialog)
+                    },
                     onAddClick = onAddClick,
                     onCloseClick = {
                         homePageStateViewModel.setShowEditMode(false)
@@ -227,10 +231,17 @@ fun ScheduleInformation(
                         if (scheduleViewModel.schedulesToDelete.isNotEmpty())
                             homePageStateViewModel.setShowConfirmDialog(true)
                     },
-                    onMoveClick = {},
+                    onMoveClick = {
+                        homePageStateViewModel.setShowMoveDatePickerDialog(!showMoveDatePickerDialog)
+                    },
+                    onIndicatorClick = {
+                        homePageStateViewModel.retryState.value = !homePageStateViewModel.retryState.value
+                    },
                     viewModel = scheduleViewModel,
                     isCompact = isCompact,
-                    nickname = nickname
+                    nickname = nickname,
+                    showEditMode = showEditMode,
+                    connectionStatus = homePageStateViewModel.connectionStatus.value
                 )
             }
 
@@ -247,7 +258,9 @@ fun ScheduleInformation(
                         ) {
                             TopBar(
                                 date = date,
-                                homePageStateViewModel = homePageStateViewModel,
+                                onDataClick = {
+                                    homePageStateViewModel.setShowDatePickerDialog(!showDatePickerDialog)
+                                },
                                 onAddClick = onAddClick,
                                 onCloseClick = {
                                     homePageStateViewModel.setShowEditMode(false)
@@ -257,10 +270,17 @@ fun ScheduleInformation(
                                     if (scheduleViewModel.schedulesToDelete.isNotEmpty())
                                         homePageStateViewModel.setShowConfirmDialog(true)
                                 },
-                                onMoveClick = {},
+                                onMoveClick = {
+                                    homePageStateViewModel.setShowMoveDatePickerDialog(!showMoveDatePickerDialog)
+                                },
+                                onIndicatorClick = {
+                                    homePageStateViewModel.retryState.value = !homePageStateViewModel.retryState.value
+                                },
                                 viewModel = scheduleViewModel,
                                 isCompact = isCompact,
-                                nickname = nickname
+                                nickname = nickname,
+                                showEditMode = showEditMode,
+                                connectionStatus = homePageStateViewModel.connectionStatus.value
                             )
                         }
                     }
@@ -326,7 +346,9 @@ fun ScheduleInformation(
                     homePageStateViewModel = homePageStateViewModel,
                     onAddClick = onAddClick,
                     onCloseClick = { homePageStateViewModel.setShowEditMode(false) },
-                    onMoveClick = {},
+                    onMoveClick = {
+                        homePageStateViewModel.setShowMoveDatePickerDialog(!showMoveDatePickerDialog)
+                    },
                     onDeleteClick = {
                         if (scheduleViewModel.schedulesToDelete.isNotEmpty())
                             homePageStateViewModel.setShowConfirmDialog(true)
@@ -356,6 +378,20 @@ fun ScheduleInformation(
                 },
                 onDateSelected = {
                     date.value = it
+                },
+                date = date,
+                scheduleViewModel = scheduleViewModel
+            )
+        }
+
+        if (showMoveDatePickerDialog) {
+            CalendarPickerDialog(
+                onDismiss = {
+                    homePageStateViewModel.setShowMoveDatePickerDialog(false)
+                },
+                onDateSelected = {
+                    scheduleViewModel.moveSchedulesToDate(scheduleViewModel.schedulesToDelete, it, showSnackBar)
+                    homePageStateViewModel.setShowMoveDatePickerDialog(false)
                 },
                 date = date,
                 scheduleViewModel = scheduleViewModel
@@ -453,17 +489,20 @@ fun OtherInformation(
 fun TopBar(
     modifier: Modifier = Modifier,
     date: MutableState<LocalDate>,
-    homePageStateViewModel: HomePageStateViewModel,
+    onDataClick: () -> Unit,
     onAddClick: () -> Unit,
     onCloseClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onMoveClick: () -> Unit,
+    onIndicatorClick: () -> Unit,
     viewModel: ScheduleViewModel,
     isCompact: Boolean,
-    nickname: String
+    nickname: String,
+    showEditMode: Boolean,
+    connectionStatus: SseConnectionStatus,
 ) {
-    val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
-    val showDatePickerDialog by homePageStateViewModel.showDatePickerDialog.collectAsState()
+//    val showEditMode by homePageStateViewModel.showEditMode.collectAsState()
+//    val showDatePickerDialog by homePageStateViewModel.showDatePickerDialog.collectAsState()
 
     val animateColor by animateColorAsState(
         if (showEditMode)
@@ -537,7 +576,7 @@ fun TopBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     IconButton(
-                        onClick = { homePageStateViewModel.setShowDatePickerDialog(!showDatePickerDialog) },
+                        onClick = onDataClick,
                     ) {
                         Icon(
                             imageVector = Icons.Default.DateRange,
@@ -610,11 +649,9 @@ fun TopBar(
                 }
                 if (isCompact) {
                     SseConnectionStatusIndicator(
-                        connectionStatus = homePageStateViewModel.connectionStatus.value,
+                        connectionStatus = connectionStatus,
                         modifier = Modifier.padding(end = 20.dp),
-                        onClick = {
-                            homePageStateViewModel.retryState.value = !homePageStateViewModel.retryState.value
-                        }
+                        onClick = onIndicatorClick
                     )
                 }
             }
