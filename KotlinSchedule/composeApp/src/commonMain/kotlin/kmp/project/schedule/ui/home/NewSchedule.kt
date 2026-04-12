@@ -52,9 +52,6 @@ import kmp.project.schedule.util.getRepeat
 import kmp.project.schedule.util.timeUtil.convertLocalDateToDate
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlin.time.Clock
 
 
 /**
@@ -239,15 +236,12 @@ fun DatePickerDocked(
             textStyle = TextStyle(MaterialTheme.colorScheme.onBackground)
         )
         if (showDatePickerModal) {
-            var noSelect = true
+            val originDate = remember { date.value } // 保存原始日期
             DatePickerModal(
                 onDismiss = {
                     showDatePickerModal = false
-                    if (noSelect)
-                        date.value = Clock.System.todayIn(TimeZone.currentSystemDefault())
                 },
                 onConfirmClicked = {
-                    noSelect = false
                     showDatePickerModal = false
                 },
                 onDayClicked = {
@@ -258,6 +252,7 @@ fun DatePickerDocked(
                     viewModel.date.value = it
                     date.value = it
                 },
+                originDate = originDate,
                 date = date,
                 isCompact = isCompact,
                 scheduleViewModel = viewModel
@@ -279,10 +274,10 @@ fun DatePickerModal(
     onDayClicked: (LocalDate) -> Unit,
     onMonthChanged: (LocalDate) -> Unit,
     date: MutableState<LocalDate>,
+    originDate: LocalDate,
     isCompact: Boolean,
     scheduleViewModel: ScheduleViewModel
 ) {
-    scheduleViewModel.date.value
     BasicAlertDialog(
         onDismissRequest = onDismiss,
     ) {
@@ -308,7 +303,10 @@ fun DatePickerModal(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(
-                        onClick = onDismiss
+                        onClick = {
+                            onDismiss()
+                            date.value = originDate
+                        }
                     ) {
                         Text(
                             text = "取消",

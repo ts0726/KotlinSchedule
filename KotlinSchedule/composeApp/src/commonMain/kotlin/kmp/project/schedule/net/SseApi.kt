@@ -32,8 +32,6 @@ class SseApi(
         while (retryCount < maxRetries) {
             homePageStateViewModel.connectionStatus.value = SseConnectionStatus.CONNECTING
             try {
-                println("SSE: trying to connect... (count: ${retryCount + 1})")
-
                 sseClient.sse(urlString = "$baseUrl/sse/events", deserialize = { typeInfo, jsonString ->
                     val serializer = Json.serializersModule.serializer(typeInfo.kotlinType!!)
                     Json.decodeFromString(serializer, jsonString)!!
@@ -53,7 +51,6 @@ class SseApi(
                                 try {
                                     val hello = deserialize<SseHello>(event.data)
                                     ApiConfig.sessionId = hello!!.sessionId
-                                    println("SSE: received Session ID: ${ApiConfig.sessionId}")
                                     onSessionIdReceived?.invoke()
                                 } catch (_: Exception) {
                                     try {
@@ -69,9 +66,6 @@ class SseApi(
                         }
                     }
                 }
-                // 如果 sse 块正常退出（非异常），说明服务器关闭了连接，也需要重连
-                println("SSE: connection closed, prepare to reconnect...")
-
             } catch (e: SSEClientException) {
                 e.printStackTrace()
             } catch (e: EOFException) {

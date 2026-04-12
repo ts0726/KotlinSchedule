@@ -130,6 +130,7 @@ class ScheduleViewModel(
                 } else {
                     schedules.add(0, schedule)
                 }
+                schedules.sortWith(compareBy<Schedule> { it.sequence }.thenBy { it.timestamp })
             }
             val monthIndex = monthSchedules.indexOfFirst { it.uuid == schedule.uuid }
             if (monthIndex >= 0) {
@@ -178,7 +179,7 @@ class ScheduleViewModel(
             }
         return (todaySchedules + repeatSchedule).filter { it.sync_status != SyncStatus.DELETED_PENDING.toString() }
             .sortedWith(
-                compareBy<Schedule> { it.sequence }.thenByDescending { it.timestamp }
+                compareBy<Schedule> { it.sequence }.thenBy { it.timestamp }
             )
     }
 
@@ -194,7 +195,7 @@ class ScheduleViewModel(
 
         return (userSchedule + repeatSchedule).filter { it.sync_status != SyncStatus.DELETED_PENDING.toString() }
             .sortedWith(
-                compareBy<Schedule> { it.sequence }.thenByDescending { it.timestamp }
+                compareBy<Schedule> { it.sequence }.thenBy { it.timestamp }
             )
     }
 

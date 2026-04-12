@@ -269,7 +269,6 @@ fun CalendarView(
                                 date = date,
                                 selectedDay = selectedDay,
                                 calendarWidth = parentWidth,
-                                scheduleViewModel = scheduleViewModel,
                                 todaySchedules = todaySchedules.value
                             )
                     }
@@ -358,7 +357,7 @@ fun CalendarDayCard(
  * @param date 当前日期
  * @param selectedDay 选中的日期
  * @param calendarWidth 父组件宽度，用于计算卡片宽度
- * @param scheduleViewModel 日程视图模型，用于加载当天的日程
+ * @param todaySchedules 当日的日程列表，用于在月视图中显示日程信息
  */
 @Composable
 fun MonthlyCalendarDayCard(
@@ -366,7 +365,6 @@ fun MonthlyCalendarDayCard(
     date: LocalDate,
     selectedDay: MutableState<Long>,
     calendarWidth: Dp,
-    scheduleViewModel: ScheduleViewModel,
     todaySchedules: List<Schedule>
 ) {
     val isSelected = remember(day, selectedDay.value) {

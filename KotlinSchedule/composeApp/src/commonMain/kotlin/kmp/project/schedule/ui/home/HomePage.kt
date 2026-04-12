@@ -75,12 +75,9 @@ import kmp.project.schedule.viewModel.HomePageStateViewModel
 import kmp.project.schedule.viewModel.ScheduleViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
-import kotlinx.datetime.todayIn
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import kotlin.time.Clock
 
 /**
  * 主页
@@ -110,9 +107,7 @@ fun MainPage(
 
     LaunchedEffect(
         "${date.value.year}-${date.value.month.number}",
-//        scheduleViewModel.monthSchedules.size,
     ) {
-        println("月份更新")
         scheduleViewModel.loadMonthSchedulesToCache(
             authViewModel.getUserName()?:"",
             getMonthDateRange(date.value).first,
@@ -123,7 +118,6 @@ fun MainPage(
     LaunchedEffect(
         "${date.value.year}-${date.value.month.number}-${date.value.day}"
     ) {
-        println("****日期更新")
         scheduleViewModel.loadTodaySchedulesToCache(date)
     }
 
@@ -356,15 +350,11 @@ fun ScheduleInformation(
         }
 
         if (showDatePickerDialog) {
-            var isSelected = true
             CalendarPickerDialog(
                 onDismiss = {
                     homePageStateViewModel.setShowDatePickerDialog(false)
-                    if (isSelected)
-                        date.value = Clock.System.todayIn(TimeZone.currentSystemDefault())
                 },
                 onDateSelected = {
-                    isSelected = false
                     date.value = it
                 },
                 date = date,
@@ -618,13 +608,15 @@ fun TopBar(
                         modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
                     )
                 }
-                SseConnectionStatusIndicator(
-                    connectionStatus = homePageStateViewModel.connectionStatus.value,
-                    modifier = Modifier.padding(end = 20.dp),
-                    onClick = {
-                        homePageStateViewModel.retryState.value = !homePageStateViewModel.retryState.value
-                    }
-                )
+                if (isCompact) {
+                    SseConnectionStatusIndicator(
+                        connectionStatus = homePageStateViewModel.connectionStatus.value,
+                        modifier = Modifier.padding(end = 20.dp),
+                        onClick = {
+                            homePageStateViewModel.retryState.value = !homePageStateViewModel.retryState.value
+                        }
+                    )
+                }
             }
         }
     }
